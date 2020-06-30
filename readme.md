@@ -6,6 +6,8 @@ Logitech gaming mouses do not natively have a way of reporting battery level, bu
 
 Without the `.xml` file, the tray will display `?` with the tooltip giving `NaN%` with a valid voltage.
 
+Does not support mice that uses HID++ 1.0 protocols. (Older than 2012?)
+
 No working refresh/rescan code for connected/disconnect devices. Current work around is to restart the program.
 
 Currently there are some weird interactions with mouses that can be wired or wireless (e.g. G403) when running in wired mode.
