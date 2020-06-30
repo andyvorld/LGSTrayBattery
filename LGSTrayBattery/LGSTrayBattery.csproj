@@ -170,6 +170,7 @@
     <Content Include="PowerModel\46D_4053.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="PowerModel\46D_405D.xml" />
     <Content Include="PowerModel\46D_4067.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -188,6 +189,7 @@
     <Content Include="PowerModel\46D_C081.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Resource Include="PowerModel\46D_C082.xml" />
     <Content Include="PowerModel\46D_C086.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
