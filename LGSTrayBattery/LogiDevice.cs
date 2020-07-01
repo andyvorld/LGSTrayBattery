@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Device.Net;
 using Device.Net.Exceptions;
+using Hid.Net.Windows;
 using PropertyChanged;
 
 namespace LGSTrayBattery
@@ -176,8 +178,16 @@ namespace LGSTrayBattery
         {
             while (_hidDevices[20].IsInitialized)
             {
-                var resData = _hidDevices[20].ReadAsync().Result;
-                ParseReport(resData);
+                try
+                {
+                    var resData = _hidDevices[20].ReadAsync().Result;
+                    ParseReport(resData);
+                }
+                catch (IOException e)
+                {
+                    Debug.WriteLine(e.Message);
+                    return;
+                }
             }
         }
 
@@ -295,7 +305,7 @@ namespace LGSTrayBattery
             }
             catch (Exception)
             {
-                _wpid = 0;
+                _wpid = (ushort) (_hidDevices[20].ConnectedDeviceDefinition.ProductId ?? 0);
             }
         }
 
