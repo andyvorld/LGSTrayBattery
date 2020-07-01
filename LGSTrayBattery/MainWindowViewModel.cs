@@ -43,6 +43,7 @@ namespace LGSTrayBattery
                 UpdateThread?.Abort();
                 UpdateThread = new Thread(UpdateSelectedBattery);
                 UpdateThread.Start();
+
                 _selectedDevice = value;
 
                 Properties.Settings.Default.LastUSBSerial = _selectedDevice.UsbSerialId;
@@ -81,7 +82,7 @@ namespace LGSTrayBattery
             };
 
             //Get the first available device and connect to it
-            var devices = DeviceManager.Current.GetDevicesAsync(deviceDefinitions).Result;
+            var devices = await DeviceManager.Current.GetDevicesAsync(deviceDefinitions).ConfigureAwait(false);
 
             var usbSerialRegex = new Regex(@"#.+?#(.+)&");
 
@@ -91,8 +92,8 @@ namespace LGSTrayBattery
             {
                 string usbSerial = usbSerialRegex.Match(device.DeviceId).Groups[1].ToString();
 
-                Debug.WriteLine(device.DeviceId);
-                Debug.WriteLine(usbSerial);
+                //Debug.WriteLine(device.DeviceId);
+                //Debug.WriteLine(usbSerial);
 
                 if (hidDeviceGroups.ContainsKey(usbSerial))
                 {
@@ -149,7 +150,8 @@ namespace LGSTrayBattery
 
             SelectedDevice = selectedDevice;
             SelectedDevice.IsChecked = true;
-            SelectedDevice.Listen();
+            _ = SelectedDevice.Listen();
+            _ = SelectedDevice.UpdateBatteryPercentage();
         }
 
         public void UpdateSelectedPollInterval(PollInterval selectedpollInterval)
@@ -163,7 +165,7 @@ namespace LGSTrayBattery
             SelectedPollInterval.IsChecked = true;
         }
 
-        private void UpdateSelectedBattery()
+        private async void UpdateSelectedBattery()
         {
             while (true)
             {
@@ -172,8 +174,8 @@ namespace LGSTrayBattery
                     return;
                 }
 
-                SelectedDevice.UpdateBatteryPercentage();
-                Task.Delay(SelectedPollInterval.delayTime).Wait();
+                await SelectedDevice.UpdateBatteryPercentage().ConfigureAwait(false);
+                await Task.Delay(SelectedPollInterval.delayTime).ConfigureAwait(false);
             }
         }
     }
