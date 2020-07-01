@@ -88,6 +88,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="LogiDevice.cs" />
+    <Compile Include="LogiDeviceException.cs" />
     <Compile Include="LogiFeatures.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

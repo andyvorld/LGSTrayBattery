@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,6 +29,9 @@ namespace LGSTrayBattery
         public MainWindow()
         {
             InitializeComponent();
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
+
             this.DataContext = viewModel;
 
             this.TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Discovery;
@@ -35,11 +40,25 @@ namespace LGSTrayBattery
             worker.DoWork += new DoWorkEventHandler((s,e) => viewModel.LoadViewModel().Wait());
             worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler((s, e) =>
                 {
+                    if (e.Error != null)
+                    {
+                        throw e.Error;
+                    }
+
                     TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Unknown;
                     viewModel.LoadLastSelected();
                 });
 
             worker.RunWorkerAsync();
+        }
+
+        private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception) args.ExceptionObject;
+            using (StreamWriter writer = new StreamWriter("./Crashlog.log", false))
+            {
+                writer.WriteLine(e.ToString());
+            }
         }
 
         private void ExitButton_OnClick(object sender, RoutedEventArgs e)
