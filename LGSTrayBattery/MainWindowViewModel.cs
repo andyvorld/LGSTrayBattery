@@ -113,7 +113,7 @@ namespace LGSTrayBattery
                 if (valid)
                 {
                     temp.Add(logiDevice);
-                    await logiDevice.LoadDevice().ConfigureAwait(false);
+                    logiDevice.LoadDevice();
                 }
                 else
                 {
@@ -150,7 +150,7 @@ namespace LGSTrayBattery
 
             SelectedDevice = selectedDevice;
             SelectedDevice.IsChecked = true;
-            _ = SelectedDevice.Listen();
+            SelectedDevice.Listen();
             _ = SelectedDevice.UpdateBatteryPercentage();
         }
 

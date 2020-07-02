@@ -59,6 +59,7 @@ namespace LGSTrayBattery
         private readonly Dictionary<int, IDevice> _hidDevices = new Dictionary<int, IDevice>();
         private readonly Dictionary<string, byte> _featureList = new Dictionary<string, byte>();
 
+        private byte _subId;
         private byte _randSwid;
 
         private readonly Random _rand = new Random();
@@ -70,6 +71,12 @@ namespace LGSTrayBattery
         private ushort _wpid;
 
         private bool _listen = false;
+
+        private AutoResetEvent _readSync = new AutoResetEvent(false);
+        private ResData _resData;
+
+        private Task _shortListener;
+        private Task _longListener;
 
         public LogiDevice(IEnumerable<IDevice> devices, string usbSerialId, out bool valid)
         {
@@ -104,7 +111,7 @@ namespace LGSTrayBattery
 
             if (_hidDevices.ContainsKey(7) && _hidDevices.ContainsKey(20))
             {
-                _protocolVer = GetProtocolVer().Result;
+                _protocolVer = GetProtocolVer();
 
                 if (_protocolVer >= 2.0)
                 {
@@ -155,25 +162,36 @@ namespace LGSTrayBattery
             }
         }
 
-        public async Task LoadDevice()
+        public void LoadDevice()
         {
-            await GetFeaturesAsync();
-            await GetDeviceNameAsync();
-            await GetWPidAsync();
+            Listen();
+            GetFeaturesAsync();
+            GetDeviceNameAsync();
+            GetWPidAsync();
+            StopListen();
         }
 
-        public async Task Listen()
+        public void Listen()
         {
-            await _hidDevices[7].InitializeAsync();
-            await _hidDevices[20].InitializeAsync();
+            if (_listen)
+            {
+                return;
+            }
 
-            //_readThread = new Thread(ReadLoop);
-            //_readThread.Start();
+            _hidDevices[(int) HidLength.Short].InitializeAsync().Wait();
+            _hidDevices[(int) HidLength.Long].InitializeAsync().Wait();
 
             _listen = true;
 
-            ReadLoopAsync(7);
-            ReadLoopAsync(20);
+            if (_shortListener == null)
+            {
+                _shortListener = ReadLoopAsync(7);
+            }
+
+            if (_longListener == null)
+            {
+                _longListener = ReadLoopAsync(20);
+            }
         }
 
         public void StopListen()
@@ -181,29 +199,30 @@ namespace LGSTrayBattery
             _listen = false;
         }
 
-        private async void ReadLoopAsync(int hidNum)
+        private async Task ReadLoopAsync(int hidNum)
         {
             while (_listen)
             {
-                try
+                _hidDevices[hidNum].InitializeAsync().Wait();
+                _resData = await _hidDevices[hidNum].ReadAsync();
+
+                if (_resData.SubId != _subId )
                 {
-                    await _hidDevices[hidNum].InitializeAsync();
-                    var resData = await _hidDevices[hidNum].ReadAsync().ConfigureAwait(false);
-                    ParseReport(resData);
+                    continue;
                 }
-                catch (ApiException e)
-                {
-                    //Debug.WriteLine(e.Message);
-                    BatteryPercentage = Double.NaN;
-                    BatteryVoltage = Double.NaN;
-                    await Task.Delay(500);
-                }
-                catch (IOException e)
-                {
-                    BatteryPercentage = Double.NaN;
-                    BatteryVoltage = Double.NaN;
-                    await Task.Delay(500);
-                }
+
+                DebugParse(_resData, 2);
+                _readSync.Set();
+            }
+
+            switch (hidNum)
+            {
+                case 7:
+                    _shortListener = null;
+                    break;
+                case 20:
+                    _longListener = null;
+                    break;
             }
         }
 
@@ -246,54 +265,61 @@ namespace LGSTrayBattery
             }
         }
 
-        private async Task GetFeaturesAsync()
+        private void GetFeaturesAsync()
         {
-            byte[] resData = await WriteReadRequestAsync(7, 0x01, 0x00, 0x00, LogiFeatures.GetHexCodeArray("FEATURE_SET"));
-            byte featureIndex = resData[4];
+            _ = WriteRequestAsync(7, 0x01, 0x00, 0x00, LogiFeatures.GetHexCodeArray("FEATURE_SET"));
+            _readSync.WaitOne();
 
-            resData = await WriteReadRequestAsync(7, 0x01, featureIndex);
-            int numFeatures = 1 + resData[4];
+            byte featureIndex = _resData.Param(0);
+
+            _ = WriteRequestAsync(7, 0x01, featureIndex);
+            _readSync.WaitOne();
+
+            int numFeatures = 1 + _resData.Param(0);
 
             Debug.WriteLine("Found {0:d} features.", numFeatures);
 
             for (byte ii = 0; ii < numFeatures; ii++)
             {
-                resData = await WriteReadRequestAsync(7, 0x01, featureIndex, 0x10, new byte[] { ii });
+                _ = WriteRequestAsync(7, 0x01, featureIndex, 0x10, new byte[] { ii });
+                _readSync.WaitOne();
 
-                byte featureIdmsb = resData[4];
-                byte featureIdlsb = resData[5];
-                byte featureType = resData[6];
+                byte featureIdmsb = _resData.Param(0);
+                byte featureIdlsb = _resData.Param(1);
+                byte featureType  = _resData.Param(2);
 
                 string featureName = LogiFeatures.GetName(new byte[] { featureIdmsb, featureIdlsb });
+
+                string outString = "";
 
                 if (featureName != "UNKNOWN")
                 {
                     _featureList.Add(featureName, ii);
                 }
 
-                Debug.Write($"\t{ii:d2} {featureName,-20:s}");
-                Debug.Write($"\t [0x{featureIdmsb:X2}{featureIdlsb:X2}] ");
+                outString += $"\t{ii:d2} {featureName,-20:s}";
+                outString += $"\t [0x{featureIdmsb:X2}{featureIdlsb:X2}] ";
 
                 if ((featureType & 0b10000000) > 0)
                 {
-                    Debug.Write("obsolete  ");
+                    outString += "obsolete  ";
                 }
 
                 if ((featureType & 0b01000000) > 0)
                 {
-                    Debug.Write("hidden  ");
+                    outString += "hidden  ";
                 }
 
                 if ((featureType & 0b00100000) > 0)
                 {
-                    Debug.Write("internal  ");
+                    outString += "internal  ";
                 }
 
-                Debug.WriteLine("");
+                Debug.WriteLine(outString);
             }
         }
 
-        private async Task GetDeviceNameAsync()
+        private void GetDeviceNameAsync()
         {
             if (!_featureList.ContainsKey("DEVICE_NAME"))
             {
@@ -301,27 +327,30 @@ namespace LGSTrayBattery
             }
 
             byte deviceNameIdx = _featureList["DEVICE_NAME"];
-            var resData = await WriteReadRequestAsync(7, 0x01, deviceNameIdx);
+            _ = WriteRequestAsync(7, 0x01, deviceNameIdx);
+            _readSync.WaitOne();
 
-            int nameLength = resData[4];
+            int nameLength = _resData.Param(0);
             byte[] nameBuffer = new byte[nameLength];
 
             for (byte ii = 0; ii < nameLength; ii += 15)
             {
-                resData = await WriteReadRequestAsync(7, 0x01, deviceNameIdx, 0x10, new byte[] { ii, 00, 00 });
+                _ = WriteRequestAsync(7, 0x01, deviceNameIdx, 0x10, new byte[] { ii, 00, 00 });
+                _readSync.WaitOne();
 
-                Buffer.BlockCopy(resData, 4, nameBuffer, ii, Math.Min(nameLength - ii, 15));
+                Buffer.BlockCopy(_resData, 4, nameBuffer, ii, Math.Min(nameLength - ii, 15));
             }
 
             DeviceName = Encoding.ASCII.GetString(nameBuffer);
         }
 
-        private async Task GetWPidAsync()
+        private void GetWPidAsync()
         {
             try
             {
-                byte[] resData = await WriteReadRequestAsync(7, 0xFF, 0x83, 0xB5, new byte[] {0x20,});
-                _wpid = (UInt16)(((UInt16)resData[7] << 8) + resData[8]);
+                _ = WriteRequestAsync(7, 0xFF, 0x83, 0xB5, new byte[] {0x20,});
+                _readSync.WaitOne();
+                _wpid = (UInt16)(((UInt16) _resData.Param(3) << 8) + _resData.Param(4));
             }
             catch (LogiDeviceException e)
             {
@@ -330,13 +359,15 @@ namespace LGSTrayBattery
             }
         }
 
-        private async Task<double> GetProtocolVer()
+        private double GetProtocolVer()
         {
             try
             {
-                var resData = await WriteReadRequestAsync(7, 0x01, 0x00, 0x10, new byte[] {0x00, 0x00, 0x88});
+                Listen();
+                _ = WriteRequestAsync(7, 0x01, 0x00, 0x10, new byte[] {0x00, 0x00, 0x88});
+                _readSync.WaitOne();
 
-                string verStr = $"{resData[4]:X}.{resData[5]:X}";
+                string verStr = $"{_resData.Param(0):X}.{_resData.Param(1):X}";
 
                 return double.Parse(verStr);
             }
@@ -344,11 +375,16 @@ namespace LGSTrayBattery
             {
                 return 1.0;
             }
+            finally
+            {
+                StopListen();
+            }
         }
 
         private async Task WriteRequestAsync(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
             _randSwid = (byte)_rand.Next(1, 16);
+            _subId = featureIndex;
 
             if (featureIndex < 0x80)
             {
@@ -367,71 +403,6 @@ namespace LGSTrayBattery
             {
                 BatteryPercentage = Double.NaN;
                 BatteryVoltage = Double.NaN;
-            }
-        }
-
-        private async Task<byte[]> WriteReadRequestAsync(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
-        {
-            try
-            {
-                await _hidDevices[7].InitializeAsync();
-                await _hidDevices[20].InitializeAsync();
-
-                byte randSwid = (byte) _rand.Next(1, 16);
-
-                if (featureIndex < 0x80)
-                {
-                    functionId |= randSwid;
-                }
-
-                byte[] request = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
-                DebugParse(request, 1);
-
-                await _hidDevices[7].WriteAsync(request);
-                byte[] resData;
-
-                do
-                {
-                    var reportReturnShort = _hidDevices[7].ReadAsync();
-                    var reportReturnLong = _hidDevices[20].ReadAsync();
-
-                    var reportReturn = await await Task.WhenAny(reportReturnLong, reportReturnShort);
-
-                    resData = reportReturn;
-
-                    if (resData[2] == 0x8F)
-                    {
-                        throw new LogiDeviceException("HID++ 1.0 Error");
-                    }
-
-                } while (featureIndex < 0x80 && (resData[3] & 0x0F) != randSwid);
-
-                DebugParse(resData, 2);
-
-                if (featureIndex < 0x80)
-                {
-                    if (resData[1] != deviceId)
-                    {
-                        throw new LogiDeviceException("Device ID mismatch");
-                    }
-
-                    if (resData[2] != featureIndex)
-                    {
-                        throw new LogiDeviceException("Feature Index mismatch");
-                    }
-
-                    if ((resData[3] & 0xF0) != (functionId & 0xF0))
-                    {
-                        throw new LogiDeviceException("Function ID mismatch");
-                    }
-                }
-
-                return resData;
-            }
-            finally
-            {
-                _hidDevices[7].Close();
-                _hidDevices[20].Close();
             }
         }
 
@@ -477,26 +448,66 @@ namespace LGSTrayBattery
 
             int i;
 
+            string outString = "";
+
             if (mode == 1)
             {
-                Debug.Write("W: ");
+                outString += "W: ";
             }
             else if (mode == 2)
             {
-                Debug.Write("R: ");
+                outString += "R: ";
             }
 
             for (i = 0; i < 4; i++)
             {
-                Debug.Write($"x{byteArray[i]:X2} ");
+                outString += $"x{byteArray[i]:X2} ";
             }
 
             for (; i < byteArray.Length; i++)
             {
-                Debug.Write($"x{byteArray[i]:X2}");
+                outString += $"x{byteArray[i]:X2}";
             }
 
-            Debug.Write("\n");
+            Debug.WriteLine(outString);
         }
+
+        #region  Helper classes
+
+        private enum HidLength : int
+        {
+            Short = 7,
+            Long = 20
+        }
+
+        private enum HidLengthFlag : byte
+        {
+            Short = 0x10,
+            Long = 0x11
+        }
+
+        private struct ResData
+        {
+            private byte[] _resData;
+
+            // HID++ 2.0
+            public byte FeatureIndex => _resData[2];
+            public byte FunctionId => (byte) (_resData[3] & 0xF0);
+            public byte SwId => (byte) (_resData[3] & 0x0F);
+
+            // HID++ 1.0
+            public byte SubId => _resData[2];
+            public byte Address => _resData[3];
+
+            // Common
+            public byte DeviceIndex => _resData[1];
+            public byte Param(int index) => _resData[4 + index];
+
+            public static implicit operator ResData(byte[] d) => new ResData() {_resData = d};
+            public static implicit operator ResData(ReadResult d) => new ResData() {_resData = d.Data};
+
+            public static implicit operator byte[](ResData d) => d._resData;
+        }
+        #endregion
     }
 }
