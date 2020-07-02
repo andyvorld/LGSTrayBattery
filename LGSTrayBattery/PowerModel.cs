@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -44,7 +45,10 @@ namespace LGSTrayBattery
 
             var temp = dischargeCurveNode.Value.Trim('\n', ' ').Split(new char[] { '\n', }, StringSplitOptions.RemoveEmptyEntries);
 
-            _dischargeCurve = temp.ToList().ConvertAll(x => Array.ConvertAll(x.Split(','), Double.Parse));
+            _dischargeCurve = Array.ConvertAll(temp,
+                x => Array.ConvertAll(x.Split(','),
+                    new Converter<string, double>(y =>
+                        Double.Parse(y, NumberStyles.Any, CultureInfo.InvariantCulture)))).ToList();
 
             if (_dischargeCurve[0][LUTCol.Volt] > _dischargeCurve[1][LUTCol.Volt])
             {
