@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -338,7 +339,7 @@ namespace LGSTrayBattery
 
                 string verStr = $"{resData[4]:X}.{resData[5]:X}";
 
-                return double.Parse(verStr);
+                return double.Parse(verStr, NumberStyles.Any, CultureInfo.InvariantCulture);
             }
             catch (LogiDeviceException e)
             {
