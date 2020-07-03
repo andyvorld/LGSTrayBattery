@@ -14,19 +14,19 @@ namespace LGSTrayBattery
             {
                 return "/Resources/Bat_100.ico";
             }
-            else if (batteryPercent >= 75)
+            else if (batteryPercent >= 65)
             {
                 return "/Resources/Bat_75.ico";
             }
-            else if (batteryPercent >= 50)
+            else if (batteryPercent >= 40)
             {
                 return "/Resources/Bat_50.ico";
             }
-            else if (batteryPercent >= 25)
+            else if (batteryPercent >= 15)
             {
                 return "/Resources/Bat_25.ico";
             }
-            else if (batteryPercent < 25)
+            else if (batteryPercent < 15)
             {
                 return "/Resources/Bat_10.ico";
             }

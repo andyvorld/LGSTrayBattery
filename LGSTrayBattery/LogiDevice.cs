@@ -58,9 +58,7 @@ namespace LGSTrayBattery
 
         private readonly Dictionary<int, IDevice> _hidDevices = new Dictionary<int, IDevice>();
         private readonly Dictionary<string, byte> _featureList = new Dictionary<string, byte>();
-
-        private byte _subId;
-        private byte _randSwid;
+        private readonly Dictionary<byte, string> _featureListR = new Dictionary<byte, string>();
 
         private readonly Random _rand = new Random();
 
@@ -72,8 +70,11 @@ namespace LGSTrayBattery
 
         private bool _listen = false;
 
+        private static int HidTimeOut = 500;
         private AutoResetEvent _readSync = new AutoResetEvent(false);
-        private ResData _resData;
+        private LogiDeviceException _lastException;
+        private HidData _senData;
+        private HidData _resData;
 
         private Task _shortListener;
         private Task _longListener;
@@ -134,31 +135,32 @@ namespace LGSTrayBattery
             StopListen();
         }
 
-        public async Task UpdateBatteryPercentage()
+        public void UpdateBatteryPercentage()
         {
-            try
+            if (_featureList.ContainsKey("BATTERY_STATUS"))
             {
-                if (_featureList.ContainsKey("BATTERY_STATUS"))
+                _ = WriteRequestAsync(7, 0x01, _featureList["BATTERY_STATUS"]).ConfigureAwait(false);
+                if (!_readSync.WaitOne(HidTimeOut) || _resData == null)
                 {
-                    await WriteRequestAsync(7, 0x01, _featureList["BATTERY_STATUS"]).ConfigureAwait(false);
-                }
-                else
-                {
-                    _ = UpdateBatteryVoltage();
+                    BatteryPercentage = Double.NaN;
                 }
             }
-            catch (ApiException)
+            else
             {
-                BatteryPercentage = Double.NaN;
-                BatteryVoltage = Double.NaN;
+                UpdateBatteryVoltage();
             }
         }
 
-        private async Task UpdateBatteryVoltage()
+        private void UpdateBatteryVoltage()
         {
             if (_featureList.ContainsKey("BATTERY_VOLTAGE"))
             {
-                await WriteRequestAsync(7, 0x01, _featureList["BATTERY_VOLTAGE"]).ConfigureAwait(false);
+                _ = WriteRequestAsync(7, 0x01, _featureList["BATTERY_VOLTAGE"]).ConfigureAwait(false);
+
+                if (!_readSync.WaitOne(HidTimeOut) || _resData == null)
+                {
+                    BatteryVoltage = Double.NaN;
+                }
             }
         }
 
@@ -203,16 +205,48 @@ namespace LGSTrayBattery
         {
             while (_listen)
             {
-                _hidDevices[hidNum].InitializeAsync().Wait();
-                _resData = await _hidDevices[hidNum].ReadAsync();
-
-                if (_resData.SubId != _subId )
+                if (!_hidDevices[hidNum].IsInitialized)
                 {
-                    continue;
+                    _hidDevices[hidNum].InitializeAsync().Wait();
                 }
 
-                DebugParse(_resData, 2);
-                _readSync.Set();
+                try
+                {
+                    _resData = await _hidDevices[hidNum].ReadAsync();
+                }
+                catch (IOException)
+                {
+                    _lastException = new LogiDeviceException($"Device disconnected");
+                    _resData = null;
+                    _readSync.Set();
+                    break;
+                }
+
+                bool valid = _resData.CompareSignature(_senData);
+
+                if (valid)
+                {
+                    _featureListR.TryGetValue(_resData.FeatureIndex, out string featureName);
+
+                    switch (featureName)
+                    {
+                        case ("BATTERY_STATUS"):
+                            BatteryPercentage = _resData.Param(0);
+                            break;
+                        case ("BATTERY_VOLTAGE"):
+                            BatteryVoltage = 0.001 * ((_resData.Param(0) << 8) + _resData.Param(1));
+                            break;
+                    }
+
+                    DebugParse(_resData, 2);
+                    _readSync.Set();
+                }
+                else if ((_resData.SubId == 0x8F) && (_resData.Address == _senData.SubId) && (_resData.Param(0) == _senData.Address))
+                {
+                    _lastException = new LogiDeviceException($"HID++ 1.0 Error (x{_resData.Param(1):X2})");
+                    _resData = null;
+                    _readSync.Set();
+                }
             }
 
             switch (hidNum)
@@ -224,45 +258,8 @@ namespace LGSTrayBattery
                     _longListener = null;
                     break;
             }
-        }
 
-        private void ParseReport(byte[] resData)
-        {
-            byte deviceId = resData[1];
-            byte functionIdx = resData[2];
-
-            DebugParse(resData, 2);
-
-            // Magic disconnect string
-            if (deviceId == 0x01 & functionIdx == 0x8F)
-            {
-                if (_featureList.ContainsValue(resData[3]))
-                {
-                    Debug.WriteLine("Device disconnected");
-                    BatteryVoltage = Double.NaN;
-                }
-            }
-
-            if ((resData[3] & 0x0F) != _randSwid)
-            {
-                Debug.WriteLine("^^^Not our SWID^^^");
-                return;
-            }
-            else
-            {
-                _randSwid = 0xFF;
-            }
-
-            if ((_featureList.ContainsKey("BATTERY_VOLTAGE")) && (functionIdx == _featureList["BATTERY_VOLTAGE"]))
-            {
-                BatteryVoltage = 0.001 * ((resData[4] << 8) + resData[5]);
-                Debug.WriteLine($"Battery Updated V = {BatteryVoltage}");
-            }
-            else if ((_featureList.ContainsKey("BATTERY_STATUS")) && (functionIdx == _featureList["BATTERY_STATUS"]))
-            {
-                BatteryPercentage = resData[4];
-                Debug.WriteLine($"Battery Percentage Updated, {BatteryPercentage:f2}%");
-            }
+            _listen = false;
         }
 
         private void GetFeaturesAsync()
@@ -295,6 +292,7 @@ namespace LGSTrayBattery
                 if (featureName != "UNKNOWN")
                 {
                     _featureList.Add(featureName, ii);
+                    _featureListR.Add(ii, featureName);
                 }
 
                 outString += $"\t{ii:d2} {featureName,-20:s}";
@@ -350,7 +348,13 @@ namespace LGSTrayBattery
             {
                 _ = WriteRequestAsync(7, 0xFF, 0x83, 0xB5, new byte[] {0x20,});
                 _readSync.WaitOne();
-                _wpid = (UInt16)(((UInt16) _resData.Param(3) << 8) + _resData.Param(4));
+
+                if (_resData == null)
+                {
+                    throw _lastException;
+                }
+
+                _wpid = (ushort) ((_resData.Param(3) << 8) + _resData.Param(4));
             }
             catch (LogiDeviceException e)
             {
@@ -366,6 +370,11 @@ namespace LGSTrayBattery
                 Listen();
                 _ = WriteRequestAsync(7, 0x01, 0x00, 0x10, new byte[] {0x00, 0x00, 0x88});
                 _readSync.WaitOne();
+
+                if (_resData == null)
+                {
+                    throw _lastException;
+                }
 
                 string verStr = $"{_resData.Param(0):X}.{_resData.Param(1):X}";
 
@@ -383,27 +392,23 @@ namespace LGSTrayBattery
 
         private async Task WriteRequestAsync(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
-            _randSwid = (byte)_rand.Next(1, 16);
-            _subId = featureIndex;
+            byte randSwid = (byte)_rand.Next(1, 16);
 
             if (featureIndex < 0x80)
             {
-                functionId |= _randSwid;
+                functionId |= randSwid;
             }
 
-            byte[] request = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
-            DebugParse(request, 1);
+            _senData = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
 
-            try
+            DebugParse(_senData, 1);
+
+            if (!_listen)
             {
-                await _hidDevices[7].InitializeAsync();
-                await _hidDevices[7].WriteAsync(request);
+                Listen();
             }
-            catch (ApiException e)
-            {
-                BatteryPercentage = Double.NaN;
-                BatteryVoltage = Double.NaN;
-            }
+
+            await _hidDevices[7].WriteAsync(_senData);
         }
 
         private byte[] CreatePacket(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
@@ -486,27 +491,32 @@ namespace LGSTrayBattery
             Long = 0x11
         }
 
-        private struct ResData
+        private class HidData
         {
-            private byte[] _resData;
+            private byte[] data;
 
             // HID++ 2.0
-            public byte FeatureIndex => _resData[2];
-            public byte FunctionId => (byte) (_resData[3] & 0xF0);
-            public byte SwId => (byte) (_resData[3] & 0x0F);
+            public byte FeatureIndex => data[2];
+            public byte FunctionId => (byte) (data[3] & 0xF0);
+            public byte SwId => (byte) (data[3] & 0x0F);
 
             // HID++ 1.0
-            public byte SubId => _resData[2];
-            public byte Address => _resData[3];
+            public byte SubId => data[2];
+            public byte Address => data[3];
 
             // Common
-            public byte DeviceIndex => _resData[1];
-            public byte Param(int index) => _resData[4 + index];
+            public byte DeviceIndex => data[1];
+            public byte Param(int index) => data[4 + index];
 
-            public static implicit operator ResData(byte[] d) => new ResData() {_resData = d};
-            public static implicit operator ResData(ReadResult d) => new ResData() {_resData = d.Data};
+            public static implicit operator HidData(byte[] d) => new HidData() {data = d};
+            public static implicit operator HidData(ReadResult d) => new HidData() {data = d.Data};
 
-            public static implicit operator byte[](ResData d) => d._resData;
+            public static implicit operator byte[](HidData d) => d.data;
+
+            public bool CompareSignature(byte[] other)
+            {
+                return (this.data[1] == other[1]) && (this.data[2] == other[2]) && (this.data[3] == data[3]);
+            }
         }
         #endregion
     }

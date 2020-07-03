@@ -151,7 +151,7 @@ namespace LGSTrayBattery
             SelectedDevice = selectedDevice;
             SelectedDevice.IsChecked = true;
             SelectedDevice.Listen();
-            _ = SelectedDevice.UpdateBatteryPercentage();
+            SelectedDevice.UpdateBatteryPercentage();
         }
 
         public void UpdateSelectedPollInterval(PollInterval selectedpollInterval)
@@ -174,7 +174,7 @@ namespace LGSTrayBattery
                     return;
                 }
 
-                await SelectedDevice.UpdateBatteryPercentage().ConfigureAwait(false);
+                SelectedDevice.UpdateBatteryPercentage();
                 await Task.Delay(SelectedPollInterval.delayTime).ConfigureAwait(false);
             }
         }
