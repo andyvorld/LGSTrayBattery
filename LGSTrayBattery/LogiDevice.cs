@@ -114,7 +114,6 @@ namespace LGSTrayBattery
             if (_hidDevices.ContainsKey((int) HidLength.Short) && _hidDevices.ContainsKey((int) HidLength.Long))
             {
                 Listen();
-                Task.Delay(100).Wait();
                 _protocolVer = GetProtocolVer().Result;
 
                 if (_protocolVer >= 2.0)
