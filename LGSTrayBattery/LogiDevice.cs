@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -59,8 +60,7 @@ namespace LGSTrayBattery
 
         private readonly Dictionary<int, IDevice> _hidDevices = new Dictionary<int, IDevice>();
         private readonly Dictionary<string, byte> _featureList = new Dictionary<string, byte>();
-
-        private byte _randSwid;
+        private readonly Dictionary<byte, string> _featureListR = new Dictionary<byte, string>();
 
         private readonly Random _rand = new Random();
 
@@ -72,10 +72,18 @@ namespace LGSTrayBattery
 
         private bool _listen = false;
 
+        private const int HidTimeOut = 250;
+
+        private LogiDeviceException _lastException;
+
+        private readonly BlockingCollection<HidData> _resDataQueue = new BlockingCollection<HidData>(new ConcurrentQueue<HidData>());
+
+        private Thread _shortListener;
+        private Thread _longListener;
+
         public LogiDevice(IEnumerable<IDevice> devices, string usbSerialId, out bool valid)
         {
             valid = false;
-
             this.UsbSerialId = usbSerialId;
 
             foreach (var device in devices)
@@ -103,8 +111,9 @@ namespace LGSTrayBattery
                 device.Close();
             }
 
-            if (_hidDevices.ContainsKey(7) && _hidDevices.ContainsKey(20))
+            if (_hidDevices.ContainsKey((int) HidLength.Short) && _hidDevices.ContainsKey((int) HidLength.Long))
             {
+                Listen();
                 _protocolVer = GetProtocolVer().Result;
 
                 if (_protocolVer >= 2.0)
@@ -125,26 +134,28 @@ namespace LGSTrayBattery
                 hidDevice.Close();
             }
 
-            StopListen();
+            _shortListener?.Abort();
+            _longListener?.Abort();
         }
 
         public async Task UpdateBatteryPercentage()
         {
-            try
+            if (_featureList.ContainsKey("BATTERY_STATUS"))
             {
-                if (_featureList.ContainsKey("BATTERY_STATUS"))
+                (RequestStatus requestStatus, HidData resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, _featureList["BATTERY_STATUS"]).ConfigureAwait(false);
+
+                if (requestStatus == RequestStatus.Success)
                 {
-                    await WriteRequestAsync(7, 0x01, _featureList["BATTERY_STATUS"]).ConfigureAwait(false);
+                    BatteryPercentage = resData.Param(0);
                 }
                 else
                 {
-                    _ = UpdateBatteryVoltage();
+                    BatteryPercentage = Double.NaN;
                 }
             }
-            catch (ApiException)
+            else
             {
-                BatteryPercentage = Double.NaN;
-                BatteryVoltage = Double.NaN;
+                await UpdateBatteryVoltage().ConfigureAwait(false);
             }
         }
 
@@ -152,7 +163,16 @@ namespace LGSTrayBattery
         {
             if (_featureList.ContainsKey("BATTERY_VOLTAGE"))
             {
-                await WriteRequestAsync(7, 0x01, _featureList["BATTERY_VOLTAGE"]).ConfigureAwait(false);
+                (RequestStatus requestStatus, HidData resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, _featureList["BATTERY_VOLTAGE"]).ConfigureAwait(false);
+
+                if (requestStatus == RequestStatus.Success)
+                {
+                    BatteryVoltage = 0.001 * ((resData.Param(0) << 8) + resData.Param(1));
+                }
+                else
+                {
+                    BatteryVoltage = Double.NaN;
+                }
             }
         }
 
@@ -163,134 +183,136 @@ namespace LGSTrayBattery
             await GetWPidAsync();
         }
 
-        public async Task Listen()
+        public void Listen()
         {
-            await _hidDevices[7].InitializeAsync();
-            await _hidDevices[20].InitializeAsync();
+            if (_listen)
+            {
+                return;
+            }
 
-            //_readThread = new Thread(ReadLoop);
-            //_readThread.Start();
 
-            _listen = true;
+            _hidDevices[(int) HidLength.Short].InitializeAsync().Wait();
+            _hidDevices[(int) HidLength.Long].InitializeAsync().Wait();
 
-            ReadLoopAsync(7);
-            ReadLoopAsync(20);
+            _listen = _hidDevices[(int)HidLength.Short].IsInitialized;
+            _listen &= _hidDevices[(int) HidLength.Long].IsInitialized;
+
+            if (_shortListener?.IsAlive != true)
+            {
+                _shortListener = new Thread(async () => await ReadLoopAsync((int) HidLength.Short));
+                _shortListener.Start();
+            }
+
+            if (_longListener?.IsAlive != true)
+            {
+                _longListener = new Thread(async () => await ReadLoopAsync((int) HidLength.Long));
+                _longListener.Start();
+            }
         }
 
-        public void StopListen()
-        {
-            _listen = false;
-        }
-
-        private async void ReadLoopAsync(int hidNum)
+        private async Task ReadLoopAsync(int hidNum)
         {
             while (_listen)
             {
+                if (!_hidDevices[hidNum].IsInitialized)
+                {
+                    _hidDevices[hidNum].InitializeAsync().Wait();
+                }
+
                 try
                 {
-                    await _hidDevices[hidNum].InitializeAsync();
-                    var resData = await _hidDevices[hidNum].ReadAsync().ConfigureAwait(false);
-                    ParseReport(resData);
+                    HidData resData = await _hidDevices[hidNum].ReadAsync();
+                    _resDataQueue.Add(resData);
                 }
-                catch (ApiException e)
+                catch (IOException)
                 {
-                    //Debug.WriteLine(e.Message);
-                    BatteryPercentage = Double.NaN;
-                    BatteryVoltage = Double.NaN;
-                    await Task.Delay(500);
-                }
-                catch (IOException e)
-                {
-                    BatteryPercentage = Double.NaN;
-                    BatteryVoltage = Double.NaN;
-                    await Task.Delay(500);
-                }
-            }
-        }
-
-        private void ParseReport(byte[] resData)
-        {
-            byte deviceId = resData[1];
-            byte functionIdx = resData[2];
-
-            DebugParse(resData, 2);
-
-            // Magic disconnect string
-            if (deviceId == 0x01 & functionIdx == 0x8F)
-            {
-                if (_featureList.ContainsValue(resData[3]))
-                {
-                    Debug.WriteLine("Device disconnected");
-                    BatteryVoltage = Double.NaN;
+                    _lastException = new LogiDeviceException($"Device disconnected");
+                    _resDataQueue.Add(null);
+                    break;
                 }
             }
 
-            if ((resData[3] & 0x0F) != _randSwid)
-            {
-                Debug.WriteLine("^^^Not our SWID^^^");
-                return;
-            }
-            else
-            {
-                _randSwid = 0xFF;
-            }
-
-            if ((_featureList.ContainsKey("BATTERY_VOLTAGE")) && (functionIdx == _featureList["BATTERY_VOLTAGE"]))
-            {
-                BatteryVoltage = 0.001 * ((resData[4] << 8) + resData[5]);
-                Debug.WriteLine($"Battery Updated V = {BatteryVoltage}");
-            }
-            else if ((_featureList.ContainsKey("BATTERY_STATUS")) && (functionIdx == _featureList["BATTERY_STATUS"]))
-            {
-                BatteryPercentage = resData[4];
-                Debug.WriteLine($"Battery Percentage Updated, {BatteryPercentage:f2}%");
-            }
+            _listen = false;
         }
 
         private async Task GetFeaturesAsync()
         {
-            byte[] resData = await WriteReadRequestAsync(7, 0x01, 0x00, 0x00, LogiFeatures.GetHexCodeArray("FEATURE_SET"));
-            byte featureIndex = resData[4];
+            (RequestStatus resRequestStatus, HidData _resData) =
+                await WriteReadRequestAsync(HidLength.Short, 0x01, 0x00, 0x00, LogiFeatures.GetHexCodeArray("FEATURE_SET"))
+                    .ConfigureAwait(false);
+            if (resRequestStatus == RequestStatus.Errored)
+            {
+                throw _lastException;
+            }
 
-            resData = await WriteReadRequestAsync(7, 0x01, featureIndex);
-            int numFeatures = 1 + resData[4];
+            if (resRequestStatus == RequestStatus.TimedOut)
+            {
+                throw new LogiDeviceException("Device Timedout");
+            }
+
+            byte featureIndex = _resData.Param(0);
+
+            (resRequestStatus, _resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, featureIndex).ConfigureAwait(false);
+            if (resRequestStatus == RequestStatus.Errored)
+            {
+                throw _lastException;
+            }
+
+            if (resRequestStatus== RequestStatus.TimedOut)
+            {
+                throw new LogiDeviceException("Device Timedout");
+            }
+
+            int numFeatures = 1 + _resData.Param(0);
 
             Debug.WriteLine("Found {0:d} features.", numFeatures);
 
             for (byte ii = 0; ii < numFeatures; ii++)
             {
-                resData = await WriteReadRequestAsync(7, 0x01, featureIndex, 0x10, new byte[] { ii });
+                (resRequestStatus, _resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, featureIndex, 0x10, new byte[] { ii }).ConfigureAwait(false);
+                if (resRequestStatus == RequestStatus.Errored)
+                {
+                    throw _lastException;
+                }
 
-                byte featureIdmsb = resData[4];
-                byte featureIdlsb = resData[5];
-                byte featureType = resData[6];
+                if (resRequestStatus == RequestStatus.TimedOut)
+                {
+                    throw new LogiDeviceException("Device Timedout");
+                }
+
+                byte featureIdmsb = _resData.Param(0);
+                byte featureIdlsb = _resData.Param(1);
+                byte featureType  = _resData.Param(2);
 
                 string featureName = LogiFeatures.GetName(new byte[] { featureIdmsb, featureIdlsb });
+
+                string outString = "";
 
                 if (featureName != "UNKNOWN")
                 {
                     _featureList.Add(featureName, ii);
+                    _featureListR.Add(ii, featureName);
                 }
 
-                Debug.Write($"\t{ii:d2} {featureName,-20:s}");
-                Debug.Write($"\t [0x{featureIdmsb:X2}{featureIdlsb:X2}] ");
+                outString += $"\t{ii:d2} {featureName,-20:s}";
+                outString += $"\t [0x{featureIdmsb:X2}{featureIdlsb:X2}] ";
 
                 if ((featureType & 0b10000000) > 0)
                 {
-                    Debug.Write("obsolete  ");
+                    outString += "obsolete  ";
                 }
 
                 if ((featureType & 0b01000000) > 0)
                 {
-                    Debug.Write("hidden  ");
+                    outString += "hidden  ";
                 }
 
                 if ((featureType & 0b00100000) > 0)
                 {
-                    Debug.Write("internal  ");
+                    outString += "internal  ";
                 }
 
-                Debug.WriteLine("");
+                Debug.WriteLine(outString);
             }
         }
 
@@ -302,14 +324,32 @@ namespace LGSTrayBattery
             }
 
             byte deviceNameIdx = _featureList["DEVICE_NAME"];
-            var resData = await WriteReadRequestAsync(7, 0x01, deviceNameIdx);
+            (RequestStatus resRequestStatus, HidData resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, deviceNameIdx);
+            if (resRequestStatus == RequestStatus.Errored)
+            {
+                throw _lastException;
+            }
 
-            int nameLength = resData[4];
+            if (resRequestStatus == RequestStatus.TimedOut)
+            {
+                throw new LogiDeviceException("Device Timedout");
+            }
+
+            int nameLength = resData.Param(0);
             byte[] nameBuffer = new byte[nameLength];
 
             for (byte ii = 0; ii < nameLength; ii += 15)
             {
-                resData = await WriteReadRequestAsync(7, 0x01, deviceNameIdx, 0x10, new byte[] { ii, 00, 00 });
+                (resRequestStatus, resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, deviceNameIdx, 0x10, new byte[] { ii, 00, 00 });
+                if (resRequestStatus == RequestStatus.Errored)
+                {
+                    throw _lastException;
+                }
+
+                if (resRequestStatus == RequestStatus.TimedOut)
+                {
+                    throw new LogiDeviceException("Device Timedout");
+                }
 
                 Buffer.BlockCopy(resData, 4, nameBuffer, ii, Math.Min(nameLength - ii, 15));
             }
@@ -321,12 +361,22 @@ namespace LGSTrayBattery
         {
             try
             {
-                byte[] resData = await WriteReadRequestAsync(7, 0xFF, 0x83, 0xB5, new byte[] {0x20,});
-                _wpid = (UInt16)(((UInt16)resData[7] << 8) + resData[8]);
+                (RequestStatus resRequestStatus, HidData resData) = await WriteReadRequestAsync(HidLength.Short, 0xFF, 0x83, 0xB5, new byte[] {0x20,});
+                if (resRequestStatus == RequestStatus.Errored)
+                {
+                    throw _lastException;
+                }
+
+                if (resRequestStatus == RequestStatus.TimedOut)
+                {
+                    throw new LogiDeviceException("Device Timedout");
+                }
+
+                _wpid = (ushort) ((resData.Param(3) << 8) + resData.Param(4));
             }
             catch (LogiDeviceException e)
             {
-                _wpid = (ushort) (_hidDevices[20].ConnectedDeviceDefinition.ProductId ?? 0);
+                _wpid = (ushort) (_hidDevices[(int) HidLength.Long].ConnectedDeviceDefinition.ProductId ?? 0);
                 Debug.WriteLine(e.Message);
             }
         }
@@ -335,120 +385,101 @@ namespace LGSTrayBattery
         {
             try
             {
-                var resData = await WriteReadRequestAsync(7, 0x01, 0x00, 0x10, new byte[] {0x00, 0x00, 0x88});
+                (RequestStatus resRequestStatus, HidData resData) = await WriteReadRequestAsync(HidLength.Short, 0x01, 0x00, 0x10, new byte[] {0x00, 0x00, 0x88});
 
-                string verStr = $"{resData[4]:X}.{resData[5]:X}";
+                if (resRequestStatus == RequestStatus.Errored)
+                {
+                    throw _lastException;
+                }
+
+                if (resRequestStatus == RequestStatus.TimedOut)
+                {
+                    throw new LogiDeviceException("Device Timedout");
+                }
+
+                string verStr = $"{resData.Param(0):X}.{resData.Param(1):X}";
 
                 return double.Parse(verStr, NumberStyles.Any, CultureInfo.InvariantCulture);
             }
-            catch (LogiDeviceException e)
+            catch (LogiDeviceException)
             {
                 return 1.0;
             }
         }
 
-        private async Task WriteRequestAsync(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
+        private async Task<HidData> WriteRequestAsync(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
-            _randSwid = (byte)_rand.Next(1, 16);
+            byte randSwid = (byte)_rand.Next(1, 16);
 
             if (featureIndex < 0x80)
             {
-                functionId |= _randSwid;
+                functionId |= randSwid;
             }
 
-            byte[] request = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
-            DebugParse(request, 1);
+            HidData senData = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
 
-            try
-            {
-                await _hidDevices[7].InitializeAsync();
-                await _hidDevices[7].WriteAsync(request);
-            }
-            catch (ApiException e)
-            {
-                BatteryPercentage = Double.NaN;
-                BatteryVoltage = Double.NaN;
-            }
+            DebugParse(senData, 1);
+
+            Listen();
+            await _hidDevices[(int) HidLength.Short].WriteAsync(senData).ConfigureAwait(false);
+
+            return senData;
         }
 
-        private async Task<byte[]> WriteReadRequestAsync(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
+        private async Task<(RequestStatus, HidData)> WriteReadRequestAsync(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
-            try
+            RequestStatus resStatus = RequestStatus.Success;
+
+            HidData senData = await WriteRequestAsync(length, deviceId, featureIndex, functionId, paramsBytes);
+            HidData resData = null;
+
+            while (true)
             {
-                await _hidDevices[7].InitializeAsync();
-                await _hidDevices[20].InitializeAsync();
+                CancellationTokenSource timeoutCt = new CancellationTokenSource();
+                timeoutCt.CancelAfter(HidTimeOut);
 
-                byte randSwid = (byte) _rand.Next(1, 16);
-
-                if (featureIndex < 0x80)
+                try
                 {
-                    functionId |= randSwid;
+                    resData = _resDataQueue.Take(timeoutCt.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    resStatus = RequestStatus.TimedOut;
+                    return (resStatus, resData);
                 }
 
-                byte[] request = CreatePacket(length, deviceId, featureIndex, functionId, paramsBytes);
-                DebugParse(request, 1);
+                bool valid = resData.CompareSignature(senData);
 
-                await _hidDevices[7].WriteAsync(request);
-                byte[] resData;
-
-                do
+                if (valid)
                 {
-                    var reportReturnShort = _hidDevices[7].ReadAsync();
-                    var reportReturnLong = _hidDevices[20].ReadAsync();
-
-                    var reportReturn = await await Task.WhenAny(reportReturnLong, reportReturnShort);
-
-                    resData = reportReturn;
-
-                    if (resData[2] == 0x8F)
-                    {
-                        throw new LogiDeviceException("HID++ 1.0 Error");
-                    }
-
-                } while (featureIndex < 0x80 && (resData[3] & 0x0F) != randSwid);
-
-                DebugParse(resData, 2);
-
-                if (featureIndex < 0x80)
-                {
-                    if (resData[1] != deviceId)
-                    {
-                        throw new LogiDeviceException("Device ID mismatch");
-                    }
-
-                    if (resData[2] != featureIndex)
-                    {
-                        throw new LogiDeviceException("Feature Index mismatch");
-                    }
-
-                    if ((resData[3] & 0xF0) != (functionId & 0xF0))
-                    {
-                        throw new LogiDeviceException("Function ID mismatch");
-                    }
+                    DebugParse(resData, 2);
+                    break;
                 }
+                else if ((resData.SubId == 0x8F) && (resData.Address == senData.SubId) && (resData.Param(0) == senData.Address))
+                {
+                    _lastException = new LogiDeviceException($"HID++ 1.0 Error (x{resData.Param(1):X2})");
+                    resStatus = RequestStatus.Errored;
+                    DebugParse(resData, 2);
+                    break;
+                }
+            }
 
-                return resData;
-            }
-            finally
-            {
-                _hidDevices[7].Close();
-                _hidDevices[20].Close();
-            }
+            return (resStatus, resData);
         }
 
-        private byte[] CreatePacket(int length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
+        private byte[] CreatePacket(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
             byte[] output;
 
             switch (length)
             {
-                case 7:
-                    output = new byte[7];
-                    output[0] = 0x10;
+                case HidLength.Short:
+                    output = new byte[(int) HidLength.Short];
+                    output[0] = (byte) HidLengthFlag.Short;
                     break;
-                case 20:
-                    output = new byte[20];
-                    output[0] = 0x11;
+                case HidLength.Long:
+                    output = new byte[(int) HidLength.Long];
+                    output[0] = (byte) HidLengthFlag.Long;
                     break;
                 default:
                     throw new LogiDeviceException("Invalid HID packet length.");
@@ -478,26 +509,78 @@ namespace LGSTrayBattery
 
             int i;
 
+            string outString = "";
+
             if (mode == 1)
             {
-                Debug.Write("W: ");
+                outString += "W: ";
             }
             else if (mode == 2)
             {
-                Debug.Write("R: ");
+                outString += "R: ";
             }
 
             for (i = 0; i < 4; i++)
             {
-                Debug.Write($"x{byteArray[i]:X2} ");
+                outString += $"x{byteArray[i]:X2} ";
             }
 
             for (; i < byteArray.Length; i++)
             {
-                Debug.Write($"x{byteArray[i]:X2}");
+                outString += $"x{byteArray[i]:X2}";
             }
 
-            Debug.Write("\n");
+            Debug.WriteLine(outString);
         }
+
+        #region  Helper classes
+
+        private enum RequestStatus : byte
+        {
+            Success = 0,
+            TimedOut = 1,
+            Errored = 2
+        }
+
+        private enum HidLength : int
+        {
+            Short = 7,
+            Long = 20
+        }
+
+        private enum HidLengthFlag : byte
+        {
+            Short = 0x10,
+            Long = 0x11
+        }
+
+        private class HidData
+        {
+            private byte[] _data;
+
+            // HID++ 2.0
+            public byte FeatureIndex => _data[2];
+            public byte FunctionId => (byte) (_data[3] & 0xF0);
+            public byte SwId => (byte) (_data[3] & 0x0F);
+
+            // HID++ 1.0
+            public byte SubId => _data[2];
+            public byte Address => _data[3];
+
+            // Common
+            public byte DeviceIndex => _data[1];
+            public byte Param(int index) => _data[4 + index];
+
+            public static implicit operator HidData(byte[] d) => new HidData() {_data = d};
+            public static implicit operator HidData(ReadResult d) => new HidData() {_data = d.Data};
+
+            public static implicit operator byte[](HidData d) => d._data;
+
+            public bool CompareSignature(HidData other)
+            {
+                return (this._data[1] == other._data[1]) && (this._data[2] == other._data[2]) && (this._data[3] == other._data[3]);
+            }
+        }
+        #endregion
     }
 }

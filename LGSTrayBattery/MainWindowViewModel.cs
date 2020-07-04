@@ -52,6 +52,7 @@ namespace LGSTrayBattery
         }
 
         public Thread UpdateThread;
+        private CancellationTokenSource _ctTimerSource;
 
         public MainWindowViewModel()
         {
@@ -60,8 +61,8 @@ namespace LGSTrayBattery
                 new PollInterval(1000, "1 second"),
                 new PollInterval(10000, "10 seconds"),
                 new PollInterval(60*1000, "1 minute"),
-                new PollInterval(5*60*1000, "5 minute"),
-                new PollInterval(10*60*1000, "15 minute")
+                new PollInterval(5*60*1000, "5 minutes"),
+                new PollInterval(10*60*1000, "15 minutes")
             };
         }
 
@@ -113,7 +114,7 @@ namespace LGSTrayBattery
                 if (valid)
                 {
                     temp.Add(logiDevice);
-                    await logiDevice.LoadDevice().ConfigureAwait(false);
+                    logiDevice.LoadDevice().Wait();
                 }
                 else
                 {
@@ -145,13 +146,12 @@ namespace LGSTrayBattery
             foreach (var device in LogiDevices)
             {
                 device.IsChecked = false;
-                device.StopListen();
             }
 
             SelectedDevice = selectedDevice;
             SelectedDevice.IsChecked = true;
-            _ = SelectedDevice.Listen();
-            _ = SelectedDevice.UpdateBatteryPercentage();
+
+            _ctTimerSource?.Cancel();
         }
 
         public void UpdateSelectedPollInterval(PollInterval selectedpollInterval)
@@ -163,6 +163,8 @@ namespace LGSTrayBattery
 
             SelectedPollInterval = selectedpollInterval;
             SelectedPollInterval.IsChecked = true;
+
+            _ctTimerSource?.Cancel();
         }
 
         private async void UpdateSelectedBattery()
@@ -174,8 +176,9 @@ namespace LGSTrayBattery
                     return;
                 }
 
-                await SelectedDevice.UpdateBatteryPercentage().ConfigureAwait(false);
-                await Task.Delay(SelectedPollInterval.delayTime).ConfigureAwait(false);
+                await SelectedDevice.UpdateBatteryPercentage();
+                _ctTimerSource = new CancellationTokenSource();
+                await Task.Delay(SelectedPollInterval.delayTime, _ctTimerSource.Token).ContinueWith(tsk => { }).ConfigureAwait(false);
             }
         }
     }
