@@ -23,7 +23,9 @@
         <tb:TaskbarIcon
             x:Name="TaskbarIcon"
             IconSource="{Binding SelectedDevice.BatteryPercentage, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BatteryToIcoConverter}}"
-            ToolTipText="{Binding SelectedDevice.ToolTipName}">
+            TrayMouseDoubleClick="TaskbarIcon_OnTrayMouseDoubleClick"
+            ToolTipText="{Binding SelectedDevice.ToolTipName}"
+            >
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Devices" ItemsSource="{Binding LogiDevices, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DeviceName">

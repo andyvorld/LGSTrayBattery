@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using Device.Net;
 using Hid.Net.Windows;
 
@@ -165,6 +166,11 @@ namespace LGSTrayBattery
             SelectedPollInterval.IsChecked = true;
 
             _ctTimerSource?.Cancel();
+        }
+
+        public void ForceBatteryRefresh()
+        {
+            _ctTimerSource.Cancel();
         }
 
         private async void UpdateSelectedBattery()

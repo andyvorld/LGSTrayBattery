@@ -113,7 +113,7 @@ namespace LGSTrayBattery
 
             if (_hidDevices.ContainsKey((int) HidLength.Short) && _hidDevices.ContainsKey((int) HidLength.Long))
             {
-                Listen();
+                Listen().Wait();
                 _protocolVer = GetProtocolVer().Result;
 
                 if (_protocolVer >= 2.0)
@@ -176,26 +176,27 @@ namespace LGSTrayBattery
             }
         }
 
-        public async Task LoadDevice()
-        {
-            await GetFeaturesAsync();
-            await GetDeviceNameAsync();
-            await GetWPidAsync();
-        }
-
-        public void Listen()
+        public async Task Listen()
         {
             if (_listen)
             {
                 return;
             }
 
-
-            _hidDevices[(int) HidLength.Short].InitializeAsync().Wait();
-            _hidDevices[(int) HidLength.Long].InitializeAsync().Wait();
-
-            _listen = _hidDevices[(int)HidLength.Short].IsInitialized;
-            _listen &= _hidDevices[(int) HidLength.Long].IsInitialized;
+            try
+            {
+                await _hidDevices[(int) HidLength.Short].InitializeAsync();
+                await _hidDevices[(int) HidLength.Long].InitializeAsync();
+            }
+            catch (ApiException)
+            {
+                Debug.WriteLine("Device not connected");
+            }
+            finally
+            {
+                _listen = _hidDevices[(int)HidLength.Short].IsInitialized;
+                _listen &= _hidDevices[(int)HidLength.Long].IsInitialized;
+            }
 
             if (_shortListener?.IsAlive != true)
             {
@@ -208,6 +209,13 @@ namespace LGSTrayBattery
                 _longListener = new Thread(async () => await ReadLoopAsync((int) HidLength.Long));
                 _longListener.Start();
             }
+        }
+
+        public async Task LoadDevice()
+        {
+            await GetFeaturesAsync();
+            await GetDeviceNameAsync();
+            await GetWPidAsync();
         }
 
         private async Task ReadLoopAsync(int hidNum)
@@ -407,7 +415,7 @@ namespace LGSTrayBattery
             }
         }
 
-        private async Task<HidData> WriteRequestAsync(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
+        private async Task<(RequestStatus, HidData)> WriteRequestAsync(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
             byte randSwid = (byte)_rand.Next(1, 16);
 
@@ -420,18 +428,28 @@ namespace LGSTrayBattery
 
             DebugParse(senData, 1);
 
-            Listen();
-            await _hidDevices[(int) HidLength.Short].WriteAsync(senData).ConfigureAwait(false);
+            await Listen();
+            try
+            {
+                await _hidDevices[(int) HidLength.Short].WriteAsync(senData).ConfigureAwait(false);
+            }
+            catch (NotInitializedException)
+            {
+                return (RequestStatus.TimedOut, senData);
+            }
 
-            return senData;
+            return (RequestStatus.Success, senData);
         }
 
         private async Task<(RequestStatus, HidData)> WriteReadRequestAsync(HidLength length, byte deviceId, byte featureIndex, byte functionId = 0x00, byte[] paramsBytes = null)
         {
-            RequestStatus resStatus = RequestStatus.Success;
-
-            HidData senData = await WriteRequestAsync(length, deviceId, featureIndex, functionId, paramsBytes);
+            (RequestStatus resStatus, HidData senData) = await WriteRequestAsync(length, deviceId, featureIndex, functionId, paramsBytes);
             HidData resData = null;
+
+            if (resStatus == RequestStatus.TimedOut)
+            {
+                return (resStatus, null);
+            }
 
             while (true)
             {
@@ -446,6 +464,11 @@ namespace LGSTrayBattery
                 {
                     resStatus = RequestStatus.TimedOut;
                     return (resStatus, resData);
+                }
+
+                if (resData == null)
+                {
+                    continue;
                 }
 
                 bool valid = resData.CompareSignature(senData);

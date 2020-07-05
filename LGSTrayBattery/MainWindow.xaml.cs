@@ -79,5 +79,11 @@ namespace LGSTrayBattery
 
             viewModel.UpdateSelectedPollInterval((PollInterval)menuItem.DataContext);
         }
+
+        private void TaskbarIcon_OnTrayMouseDoubleClick(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("Forced Refresh");
+            viewModel.ForceBatteryRefresh();
+        }
     }
 }
