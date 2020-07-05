@@ -72,7 +72,7 @@ namespace LGSTrayBattery
                         string content;
 
                         string[] request = matches.Groups[1].ToString().Split(new string[] {"/"}, StringSplitOptions.RemoveEmptyEntries);
-                        switch (request[0])
+                        switch ((request.Length) > 0 ? request[0] : "")
                         {
                             case ("devices"):
                                 contentType = "text/html";
