@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,6 +27,8 @@ namespace LGSTrayBattery
     {
         MainWindowViewModel viewModel = new MainWindowViewModel();
 
+        private Thread _httpServerThread;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -34,22 +37,7 @@ namespace LGSTrayBattery
 
             this.DataContext = viewModel;
 
-            this.TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Discovery;
-
-            BackgroundWorker worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler((s,e) => viewModel.LoadViewModel().Wait());
-            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler((s, e) =>
-                {
-                    if (e.Error != null)
-                    {
-                        throw e.Error;
-                    }
-
-                    TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Unknown;
-                    viewModel.LoadLastSelected();
-                });
-
-            worker.RunWorkerAsync();
+            LoadDevices();
         }
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
@@ -84,6 +72,42 @@ namespace LGSTrayBattery
         {
             Debug.WriteLine("Forced Refresh");
             viewModel.ForceBatteryRefresh();
+        }
+
+        private void RescanDevices(object sender, RoutedEventArgs e)
+        {
+            LoadDevices(false);
+        }
+
+        private void LoadDevices(bool startHttpServer = true)
+        {
+            this.TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Discovery;
+
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += new DoWorkEventHandler((s, e) => viewModel.LoadViewModel().Wait());
+            worker.RunWorkerCompleted += new RunWorkerCompletedEventHandler((s, e) =>
+            {
+                if (e.Error != null)
+                {
+                    throw e.Error;
+                }
+
+                TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Unknown;
+                viewModel.LoadLastSelected();
+
+                HttpServer.LoadConfig();
+
+                if (HttpServer.ServerEnabled && startHttpServer)
+                {
+                    _httpServerThread = new Thread(async () =>
+                    {
+                        await HttpServer.ServerLoop(viewModel);
+                    });
+                    _httpServerThread.Start();
+                }
+            });
+
+            worker.RunWorkerAsync();
         }
     }
 }

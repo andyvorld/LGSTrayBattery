@@ -20,7 +20,7 @@ namespace LGSTrayBattery
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public string UsbSerialId { get; set; }
+        public string UsbSerialId { get; private set; }
 
         public bool IsChecked { get; set; } = false;
 
@@ -72,7 +72,7 @@ namespace LGSTrayBattery
 
         private bool _listen = false;
 
-        private const int HidTimeOut = 250;
+        private const int HidTimeOut = 500;
 
         private LogiDeviceException _lastException;
 
@@ -81,10 +81,10 @@ namespace LGSTrayBattery
         private Thread _shortListener;
         private Thread _longListener;
 
-        public LogiDevice(IEnumerable<IDevice> devices, string usbSerialId, out bool valid)
+        public LogiDevice(IEnumerable<IDevice> devices, string usbSerialId, byte deviceIdx, out bool valid)
         {
             valid = false;
-            this.UsbSerialId = usbSerialId;
+            this.UsbSerialId = $"{usbSerialId}_{deviceIdx}";
 
             foreach (var device in devices)
             {
@@ -174,6 +174,19 @@ namespace LGSTrayBattery
                     BatteryVoltage = Double.NaN;
                 }
             }
+        }
+
+        public string XmlData()
+        {
+            string output = "";
+            output += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+            output += "<xml>\n";
+            output += $"<device_name>{DeviceName}</device_name>\n";
+            output += $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>\n";
+            output += $"<battery_percent>{BatteryPercentage:f2}</battery_percent>\n";
+            output += "</xml>";
+
+            return output;
         }
 
         public async Task Listen()
