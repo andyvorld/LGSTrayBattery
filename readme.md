@@ -27,9 +27,11 @@ Without the `.xml` file, the tray will display `?` with the tooltip giving `NaN%
 
 Does not support mice that uses HID++ 1.0 protocols. (Older than 2012?)
 
-No working refresh/rescan code for connected/disconnect devices. Current work around is to restart the program.
+~~No working refresh/rescan code for connected/disconnect devices. Current work around is to restart the program.~~ Rescan device is done manually within the right-click context menu.
 
 Currently there are some weird interactions with mouses that can be wired or wireless (e.g. G403) when running in wired mode.
+
+For unifying receiver devices, currently the program only polls the first device.
 
 ## Working with
 - G403 Wireless
