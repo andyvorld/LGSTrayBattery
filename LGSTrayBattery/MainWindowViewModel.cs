@@ -59,20 +59,20 @@ namespace LGSTrayBattery
         {
             PollIntervals = new List<PollInterval>()
             {
-                new PollInterval(1000, "1 second"),
+                new PollInterval(5000, "5 second"),
                 new PollInterval(10000, "10 seconds"),
                 new PollInterval(60*1000, "1 minute"),
                 new PollInterval(5*60*1000, "5 minutes"),
                 new PollInterval(10*60*1000, "15 minutes")
             };
+
+            LogiFeatures.LoadConfig();
         }
 
         public async Task LoadViewModel()
         {
             var logger = new DebugLogger();
             var tracer = new DebugTracer();
-
-            LogiFeatures.LoadConfig();
 
             //Register the factory for creating Usb devices. This only needs to be done once.
             WindowsHidDeviceFactory.Register(logger, tracer);
@@ -110,7 +110,7 @@ namespace LGSTrayBattery
             var temp = new List<LogiDevice>();
             foreach (var usbGroup in hidDeviceGroups)
             {
-                LogiDevice logiDevice = new LogiDevice(usbGroup.Value, usbGroup.Key, out var valid);
+                LogiDevice logiDevice = new LogiDevice(usbGroup.Value, usbGroup.Key, 1, out var valid);
 
                 if (valid)
                 {

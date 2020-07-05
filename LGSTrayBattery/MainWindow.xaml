@@ -48,6 +48,7 @@
                             </Style>
                         </MenuItem.ItemContainerStyle>
                     </MenuItem>
+                    <MenuItem Header="Rescan Devices" Click="RescanDevices"/>
                     <MenuItem Header="Exit" Click="ExitButton_OnClick"/>
                 </ContextMenu>
             </tb:TaskbarIcon.ContextMenu>
