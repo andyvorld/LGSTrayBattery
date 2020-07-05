@@ -1,6 +1,25 @@
 # LGS Tray Battery
 A tray app used to track battery levels of wireless Logitech mouse.
 
+## Features
+### Tray Indicator
+![](https://i.imgur.com/g5e3jsz.png)
+
+Battery percentage and voltage (if supported) in a tray tooltip with notification icon.
+
+Right-click for more options.
+
+### Http/Web "server" api
+By default the running of the http server is disabled, to enable modify `HttpConfig.ini` and change `serverEnable = false` to `serverEnable = true`. Default port number is `12321`, which is configurable if you run into any issues with port numbers. 
+
+![](https://i.imgur.com/IH4YKHl.png)
+
+Send a GET/HTTP request to `localhost:{port}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
+
+![](https://i.imgur.com/hFIlh0o.png)
+
+With the `deviceID`, a GET/HTTP request to `localhost:{port}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
+
 ## Known Issues
 Logitech gaming mouses do not natively have a way of reporting battery level, but rather voltage levels. A voltage to percentage lookup table is available for some mouses from Logitech Gaming Software and are included in `PowerModel`. However newer mice have their files embedded within Logitech G Hub and it is not possible to retrieve them without owning said mice. It is possible to dump an `.xml` file within `PowerModel` for support. [Refer to this issue in libratbag.](https://github.com/libratbag/piper/issues/222#issuecomment-487557251)
 
