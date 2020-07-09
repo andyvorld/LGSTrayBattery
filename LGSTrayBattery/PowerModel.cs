@@ -43,7 +43,7 @@ namespace LGSTrayBattery
                 return;
             }
 
-            var temp = dischargeCurveNode.Value.Trim('\n', ' ').Split(new char[] { '\n', }, StringSplitOptions.RemoveEmptyEntries);
+            var temp = dischargeCurveNode.Value.Trim().Split(new[] { "\n", "\r\n"}, StringSplitOptions.RemoveEmptyEntries);
 
             _dischargeCurve = Array.ConvertAll(temp,
                 x => Array.ConvertAll(x.Split(','),
