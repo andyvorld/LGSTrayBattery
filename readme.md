@@ -36,6 +36,7 @@ For unifying receiver devices, currently the program only polls the first device
 ## Working with
 - G403 Wireless
 - MX Anywhere 2S
+- MX Vertical
 
 ## Acknowledgements
 This project began as a task with me messing around with my mouse for battery tracking.
