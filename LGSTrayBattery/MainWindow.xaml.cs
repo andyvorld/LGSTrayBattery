@@ -33,6 +33,8 @@ namespace LGSTrayBattery
         {
             InitializeComponent();
 
+            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
             this.DataContext = viewModel;

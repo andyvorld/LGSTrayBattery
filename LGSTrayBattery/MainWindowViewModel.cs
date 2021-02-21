@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Device.Net;
 using Hid.Net.Windows;
+using Microsoft.Win32;
 
 namespace LGSTrayBattery
 {
@@ -49,6 +51,41 @@ namespace LGSTrayBattery
 
                 Properties.Settings.Default.LastUSBSerial = _selectedDevice.UsbSerialId;
                 Properties.Settings.Default.Save();
+            }
+        }
+
+        private bool? _autoStart = null;
+        public bool AutoStart
+        {
+            get
+            {
+                if (_autoStart == null)
+                {
+                    RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                    _autoStart = registryKey?.GetValue("LGSTrayBattery") != null;
+                }
+
+                return _autoStart ?? false;
+            }
+            set
+            {
+                RegistryKey registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                if (registryKey == null)
+                {
+                    return;
+                }
+
+                if (value)
+                {
+                    registryKey.SetValue("LGSTrayBattery", Assembly.GetEntryAssembly().Location);
+                }
+                else
+                {
+                    registryKey.DeleteValue("LGSTrayBattery", false);
+                }
+
+                _autoStart = value;
             }
         }
 
