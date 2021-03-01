@@ -73,7 +73,7 @@ namespace LGSTrayBattery
         private void TaskbarIcon_OnTrayMouseDoubleClick(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Forced Refresh");
-            viewModel.ForceBatteryRefresh();
+            LoadDevices(false);
         }
 
         private void RescanDevices(object sender, RoutedEventArgs e)

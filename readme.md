@@ -7,6 +7,8 @@ A tray app used to track battery levels of wireless Logitech mouse.
 
 Battery percentage and voltage (if supported) in a tray tooltip with notification icon.
 
+Double click for rescan/refresh.
+
 Right-click for more options.
 
 ### Http/Web "server" api
