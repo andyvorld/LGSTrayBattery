@@ -318,4 +318,8 @@
     <Error Condition="!Exists('..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.3.2.0\build\Costura.Fody.props'))" />
   </Target>
   <Import Project="..\packages\Fody.3.3.2\build\Fody.targets" Condition="Exists('..\packages\Fody.3.3.2\build\Fody.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+del *.xml</PostBuildEvent>
+  </PropertyGroup>
 </Project>
