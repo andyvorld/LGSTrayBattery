@@ -253,6 +253,9 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="PowerModel\46D_0AB5.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="PowerModel\46D_4053.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -266,6 +269,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PowerModel\46D_4079.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="PowerModel\46D_4086.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="PowerModel\46D_A5B.xml">
