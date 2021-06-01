@@ -1,6 +1,8 @@
 # LGS Tray Battery
 A tray app used to track battery levels of wireless Logitech mouse.
 
+**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**
+
 ## Features
 ### Tray Indicator
 ![](https://i.imgur.com/g5e3jsz.png)
@@ -30,6 +32,8 @@ With the `deviceID`, a GET/HTTP request to `localhost:{port}/device/{deviceID}`,
     - Using this [automated tool](https://github.com/andyvorld/LGSTrayBattery_GHUB_dump) for automated extraction of `.xml` files. (Working as of 24/02/2021)
 
 - Does not support mice that uses HID++ 1.0 protocols. (Older than 2012?)
+
+- Does not work on mice that uses "Unified Battery Reporting". (Newer than late 2020?)
 
 - ~~No working refresh/rescan code for connected/disconnect devices. Current work around is to restart the program.~~ Rescan device is done manually within the right-click context menu.
 
