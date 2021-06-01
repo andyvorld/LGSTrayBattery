@@ -286,6 +286,8 @@ namespace LGSTrayBattery
 
             int numFeatures = 1 + _resData.Param(0);
 
+            Debug.WriteLine("");
+            Debug.WriteLine($"Checking device: {UsbSerialId}");
             Debug.WriteLine("Found {0:d} features.", numFeatures);
 
             for (byte ii = 0; ii < numFeatures; ii++)

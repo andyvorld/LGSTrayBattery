@@ -31,6 +31,8 @@ namespace LGSTrayBattery
 
         public MainWindow()
         {
+            Debug.Listeners.Add(new TextWriterTraceListener("./debug_trace.txt"));
+
             InitializeComponent();
 
             Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
