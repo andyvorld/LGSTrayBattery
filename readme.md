@@ -1,7 +1,7 @@
 # LGS Tray Battery
 A tray app used to track battery levels of wireless Logitech mouse.
 
-**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**
+**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do not have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**
 
 ## Features
 ### Tray Indicator
