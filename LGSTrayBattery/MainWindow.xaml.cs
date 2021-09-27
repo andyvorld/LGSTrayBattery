@@ -85,7 +85,7 @@ namespace LGSTrayBattery
 
         private void LoadDevices(bool startHttpServer = true)
         {
-            this.TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Discovery;
+            this.TaskbarIcon.Icon = CheckTheme.LightTheme ? Properties.Resources.Discovery_light : Properties.Resources.Discovery;
 
             BackgroundWorker worker = new BackgroundWorker();
             worker.DoWork += new DoWorkEventHandler((s, e) => viewModel.LoadViewModel().Wait());
@@ -96,7 +96,7 @@ namespace LGSTrayBattery
                     throw e.Error;
                 }
 
-                TaskbarIcon.Icon = LGSTrayBattery.Properties.Resources.Unknown;
+                TaskbarIcon.Icon = CheckTheme.LightTheme ? Properties.Resources.Unknown_light : Properties.Resources.Unknown;
                 viewModel.LoadLastSelected();
 
                 HttpServer.LoadConfig();

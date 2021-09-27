@@ -165,6 +165,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CheckTheme.cs" />
     <Compile Include="HttpServer.cs" />
     <Compile Include="LogiDevice.cs" />
     <Compile Include="LogiDeviceException.cs" />
