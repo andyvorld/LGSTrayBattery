@@ -6,6 +6,18 @@ namespace LGSTrayBattery
 {
     public class BatteryToIcoConverter : IValueConverter
     {
+        private static bool? _lightTheme = null;
+        public static bool LightTheme
+        {
+            get
+            {
+                if (_lightTheme == null) {
+                    _lightTheme = true;
+                }
+
+                return (bool)_lightTheme;
+            }
+        }
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             double batteryPercent = value is double d ? d : 0;

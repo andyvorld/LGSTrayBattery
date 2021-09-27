@@ -210,9 +210,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\logo_black.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\logo_black.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="FodyWeavers.xml">
@@ -220,37 +218,25 @@
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Discovery.ico" />
+    <Resource Include="Resources\Discovery.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Unknown.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Unknown.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Bat_10.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Bat_10.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Bat_25.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Bat_25.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Bat_50.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Bat_50.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Bat_75.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Bat_75.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Bat_100.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Resources\Bat_100.ico" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="PowerModel\46D_0AB5.xml">
@@ -295,6 +281,13 @@
     <Content Include="PowerModel\46D_C088.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Resources\Bat_100_light.ico" />
+    <Resource Include="Resources\Bat_10_light.ico" />
+    <Resource Include="Resources\Bat_25_light.ico" />
+    <Resource Include="Resources\Bat_50_light.ico" />
+    <Resource Include="Resources\Bat_75_light.ico" />
+    <Resource Include="Resources\Discovery_light.ico" />
+    <Resource Include="Resources\Unknown_light.ico" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.6.1">

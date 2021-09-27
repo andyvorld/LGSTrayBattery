@@ -142,4 +142,25 @@
   <data name="logo_black" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\logo_black.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Bat_100_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bat_100_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bat_10_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bat_10_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bat_25_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bat_25_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bat_50_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bat_50_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Bat_75_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Bat_75_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Discovery_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Discovery_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Unknown_light" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Unknown_light.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
