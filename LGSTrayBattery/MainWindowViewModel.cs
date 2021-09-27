@@ -173,6 +173,12 @@ namespace LGSTrayBattery
 
             if (lastDevice == null)
             {
+                // Selecting first in the list
+                LogiDevice firstDevice = LogiDevices.FirstOrDefault();
+                if (firstDevice != null)
+                {
+                    UpdateSelectedDevice(firstDevice);
+                }
                 return;
             }
 
