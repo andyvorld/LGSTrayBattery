@@ -14,15 +14,17 @@ Double click for rescan/refresh.
 Right-click for more options.
 
 ### Http/Web "server" api
-By default the running of the http server is disabled, to enable modify `HttpConfig.ini` and change `serverEnable = false` to `serverEnable = true`. Default port number is `12321`, which is configurable if you run into any issues with port numbers. 
+By default the running of the http server is disabled, to enable modify `HttpConfig.ini` and change `serverEnable = false` to `serverEnable = true`. The IP address and port used for bindings are under `tcpAddr` and `tcpPort` respectively with the defaults being `localhost` and `12321`.
+
+`tcpAddr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `0.0.0.0` to allow for external access to the devices. If an invalid hostname is provided, the server will fall back to binding on `127.0.0.1`.
 
 ![](https://i.imgur.com/IH4YKHl.png)
 
-Send a GET/HTTP request to `localhost:{port}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
+Send a GET/HTTP request to `{tcpAddr}:{tcpPort}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
 
 ![](https://i.imgur.com/hFIlh0o.png)
 
-With the `deviceID`, a GET/HTTP request to `localhost:{port}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
+With the `deviceID`, a GET/HTTP request to `{tcpAddr}:{tcpPort}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
 
 ## Known Issues
 - Logitech gaming mouses do not natively have a way of reporting battery level, but rather voltage levels. A voltage to percentage lookup table is available for some mouses from Logitech Gaming Software and are included in `PowerModel`. However newer mice have their files embedded within Logitech G Hub and it is not possible to retrieve them without owning said mice. It is possible to dump an `.xml` file within `PowerModel` for support. [Refer to this issue in libratbag.](https://github.com/libratbag/piper/issues/222#issuecomment-487557251)
