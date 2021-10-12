@@ -41,6 +41,16 @@
   <PropertyGroup>
     <ApplicationIcon>Resources\logo_black.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseGHUB|AnyCPU'">
+    <OutputPath>bin\ReleaseGHUB\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Costura, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9919ef960d84173d, processorArchitecture=MSIL">
       <HintPath>..\packages\Costura.Fody.3.2.0\lib\net46\Costura.dll</HintPath>
@@ -252,6 +262,10 @@
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj">
       <Project>{cfc263a8-5480-41b1-a7ba-3b60c65ad42c}</Project>
       <Name>LGSTrayCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LGSTrayGHUB\LGSTrayGHUB.csproj">
+      <Project>{0f1f2088-5d0e-41ca-8ac7-7952f5fa30ae}</Project>
+      <Name>LGSTrayGHUB</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

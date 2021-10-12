@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayGUI", "LGSTrayGUI\LG
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{CFC263A8-5480-41B1-A7BA-3B60C65AD42C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayGHUB", "LGSTrayGHUB\LGSTrayGHUB.csproj", "{0F1F2088-5D0E-41CA-8AC7-7952F5FA30AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{CFC263A8-5480-41B1-A7BA-3B60C65AD42C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CFC263A8-5480-41B1-A7BA-3B60C65AD42C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CFC263A8-5480-41B1-A7BA-3B60C65AD42C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F1F2088-5D0E-41CA-8AC7-7952F5FA30AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F1F2088-5D0E-41CA-8AC7-7952F5FA30AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F1F2088-5D0E-41CA-8AC7-7952F5FA30AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F1F2088-5D0E-41CA-8AC7-7952F5FA30AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,6 +6,7 @@ using Microsoft.Win32;
 using LGSTrayCore;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using LGSTrayGHUB;
 
 namespace LGSTrayGUI
 {
@@ -48,11 +49,14 @@ namespace LGSTrayGUI
             }
         }
 
+        private Thread httpThread;
         public Thread UpdateThread;
         private CancellationTokenSource _ctTimerSource;
 
-        private ObservableCollection<LogiDevice> _logiDevices = new ObservableCollection<LogiDevice>();
-        public ObservableCollection<LogiDevice> LogiDevices { get { return this._logiDevices; } }
+        private ObservableCollection<ObservableCollection<LogiDevice>> _logiDevices = new ObservableCollection<ObservableCollection<LogiDevice>>();
+        public ObservableCollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
+
+        private GHUBDeviceManager ghubDeviceManager;
 
         public MainWindowViewModel()
         {
@@ -60,6 +64,18 @@ namespace LGSTrayGUI
 
         public async Task LoadViewModel()
         {
+            ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
+            ghubDeviceManager = new GHUBDeviceManager(ref ghubDevices);
+            await ghubDeviceManager.LoadDevicesAsync();
+            LogiDevices.Add(ghubDevices);
+
+            HttpServer.LoadConfig();
+            if (HttpServer.ServerEnabled)
+            {
+                httpThread = new Thread(() => HttpServer.ServeLoop(ref _logiDevices));
+                httpThread.IsBackground = true;
+                httpThread.Start();
+            }
         }
     }
 }
