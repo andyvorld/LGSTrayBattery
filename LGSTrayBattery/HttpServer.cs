@@ -138,8 +138,8 @@ namespace LGSTrayBattery
                         }
 
                         string response = $"HTTP/1.1 {statusCode}\r\n";
-                        response += $"{contentType}\r\n";
-
+                        response += $"Content-Type: {contentType}\r\n";
+                        response += $"Access-Control-Allow-Origin: *\r\n";
                         response += "Cache-Control: no-store, must-revalidate\r\n";
                         response += "Pragma: no-cache\r\n";
                         response += "Expires: 0\r\n";
