@@ -51,7 +51,7 @@ namespace LGSTrayCore
             parser.WriteFile("./HttpConfig.ini", data);
         }
 
-        public static void ServeLoop(ref ObservableCollection<ObservableCollection<LogiDevice>> logiDevices)
+        public static void ServeLoop(IEnumerable<IEnumerable<LogiDevice>> logiDevices)
         {
             Debug.WriteLine("\nHttp Server starting");
 

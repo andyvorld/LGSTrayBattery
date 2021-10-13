@@ -9,8 +9,8 @@ namespace LGSTrayCore
 {
     public abstract class LogiDeviceManager
     {
-        protected ObservableCollection<LogiDevice> _LogiDevices;
-        public LogiDeviceManager(ref ObservableCollection<LogiDevice> logiDevices)
+        protected ICollection<LogiDevice> _LogiDevices;
+        public LogiDeviceManager(ICollection<LogiDevice> logiDevices)
         {
             this._LogiDevices = logiDevices;
         }

@@ -267,6 +267,10 @@
       <Project>{0f1f2088-5d0e-41ca-8ac7-7952f5fa30ae}</Project>
       <Name>LGSTrayGHUB</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LGSTrayHID\LGSTrayHID.csproj">
+      <Project>{cbd359c9-b31f-4290-bef9-c8ed576be4f8}</Project>
+      <Name>LGSTrayHID</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

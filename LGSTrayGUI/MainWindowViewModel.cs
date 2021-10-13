@@ -7,6 +7,7 @@ using LGSTrayCore;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using LGSTrayGHUB;
+using LGSTrayHID;
 
 namespace LGSTrayGUI
 {
@@ -57,6 +58,7 @@ namespace LGSTrayGUI
         public ObservableCollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
 
         private GHUBDeviceManager ghubDeviceManager;
+        private HIDDeviceManager hidDeviceManager;
 
         public MainWindowViewModel()
         {
@@ -64,15 +66,22 @@ namespace LGSTrayGUI
 
         public async Task LoadViewModel()
         {
-            ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
-            ghubDeviceManager = new GHUBDeviceManager(ref ghubDevices);
-            await ghubDeviceManager.LoadDevicesAsync();
-            LogiDevices.Add(ghubDevices);
+            //ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
+            //ghubDeviceManager = new GHUBDeviceManager(ghubDevices);
+            //var t1 = ghubDeviceManager.LoadDevicesAsync();
+
+            ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
+            hidDeviceManager = new HIDDeviceManager(hidDevices);
+            var t2 = hidDeviceManager.LoadDevicesAsync();
+
+            //await Task.WhenAll(t1, t2);
+            //LogiDevices.Add(ghubDevices);
+            //LogiDevices.Add(hidDevices);
 
             HttpServer.LoadConfig();
             if (HttpServer.ServerEnabled)
             {
-                httpThread = new Thread(() => HttpServer.ServeLoop(ref _logiDevices));
+                httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices));
                 httpThread.IsBackground = true;
                 httpThread.Start();
             }

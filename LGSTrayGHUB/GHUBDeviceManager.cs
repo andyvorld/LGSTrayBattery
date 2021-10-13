@@ -17,7 +17,7 @@ namespace LGSTrayGHUB
     public class GHUBDeviceManager : LogiDeviceManager
     {
         private WebsocketClient _ws = null;
-        public GHUBDeviceManager(ref ObservableCollection<LogiDevice> logiDevices) : base(ref logiDevices)
+        public GHUBDeviceManager(ICollection<LogiDevice> logiDevices) : base(logiDevices)
         {
             var url = new Uri("ws://localhost:9010");
 
