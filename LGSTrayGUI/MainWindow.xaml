@@ -18,21 +18,13 @@
             >
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Devices" ItemsSource="{Binding LogiDevices, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DeviceName">
+                    <MenuItem x:Name="DeviceList" Header="Devices" ItemsSource="{Binding LogiDevicesFlat, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="DeviceName">
                         <MenuItem.ItemContainerStyle>
                             <Style TargetType="{x:Type MenuItem}">
                                 <Setter Property="IsChecked" Value="{Binding IsChecked, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <Setter Property="IsCheckable" Value="True"/>
                                 <Setter Property="StaysOpenOnClick" Value="False"/>
-                            </Style>
-                        </MenuItem.ItemContainerStyle>
-                    </MenuItem>
-                    <MenuItem Header="Poll Interval" ItemsSource="{Binding PollIntervals, UpdateSourceTrigger=PropertyChanged}" DisplayMemberPath="DisplayName">
-                        <MenuItem.ItemContainerStyle>
-                            <Style TargetType="{x:Type MenuItem}">
-                                <Setter Property="IsChecked" Value="{Binding IsChecked, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <Setter Property="IsCheckable" Value="True"/>
-                                <Setter Property="StaysOpenOnClick" Value="False"/>
+                                <!--<EventSetter Event="Click" Handler="DeviceSelect_OnClick"/>-->
                             </Style>
                         </MenuItem.ItemContainerStyle>
                     </MenuItem>

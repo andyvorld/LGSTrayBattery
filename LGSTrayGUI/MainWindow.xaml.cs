@@ -16,6 +16,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LGSTrayCore;
 using PropertyChanged;
 
 namespace LGSTrayGUI
@@ -25,7 +26,7 @@ namespace LGSTrayGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        MainWindowViewModel viewModel = new MainWindowViewModel();
+        MainWindowViewModel viewModel;
 
         private Thread _httpServerThread;
 
@@ -37,6 +38,8 @@ namespace LGSTrayGUI
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
             this.TaskbarIcon.Icon = Properties.Resources.logo_black;
+            this.viewModel = new MainWindowViewModel((IEnumerable<LogiDevice> value) => this.DeviceList.ItemsSource = value);
+            this.DataContext = viewModel;
             _ = this.viewModel.LoadViewModel();
         }
 

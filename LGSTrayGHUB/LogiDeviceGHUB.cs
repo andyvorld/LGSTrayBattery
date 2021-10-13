@@ -15,7 +15,7 @@ namespace LGSTrayGHUB
 
         private double _batteryPercentage;
         public override string DeviceID { get => _deviceID; set => _deviceID = value; }
-        public override string DeviceName { get => _deviceName; set => _deviceName = value; }
+        public override string DeviceName { get => "GHUB: " + _deviceName; set => _deviceName = value; }
         public override double BatteryPercentage { get => _batteryPercentage; set => _batteryPercentage = value; }
         public override string TooltipString { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 

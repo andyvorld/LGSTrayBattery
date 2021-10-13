@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using LGSTrayCore;
 using Newtonsoft.Json;
@@ -39,14 +40,26 @@ namespace LGSTrayGHUB
             _ws.ErrorReconnectTimeout = TimeSpan.FromMilliseconds(500);
             _ws.ReconnectTimeout = null;
 
-            Console.WriteLine($"Trying to connect to LGHUB_agent, at {url}");
+            Debug.WriteLine($"Trying to connect to LGHUB_agent, at {url}");
 
+            int retries = 0;
             while (!_ws.IsRunning)
             {
-                _ws.Start().Wait();
+                _ws.Start();
+                Thread.Sleep(100);
+                retries++;
+
+                if (retries > 5)
+                {
+                    break;
+                }
             }
 
-            Console.WriteLine($"Connected to LGHUB_agent");
+            if (_ws.IsRunning)
+            {
+                Debug.WriteLine($"Connected to LGHUB_agent");
+
+            }
 
             _ws.Send(JsonConvert.SerializeObject(new
             {

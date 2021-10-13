@@ -8,12 +8,18 @@ using Hid.Net;
 
 namespace LGSTrayHID
 {
+    public enum HIDFeatureID : ushort
+    {
+        DEVICE_NAME = 0x0005,
+        BATTERY_STATUS = 0x1000,
+        BATTERY_VOLTAGE = 0x1001
+    }
     public static class HIDMsg
     {
-        public static async Task<int> GetProtocolAsync(IDevice device)
+        public static async Task<int> GetProtocolAsync(IDevice device, byte deviceId)
         {
-            byte[] payload = BlankMsg();
-            payload[1] = 0x01;
+            byte[] payload = CreateBlankHIDMsg();
+            payload[1] = deviceId;
             payload[2] = 0x00;
             payload[3] = 0x10;
 
@@ -22,10 +28,10 @@ namespace LGSTrayHID
             return ((HidData)res).Param(0);
         }
 
-        public static async Task<byte> GetFeatureIdx(IDevice device, UInt16 featureId)
+        public static async Task<byte> GetFeatureIdx(IDevice device, byte deviceId, UInt16 featureId)
         {
-            byte[] payload = BlankMsg();
-            payload[1] = 0x01;
+            byte[] payload = CreateBlankHIDMsg();
+            payload[1] = deviceId;
             payload[2] = 0x00;
             payload[3] = 0x00;
             payload[4] = (byte) ((featureId & 0xFF00) >> 8);
@@ -36,7 +42,30 @@ namespace LGSTrayHID
             return ((HidData)res).Param(0);
         }
 
-        private static byte[] BlankMsg()
+        public static async Task<byte> GetFeatureIdx(IDevice device, byte deviceId, HIDFeatureID featureID)
+        {
+            return await GetFeatureIdx(device, deviceId, (UInt16)featureID);
+        }
+
+        public static byte[] CreateHIDMsg(byte deviceID, byte featureIdx, byte functionIdx, byte[] param = null)
+        {
+            byte[] payload = CreateBlankHIDMsg();
+            payload[1] = deviceID;
+            payload[2] = featureIdx;
+            payload[3] = (byte) (functionIdx << 4);
+            
+            if (param != null)
+            {
+                for (int i = 0; i < param.Count(); i++)
+                {
+                    payload[i + 4] = param[i];
+                }
+            }
+
+            return payload;
+        }
+
+        private static byte[] CreateBlankHIDMsg()
         {
             byte[] msg = new byte[20];
 
@@ -45,7 +74,7 @@ namespace LGSTrayHID
             return msg;
         }
 
-        private class HidData
+        public class HidData
         {
             private byte[] _data;
 

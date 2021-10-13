@@ -93,6 +93,7 @@
     <Compile Include="HIDDeviceManager.cs" />
     <Compile Include="HIDMsg.cs" />
     <Compile Include="LogiDeviceHID.cs" />
+    <Compile Include="PowerModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

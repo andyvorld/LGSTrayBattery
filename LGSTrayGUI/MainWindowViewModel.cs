@@ -8,6 +8,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using LGSTrayGHUB;
 using LGSTrayHID;
+using System.Linq;
+using PropertyChanged;
+using System.Windows;
+using System;
 
 namespace LGSTrayGUI
 {
@@ -57,26 +61,43 @@ namespace LGSTrayGUI
         private ObservableCollection<ObservableCollection<LogiDevice>> _logiDevices = new ObservableCollection<ObservableCollection<LogiDevice>>();
         public ObservableCollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
 
+        public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
+
         private GHUBDeviceManager ghubDeviceManager;
         private HIDDeviceManager hidDeviceManager;
 
-        public MainWindowViewModel()
+        public delegate void UpdateDeviceListDelegate(IEnumerable<LogiDevice> val);
+        private UpdateDeviceListDelegate updateDeviceList;
+        public MainWindowViewModel(UpdateDeviceListDelegate fnc)
         {
+            updateDeviceList = fnc;
         }
 
         public async Task LoadViewModel()
         {
-            //ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
-            //ghubDeviceManager = new GHUBDeviceManager(ghubDevices);
-            //var t1 = ghubDeviceManager.LoadDevicesAsync();
-
+            ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
             ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
+
+            ghubDevices.CollectionChanged += (o, e) => {
+                //Application.Current.Dispatcher.BeginInvoke(new Action(() => { updateDeviceList(LogiDevicesFlat); }));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LogiDevicesFlat"));
+            };
+            hidDevices.CollectionChanged += (o, e) => {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LogiDevicesFlat"));
+            };
+
+            LogiDevices.Add(ghubDevices);
+            LogiDevices.Add(hidDevices);
+
+            ghubDeviceManager = new GHUBDeviceManager(ghubDevices);
+            var t1 = ghubDeviceManager.LoadDevicesAsync();
+
             hidDeviceManager = new HIDDeviceManager(hidDevices);
             var t2 = hidDeviceManager.LoadDevicesAsync();
 
-            //await Task.WhenAll(t1, t2);
-            //LogiDevices.Add(ghubDevices);
-            //LogiDevices.Add(hidDevices);
+            await Task.WhenAll(t1, t2);
+
+            //updateDeviceList(LogiDevicesFlat);
 
             HttpServer.LoadConfig();
             if (HttpServer.ServerEnabled)

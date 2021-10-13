@@ -65,12 +65,21 @@ namespace LGSTrayHID
                     }
                 );
             }
-            Task.WaitAll(taskQueue);
+
+            await Task.WhenAll(taskQueue);
+            await UpdateDevicesAsync();
         }
 
-        public override Task UpdateDevicesAsync()
+        public override async Task UpdateDevicesAsync()
         {
-            throw new NotImplementedException();
+            Task[] taskQueue = new Task[_LogiDevices.Count()];
+
+            foreach (var it in _LogiDevices.Select((x, i) => new { index = i, item = x }))
+            {
+                var device = it.item;
+                taskQueue[it.index] = (device as LogiDeviceHID).UpdateBattery();
+            }
+            await Task.WhenAll(taskQueue);
         }
     }
 }
