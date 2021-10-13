@@ -12,27 +12,35 @@ namespace LGSTrayHID
     {
         public static async Task<int> GetProtocolAsync(IDevice device)
         {
-            byte[] payload = new byte[7];
-            payload[0] = 0x10;
+            byte[] payload = BlankMsg();
             payload[1] = 0x01;
             payload[2] = 0x00;
-            payload[3] = 0x03;
-            payload[4] = 0x00;
-            payload[5] = 0x00;
-            payload[6] = 0x00;
+            payload[3] = 0x10;
 
-            await device.InitializeAsync();
-            device.WriteAsync(payload).Wait();
+            var res = await device.WriteAndReadAsync(payload);
 
+            return ((HidData)res).Param(0);
+        }
 
-            return 0;
+        public static async Task<byte> GetFeatureIdx(IDevice device, UInt16 featureId)
+        {
+            byte[] payload = BlankMsg();
+            payload[1] = 0x01;
+            payload[2] = 0x00;
+            payload[3] = 0x00;
+            payload[4] = (byte) ((featureId & 0xFF00) >> 8);
+            payload[5] = (byte) ((featureId & 0x00FF));
+
+            var res = await device.WriteAndReadAsync(payload);
+
+            return ((HidData)res).Param(0);
         }
 
         private static byte[] BlankMsg()
         {
-            byte[] msg = new byte[7];
+            byte[] msg = new byte[20];
 
-            msg[0] = 0x10;
+            msg[0] = 0x11;
 
             return msg;
         }
@@ -51,7 +59,7 @@ namespace LGSTrayHID
             public byte Param(int index) => _data[4 + index];
 
             public static implicit operator HidData(byte[] d) => new HidData() { _data = d };
-            //public static implicit operator HidData(TransferResult d) => new HidData() { _data = d.Data };
+            public static implicit operator HidData(ReadResult d) => new HidData() { _data = d.Data };
 
             public static implicit operator byte[](HidData d) => d._data;
 

@@ -9,9 +9,9 @@ namespace LGSTrayCore
 {
     public enum DeviceType
     {
-        Mouse,
-        Keyboard,
-        Headset
+        Mouse = 3,
+        Keyboard = 0,
+        Headset = 8
     }
     public abstract class LogiDevice : INotifyPropertyChanged
     {

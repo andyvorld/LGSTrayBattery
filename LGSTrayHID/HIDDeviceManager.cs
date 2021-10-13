@@ -19,24 +19,53 @@ namespace LGSTrayHID
         }
         public override async Task LoadDevicesAsync()
         {
-            var hidFactory = new FilterDeviceDefinition(vendorId: 0x046D).CreateWindowsHidDeviceFactory();
-            var deviceDefinitions = (await hidFactory.GetConnectedDeviceDefinitionsAsync().ConfigureAwait(false));
+            var logger = new DebugLogger();
+            var tracer = new DebugTracer();
+
+            //Register the factory for creating Usb devices. This only needs to be done once.
+            WindowsHidDeviceFactory.Register(logger, tracer);
+
+            //Define the types of devices to search for. This particular device can be connected to via USB, or Hid
+            var deviceDefinitions = new List<FilterDeviceDefinition>
+            {
+                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D},
+            };
+
+            //Get the first available device and connect to it
+            var devices = await DeviceManager.Current.GetDevicesAsync(deviceDefinitions).ConfigureAwait(false);
 
             _LogiDevices.Clear();
-            foreach (var device in deviceDefinitions.Where(x => x.WriteBufferSize == 20 && x.ReadBufferSize == 20))
+            Task[] taskQueue = new Task[devices.Count];
+            for (int i =0; i < devices.Count; i++)
             {
-                var hidDevice = await hidFactory.GetDeviceAsync(device);
-                await hidDevice.InitializeAsync();
-                LogiDeviceHID tmp = new LogiDeviceHID()
-                {
-                    _hidDevice = hidDevice as HidDevice
-                };
+                var device = devices[i];
+                taskQueue[i] = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            device.InitializeAsync().Wait();
+                        }
+                        catch (Exception)
+                        {
+                            return;
+                        }
 
-                if (tmp.InitializeDevice())
-                {
-                    _LogiDevices.Add(tmp);
-                }
+                        if (device.ConnectedDeviceDefinition.ReadBufferSize == 20 && device.ConnectedDeviceDefinition.WriteBufferSize == 20)
+                        {
+                            LogiDeviceHID tmp = new LogiDeviceHID()
+                            {
+                                _hidDevice = device
+                            };
+
+                            if (await tmp.InitializeDeviceAsync())
+                            {
+                                _LogiDevices.Add(tmp);
+                            }
+                        }
+                    }
+                );
             }
+            Task.WaitAll(taskQueue);
         }
 
         public override Task UpdateDevicesAsync()

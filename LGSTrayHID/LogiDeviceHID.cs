@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using LGSTrayCore;
 using Device.Net;
 using Hid.Net;
+using System.Diagnostics;
 
 namespace LGSTrayHID
 {
@@ -18,9 +19,18 @@ namespace LGSTrayHID
 
         protected internal IDevice _hidDevice;
 
-        protected internal bool InitializeDevice()
+        protected internal async Task<bool> InitializeDeviceAsync()
         {
-            HIDMsg.GetProtocolAsync(_hidDevice).Wait();
+            var version = await HIDMsg.GetProtocolAsync(_hidDevice);
+
+            // Magic number for HID++ 1.0, not supported
+            if (version == 0x8f)
+            {
+                Debug.WriteLine($"{_hidDevice.DeviceId} is HID++ 1.0, not supported");
+                return false;
+            }
+
+            await HIDMsg.GetFeatureIdx(_hidDevice, 0x1001);
 
             return true;
         }
