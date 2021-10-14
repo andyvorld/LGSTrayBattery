@@ -1,8 +1,23 @@
-# LGS Tray Battery
-A tray app used to track battery levels of wireless Logitech mouse.
+# LGS Tray Battery (WIP Revamp Branch)
+~~A tray app used to track battery levels of wireless Logitech mouse.~~
 
-**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do not have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**
+~~**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do not have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**~~
 
+A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
+
+## New Features
+- New reactive Icons
+    - Now reacts to light/dark theme
+    - Now reacts to what type of device you currently have selected (Supports mouse, keyboards and headsets)
+- Native HID Battery percentages now uses a formula rather old xml files
+    - Assuming they use 3.7V lipo batteries, if you are getting weird battery percentages or voltage readings < 3.5V, please open an issue
+- Smarter polling (Planned)
+    - When successful don't update for a long delay, else check back frequently till an update
+
+## Known Missing features
+- Force update battery percentage
+- Force rescan of devices
+- Reselect last device on startup
 ## Features
 ### Tray Indicator
 ![](https://i.imgur.com/g5e3jsz.png)
@@ -56,3 +71,8 @@ This project began as a task with me messing around with my mouse for battery tr
 
 - [Solaar](https://github.com/pwr-Solaar/Solaar), for the source code to base the HID++ paramters and reverse engineering of the protocol.
 - [XB1ControllerBatteryIndicator](https://github.com/NiyaShy/XB1ControllerBatteryIndicator), for the idea and base of the icons
+- [The Noun Project](https://thenounproject.com/), for base icons
+    - empty battery, By Adrien Coquet, FR, In the Battery Collection
+    - Mouse, By projecthayat, ID, In the Technology & computer hardware Collection
+    - Keyboard, By HideMaru, ID, In the Electronic BL.2 Collection
+    - Headphones, By Peter Lakenbrink, DE, In the School and Online Learning Glyph Collection
