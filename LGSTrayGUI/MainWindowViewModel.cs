@@ -55,25 +55,10 @@ namespace LGSTrayGUI
         }
 
         private Thread httpThread;
-        public Thread UpdateThread;
-        private CancellationTokenSource _ctTimerSource;
+        private System.Timers.Timer updateTimer;
 
         private ICollection<ObservableCollection<LogiDevice>> _logiDevices = new List<ObservableCollection<LogiDevice>>();
         public ICollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
-
-        //private bool _selectedDevice;
-        //public bool SelectedDevice
-        //{
-        //    get
-        //    {
-        //        return _selectedDevice;
-        //    }
-        //    set
-        //    {
-        //        _selectedDevice = value;
-        //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedDevice"));
-        //    }
-        //}
 
         public LogiDevice SelectedDevice { get; set; }
 
@@ -111,6 +96,12 @@ namespace LGSTrayGUI
             await Task.WhenAll(t1, t2);
 
             //updateDeviceList(LogiDevicesFlat);
+
+            updateTimer = new System.Timers.Timer();
+            updateTimer.Elapsed += (s, e) => { ghubDeviceManager.UpdateDevicesAsync().Wait(1000); };
+            updateTimer.Elapsed += (s, e) => { hidDeviceManager.UpdateDevicesAsync().Wait(1000); };
+            updateTimer.Interval = 10000;
+            updateTimer.Start();
 
             HttpServer.LoadConfig();
             if (HttpServer.ServerEnabled)

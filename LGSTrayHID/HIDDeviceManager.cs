@@ -67,7 +67,7 @@ namespace LGSTrayHID
                 );
             }
 
-            Task.WhenAll(taskQueue);
+            await Task.WhenAll(taskQueue);
             await UpdateDevicesAsync();
         }
 

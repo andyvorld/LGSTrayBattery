@@ -28,8 +28,6 @@ namespace LGSTrayGUI
     {
         MainWindowViewModel viewModel;
 
-        private Thread _httpServerThread;
-
         public MainWindow()
         {
             Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
@@ -37,7 +35,7 @@ namespace LGSTrayGUI
             InitializeComponent();
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
-            //this.TaskbarIcon.Icon = Properties.Resources.Icons;
+            this.TaskbarIcon.Icon = TrayIconTools.ErrorIcon();
             this.viewModel = new MainWindowViewModel();
             this.DataContext = viewModel;
             _ = this.viewModel.LoadViewModel();

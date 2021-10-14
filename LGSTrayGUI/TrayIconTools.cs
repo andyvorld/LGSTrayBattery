@@ -28,16 +28,21 @@ namespace LGSTrayGUI
             return bitmap;
         }
 
-        private static Bitmap ErrorIcon()
+        private static Bitmap ErrorBitMap()
         {
             return MixBitmap(Mouse, Battery, Missing);
+        }
+
+        public static Icon ErrorIcon()
+        {
+            return Icon.FromHandle(ErrorBitMap().GetHicon());
         }
         public static Icon GenerateIcon(LogiDevice logiDevice)
         {
             Bitmap output;
             if (logiDevice == null)
             {
-                output = ErrorIcon();
+                output = ErrorBitMap();
             }
             else
             {
