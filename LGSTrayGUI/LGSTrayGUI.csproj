@@ -39,7 +39,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Resources\logo_black.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseGHUB|AnyCPU'">
     <OutputPath>bin\ReleaseGHUB\</OutputPath>
@@ -220,8 +221,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="BatteryToIcoConverter.cs" />
     <Compile Include="CheckTheme.cs" />
+    <Compile Include="DevicePrefixConverter.cs" />
+    <Compile Include="TrayIconTools.cs" />
+    <Compile Include="LogiDeviceIsSelectedConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -245,6 +248,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -254,9 +258,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\logo_black.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj">
@@ -271,6 +272,51 @@
       <Project>{cbd359c9-b31f-4290-bef9-c8ed576be4f8}</Project>
       <Name>LGSTrayHID</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icons.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\logo_black.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Battery.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Battery_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Headset.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Headset_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Indicator_10.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Indicator_50.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Indicator_100.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Keyboard.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Keyboard_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Missing.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Missing_dark.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Mouse.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Mouse_dark.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

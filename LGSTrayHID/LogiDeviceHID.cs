@@ -15,7 +15,7 @@ namespace LGSTrayHID
         private static IPowerModel powerModel = new PowerModel_3deg();
         private string _deviceName = "NOT_FOUND";
         public override string DeviceID { get => _hidDevice.DeviceId.GetHashCode().ToString(); set => throw new NotImplementedException(); }
-        public override string DeviceName { get => "HID: " + _deviceName; set => _deviceName = value; }
+        public override string DeviceName { get => _deviceName; set => _deviceName = value; }
 
         private double _batteryPercentage = double.NaN;
         public override double BatteryPercentage { get => _batteryPercentage; set => _batteryPercentage = value; }
@@ -33,7 +33,6 @@ namespace LGSTrayHID
                 BatteryPercentage = 100*powerModel.GetCapacity(_batteryVoltage);
             }
         }
-        public override string TooltipString { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         protected internal IDevice _hidDevice;
 
@@ -46,6 +45,11 @@ namespace LGSTrayHID
             var version = await HIDMsg.GetProtocolAsync(_hidDevice, 0x01);
 
             // Magic number for HID++ 1.0, not supported
+            if (version == -1)
+            {
+                Debug.WriteLine($"{_hidDevice.DeviceId} failed to response to GetProtocol");
+                return false;
+            }
             if (version == 0x8f)
             {
                 Debug.WriteLine($"{_hidDevice.DeviceId} is HID++ 1.0, not supported");

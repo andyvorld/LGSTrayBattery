@@ -36,11 +36,12 @@ namespace LGSTrayHID
 
             _LogiDevices.Clear();
             Task[] taskQueue = new Task[devices.Count];
-            for (int i =0; i < devices.Count; i++)
+            for (int i = 0; i < devices.Count; i++)
             {
                 var device = devices[i];
                 taskQueue[i] = Task.Run(async () =>
                     {
+                        var t = i;
                         try
                         {
                             device.InitializeAsync().Wait();
@@ -66,7 +67,7 @@ namespace LGSTrayHID
                 );
             }
 
-            await Task.WhenAll(taskQueue);
+            Task.WhenAll(taskQueue);
             await UpdateDevicesAsync();
         }
 

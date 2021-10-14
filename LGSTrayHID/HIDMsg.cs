@@ -23,9 +23,13 @@ namespace LGSTrayHID
             payload[2] = 0x00;
             payload[3] = 0x10;
 
-            var res = await device.WriteAndReadAsync(payload);
+            Task<ReadResult> task = device.WriteAndReadAsync(payload);
+            if (await Task.WhenAny(task, Task.Delay(500)) == task)
+            {
+                return ((HidData)task.Result).Param(0);
+            }
 
-            return ((HidData)res).Param(0);
+            return -1;
         }
 
         public static async Task<byte> GetFeatureIdx(IDevice device, byte deviceId, UInt16 featureId)

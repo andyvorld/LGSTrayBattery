@@ -1,0 +1,86 @@
+﻿using LGSTrayCore;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace LGSTrayGUI
+{
+    public static class TrayIconTools
+    {
+        private static Bitmap Mouse => CheckTheme.LightTheme ? Properties.Resources.Mouse : Properties.Resources.Mouse_dark;
+        private static Bitmap Keyboard => CheckTheme.LightTheme ? Properties.Resources.Keyboard : Properties.Resources.Keyboard_dark;
+        private static Bitmap Headset => CheckTheme.LightTheme ? Properties.Resources.Headset : Properties.Resources.Headset_dark;
+        private static Bitmap Battery => CheckTheme.LightTheme ? Properties.Resources.Battery : Properties.Resources.Battery_dark;
+        private static Bitmap Missing => CheckTheme.LightTheme ? Properties.Resources.Missing : Properties.Resources.Missing_dark;
+
+        private static Bitmap MixBitmap(Bitmap device, Bitmap battery, Bitmap indicator)
+        {
+            Bitmap bitmap = new Bitmap(48, 48);
+            Graphics canvas = Graphics.FromImage(bitmap);
+            canvas.DrawImage(device, new Point(0, 0));
+            canvas.DrawImage(battery, new Point(0, 0));
+            canvas.DrawImage(indicator, new Point(0, 0));
+            canvas.Save();
+
+            return bitmap;
+        }
+
+        private static Bitmap ErrorIcon()
+        {
+            return MixBitmap(Mouse, Battery, Missing);
+        }
+        public static Icon GenerateIcon(LogiDevice logiDevice)
+        {
+            Bitmap output;
+            if (logiDevice == null)
+            {
+                output = ErrorIcon();
+            }
+            else
+            {
+                Bitmap device;
+                Bitmap indicator;
+
+                switch (logiDevice.DeviceType)
+                {
+                    case DeviceType.Mouse:
+                        device = Mouse;
+                        break;
+                    case DeviceType.Keyboard:
+                        device = Keyboard;
+                        break;
+                    case DeviceType.Headset:
+                        device = Headset;
+                        break;
+                    default:
+                        device = Mouse;
+                        break;
+                }
+
+                if (logiDevice.BatteryPercentage > 60)
+                {
+                    indicator = Properties.Resources.Indicator_100;
+                }
+                else if (logiDevice.BatteryPercentage > 20)
+                {
+                    indicator = Properties.Resources.Indicator_50;
+                }
+                else if (logiDevice.BatteryPercentage > 0)
+                {
+                    indicator = Properties.Resources.Indicator_10;
+                }
+                else
+                {
+                    indicator = Missing;
+                }
+
+                output = MixBitmap(device, Battery, indicator);
+            }
+
+            return Icon.FromHandle(output.GetHicon());
+        }
+    }
+}

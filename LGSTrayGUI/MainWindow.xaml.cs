@@ -37,7 +37,7 @@ namespace LGSTrayGUI
             InitializeComponent();
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
-            this.TaskbarIcon.Icon = Properties.Resources.logo_black;
+            //this.TaskbarIcon.Icon = Properties.Resources.Icons;
             this.viewModel = new MainWindowViewModel();
             this.DataContext = viewModel;
             _ = this.viewModel.LoadViewModel();
@@ -55,6 +55,50 @@ namespace LGSTrayGUI
         private void ExitButton_OnClick(object sender, RoutedEventArgs e)
         {
             Environment.Exit(0);
+        }
+
+        public static T GetChildOfType<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj == null) return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+
+                var result = (child as T) ?? GetChildOfType<T>(child);
+                if (result != null) return result;
+            }
+            return null;
+        }
+
+        private void DeviceSelect_OnClick(object sender, RoutedEventArgs e)
+        {
+            MenuItem mi = sender as MenuItem;
+            if (mi == null)
+            {
+                return;
+            }
+
+            if (this.viewModel.SelectedDevice != null)
+            {
+                this.viewModel.SelectedDevice.PropertyChanged -= SelectedDevice_PropertyChanged;
+            }
+
+            this.viewModel.SelectedDevice = (LogiDevice)mi.DataContext;
+            SelectedDevice_PropertyChanged(this.viewModel.SelectedDevice, null);
+            this.viewModel.SelectedDevice.PropertyChanged += SelectedDevice_PropertyChanged;
+            e.Handled = true;
+        }
+
+        private void SelectedDevice_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            LogiDevice selectedDevice = sender as LogiDevice;
+            if (selectedDevice == null)
+            {
+                return;
+            }
+
+            this.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(selectedDevice);
         }
     }
 }

@@ -9,24 +9,47 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
         Title="MainWindow" Height="0" Width="0">
     <Window.Resources>
+        <local:DevicePrefixConverter x:Key="DevicePrefixConverter"/>
+        <local:LogiDeviceIsSelectedConverter x:Key="LogiDeviceIsSelectedConverter"/>
     </Window.Resources>
     <Grid>
         <tb:TaskbarIcon
             x:Name="TaskbarIcon"
+            ToolTipText="{Binding SelectedDevice.TooltipString, UpdateSourceTrigger=PropertyChanged}"
             >
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
-                    <MenuItem x:Name="DeviceList" Header="Devices" ItemsSource="{Binding LogiDevicesFlat, UpdateSourceTrigger=LostFocus}" DisplayMemberPath="DeviceName">
+                    <MenuItem x:Name="DeviceList"
+                              Header="Devices"
+                              ItemsSource="{Binding LogiDevicesFlat, UpdateSourceTrigger=LostFocus}"
+                              >
                         <MenuItem.ItemContainerStyle>
-                            <Style TargetType="{x:Type MenuItem}">
-                                <Setter Property="IsChecked" Value="{Binding IsChecked, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <Setter Property="IsCheckable" Value="True"/>
+                            <Style TargetType="MenuItem">
+                                <!--<Setter Property="IsChecked" Value="{Binding RelativeSource={RelativeSource AncestorType=ContextMenu}, Path=DataContext.SelectedDevice, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource LogiDeviceIsSelectedConverter}, ConverterParameter=}"/>-->
+                                <Setter Property="IsChecked">
+                                    <Setter.Value>
+                                        <MultiBinding Converter="{StaticResource LogiDeviceIsSelectedConverter}" Mode="OneWay">
+                                            <Binding Path="DataContext.SelectedDevice" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
+                                            <Binding Path="."/>
+                                        </MultiBinding>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="IsCheckable" Value="False"/>
                                 <Setter Property="StaysOpenOnClick" Value="False"/>
-                                <!--<EventSetter Event="Click" Handler="DeviceSelect_OnClick"/>-->
+                                <EventSetter Event="Click" Handler="DeviceSelect_OnClick"/>
                             </Style>
                         </MenuItem.ItemContainerStyle>
+                        <MenuItem.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding ., Converter={StaticResource DevicePrefixConverter}}"/>
+                                    <TextBlock Text="{Binding DeviceName}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </MenuItem.ItemTemplate>
                     </MenuItem>
                     <MenuItem Header="Rescan Devices"/>
                     <MenuItem Header="Autostart with Windows"/>

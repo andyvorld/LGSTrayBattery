@@ -24,7 +24,7 @@ namespace LGSTrayGUI
         {
             get
             {
-                return LightTheme ? "_light" : "";
+                return LightTheme ? "" : "_dark";
             }
         }
     }

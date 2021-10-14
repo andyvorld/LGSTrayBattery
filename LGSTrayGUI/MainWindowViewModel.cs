@@ -58,8 +58,24 @@ namespace LGSTrayGUI
         public Thread UpdateThread;
         private CancellationTokenSource _ctTimerSource;
 
-        private ObservableCollection<ObservableCollection<LogiDevice>> _logiDevices = new ObservableCollection<ObservableCollection<LogiDevice>>();
-        public ObservableCollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
+        private ICollection<ObservableCollection<LogiDevice>> _logiDevices = new List<ObservableCollection<LogiDevice>>();
+        public ICollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
+
+        //private bool _selectedDevice;
+        //public bool SelectedDevice
+        //{
+        //    get
+        //    {
+        //        return _selectedDevice;
+        //    }
+        //    set
+        //    {
+        //        _selectedDevice = value;
+        //        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedDevice"));
+        //    }
+        //}
+
+        public LogiDevice SelectedDevice { get; set; }
 
         public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
 

@@ -21,7 +21,7 @@ namespace LGSTrayCore
         public abstract string DeviceName { get; set; }
         public abstract double BatteryPercentage { get; set; }
 
-        public abstract string TooltipString { get; set; }
+        public string TooltipString { get => $"{DeviceName}, {BatteryPercentage:f2}%"; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
