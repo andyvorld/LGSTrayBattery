@@ -67,10 +67,8 @@ namespace LGSTrayGUI
         private HIDDeviceManager hidDeviceManager;
 
         public delegate void UpdateDeviceListDelegate(IEnumerable<LogiDevice> val);
-        private UpdateDeviceListDelegate updateDeviceList;
-        public MainWindowViewModel(UpdateDeviceListDelegate fnc)
+        public MainWindowViewModel()
         {
-            updateDeviceList = fnc;
         }
 
         public async Task LoadViewModel()
@@ -79,7 +77,6 @@ namespace LGSTrayGUI
             ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
 
             ghubDevices.CollectionChanged += (o, e) => {
-                //Application.Current.Dispatcher.BeginInvoke(new Action(() => { updateDeviceList(LogiDevicesFlat); }));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LogiDevicesFlat"));
             };
             hidDevices.CollectionChanged += (o, e) => {

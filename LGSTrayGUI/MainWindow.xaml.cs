@@ -38,7 +38,7 @@ namespace LGSTrayGUI
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
             this.TaskbarIcon.Icon = Properties.Resources.logo_black;
-            this.viewModel = new MainWindowViewModel((IEnumerable<LogiDevice> value) => this.DeviceList.ItemsSource = value);
+            this.viewModel = new MainWindowViewModel();
             this.DataContext = viewModel;
             _ = this.viewModel.LoadViewModel();
         }
