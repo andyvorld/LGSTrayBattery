@@ -18,7 +18,7 @@ namespace LGSTrayGUI
 
         private static Bitmap MixBitmap(Bitmap device, Bitmap battery, Bitmap indicator)
         {
-            Bitmap bitmap = new Bitmap(48, 48);
+            Bitmap bitmap = new Bitmap(device.Width, device.Height);
             Graphics canvas = Graphics.FromImage(bitmap);
             canvas.DrawImage(device, new Point(0, 0));
             canvas.DrawImage(battery, new Point(0, 0));

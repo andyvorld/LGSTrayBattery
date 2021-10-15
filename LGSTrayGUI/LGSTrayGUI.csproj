@@ -279,6 +279,11 @@
     <None Include="Resources\logo_black.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="FodyWeavers.xml">
+      <SubType>Designer</SubType>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Resources\Battery.png" />
   </ItemGroup>
   <ItemGroup>
@@ -316,11 +321,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Mouse_dark.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="FodyWeavers.xml">
-      <SubType>Designer</SubType>
-    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
