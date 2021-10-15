@@ -72,7 +72,6 @@ This project began as a task with me messing around with my mouse for battery tr
 - [Solaar](https://github.com/pwr-Solaar/Solaar), for the source code to base the HID++ paramters and reverse engineering of the protocol.
 - [XB1ControllerBatteryIndicator](https://github.com/NiyaShy/XB1ControllerBatteryIndicator), for the idea and base of the icons
 - [The Noun Project](https://thenounproject.com/), for base icons
-    - empty battery, By Adrien Coquet, FR, In the Battery Collection
     - Mouse, By projecthayat, ID, In the Technology & computer hardware Collection
     - Keyboard, By HideMaru, ID, In the Electronic BL.2 Collection
     - Headphones, By Peter Lakenbrink, DE, In the School and Online Learning Glyph Collection
