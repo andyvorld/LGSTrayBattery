@@ -28,7 +28,8 @@ namespace LGSTrayHID
             //Define the types of devices to search for. This particular device can be connected to via USB, or Hid
             var deviceDefinitions = new List<FilterDeviceDefinition>
             {
-                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D},
+                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D, UsagePage = 0xFF00},
+                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D, UsagePage = 0xFF43}
             };
 
             //Get the first available device and connect to it
