@@ -48,7 +48,7 @@ namespace LGSTrayHID
             if (version == -1)
             {
                 Debug.WriteLine($"{_hidDevice.DeviceId} failed to response to GetProtocol");
-                _hidDevice.Close();
+                _hidDevice.Dispose();
                 return false;
             }
             if (version == 0x8f)
