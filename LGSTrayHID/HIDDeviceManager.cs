@@ -42,7 +42,6 @@ namespace LGSTrayHID
                 var device = devices[i];
                 taskQueue[i] = Task.Run(async () =>
                     {
-                        var t = i;
                         try
                         {
                             device.InitializeAsync().Wait();
