@@ -31,6 +31,7 @@ namespace LGSTrayHID
             {
                 _batteryVoltage = value;
                 BatteryPercentage = 100*powerModel.GetCapacity(_batteryVoltage);
+                Debug.WriteLine("batt updated");
             }
         }
 
@@ -89,6 +90,7 @@ namespace LGSTrayHID
 
         public async Task UpdateBattery()
         {
+            Debug.WriteLine("Starting Update");
             if (_batteryVoltageIdx != 0)
             {
                 await UpdateBatteryVoltage();
@@ -97,22 +99,30 @@ namespace LGSTrayHID
             {
                 await UpdateBatteryStatus();
             }
+            Debug.WriteLine("Updating Fin");
         }
 
         private async Task UpdateBatteryStatus()
         {
             byte[] payload = HIDMsg.CreateHIDMsg(0x01, _batteryStatusIdx, 0x00);
-            var resData = (HIDMsg.HidData)(await _hidDevice.WriteAndReadAsync(payload));
+            var resData = await _hidDevice.WriteReadyTimeoutAsync(payload);
 
-            BatteryPercentage = resData.Param(0);
+            if (resData != null)
+            {
+                BatteryPercentage = ((HIDMsg.HidData)resData).Param(0);
+            }
         }
 
         private async Task UpdateBatteryVoltage()
         {
             byte[] payload = HIDMsg.CreateHIDMsg(0x01, _batteryVoltageIdx, 0x00);
-            var resData = (HIDMsg.HidData)(await _hidDevice.WriteAndReadAsync(payload));
+            var resData = await _hidDevice.WriteReadyTimeoutAsync(payload);
 
-            BatteryVoltage = 0.001 * ((resData.Param(0) << 8) + resData.Param(1));
+            if (resData != null)
+            {
+                var tmp = (HIDMsg.HidData)resData;
+                BatteryVoltage = 0.001 * ((tmp.Param(0) << 8) + tmp.Param(1));
+            }
         }
         public override string GetXmlData()
         {

@@ -8,7 +8,6 @@ using Device.Net;
 using Hid.Net;
 using Hid.Net.Windows;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 
 namespace LGSTrayHID
 {
@@ -19,32 +18,26 @@ namespace LGSTrayHID
         }
         public override async Task LoadDevicesAsync()
         {
-            var logger = new DebugLogger();
-            var tracer = new DebugTracer();
+            var legacyHid = new FilterDeviceDefinition(vendorId: 0x046D, usagePage: 0xFF00)
+                            .CreateWindowsHidDeviceFactory();
 
-            //Register the factory for creating Usb devices. This only needs to be done once.
-            WindowsHidDeviceFactory.Register(logger, tracer);
+            var modernHid = new FilterDeviceDefinition(vendorId: 0x046D, usagePage: 0xFF43)
+                            .CreateWindowsHidDeviceFactory();
 
-            //Define the types of devices to search for. This particular device can be connected to via USB, or Hid
-            var deviceDefinitions = new List<FilterDeviceDefinition>
-            {
-                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D, UsagePage = 0xFF00},
-                new FilterDeviceDefinition {DeviceType = Device.Net.DeviceType.Hid, VendorId = 0x046D, UsagePage = 0xFF43}
-            };
+            var factories = legacyHid.Aggregate(modernHid);
 
-            //Get the first available device and connect to it
-            var devices = await DeviceManager.Current.GetDevicesAsync(deviceDefinitions).ConfigureAwait(false);
+            var deviceDefinitions = (await factories.GetConnectedDeviceDefinitionsAsync().ConfigureAwait(false)).ToList();
 
             _LogiDevices.Clear();
-            Task[] taskQueue = new Task[devices.Count];
-            for (int i = 0; i < devices.Count; i++)
+            Task[] taskQueue = new Task[deviceDefinitions.Count()];
+            for (int i = 0; i < deviceDefinitions.Count(); i++)
             {
-                var device = devices[i];
+                var device = await factories.GetDeviceAsync(deviceDefinitions[i]);
                 taskQueue[i] = Task.Run(async () =>
                     {
                         try
                         {
-                            device.InitializeAsync().Wait();
+                            await device.InitializeAsync();
                         }
                         catch (Exception)
                         {

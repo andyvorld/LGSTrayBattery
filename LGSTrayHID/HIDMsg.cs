@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,24 @@ namespace LGSTrayHID
     }
     public static class HIDMsg
     {
+        public static async Task<TransferResult?> WriteReadyTimeoutAsync(this IDevice device, byte[] payload, UInt16 timeout = 11500)
+        {
+            var updateTask = device.WriteAndReadAsync(payload);
+
+            await Task.WhenAny(updateTask, Task.Delay(timeout));
+
+            if (updateTask.IsCompleted)
+            {
+                return updateTask.Result;
+            }
+            else
+            {
+                Debug.WriteLine("Device Failed to response in time");
+            }
+
+            return null;
+        }
+
         public static async Task<int> GetProtocolAsync(IDevice device, byte deviceId)
         {
             byte[] payload = CreateBlankHIDMsg();
@@ -23,7 +42,7 @@ namespace LGSTrayHID
             payload[2] = 0x00;
             payload[3] = 0x10;
 
-            Task<ReadResult> task = device.WriteAndReadAsync(payload);
+            Task<TransferResult> task = device.WriteAndReadAsync(payload);
             if (await Task.WhenAny(task, Task.Delay(500)) == task)
             {
                 return ((HidData)task.Result).Param(0);
@@ -92,7 +111,7 @@ namespace LGSTrayHID
             public byte Param(int index) => _data[4 + index];
 
             public static implicit operator HidData(byte[] d) => new HidData() { _data = d };
-            public static implicit operator HidData(ReadResult d) => new HidData() { _data = d.Data };
+            public static implicit operator HidData(TransferResult d) => new HidData() { _data = d.Data };
 
             public static implicit operator byte[](HidData d) => d._data;
 
