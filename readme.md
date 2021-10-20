@@ -1,4 +1,4 @@
-## Try out the v2 alpha [here](https://github.com/andyvorld/LGSTrayBattery/releases), with source and readme [here](https://github.com/andyvorld/LGSTrayBattery/tree/v2.0.0_alpha)
+## Try out the v2 alpha [here](https://github.com/andyvorld/LGSTrayBattery/releases), with source and readme [here](https://github.com/andyvorld/LGSTrayBattery/tree/v2.0.2_rc)
 # LGS Tray Battery
 A tray app used to track battery levels of wireless Logitech mouse.
 
