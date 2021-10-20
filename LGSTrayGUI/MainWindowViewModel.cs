@@ -19,6 +19,10 @@ namespace LGSTrayGUI
 {
     class MainWindowViewModel : INotifyPropertyChanged
     {
+        private const double BATTERY_UPDATE_PERIOD_MS = 5e3;
+
+        private MainWindow view;
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private bool? _autoStart = null;
@@ -62,7 +66,39 @@ namespace LGSTrayGUI
         private ICollection<ObservableCollection<LogiDevice>> _logiDevices = new List<ObservableCollection<LogiDevice>>();
         public ICollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
 
-        public LogiDevice SelectedDevice { get; set; }
+        private LogiDevice _SelectedDevice;
+        public LogiDevice SelectedDevice
+        {
+            get
+            {
+                return _SelectedDevice;
+            }
+            set
+            {
+                if (_SelectedDevice != null)
+                {
+                    _SelectedDevice.PropertyChanged -= UpdateBatteryIcon;
+
+                }
+                _SelectedDevice = value;
+                _SelectedDevice.PropertyChanged += UpdateBatteryIcon;
+                UpdateBatteryIcon(value, new PropertyChangedEventArgs("LastUpdate"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedDevice)));
+
+                Properties.Settings.Default.LastSelectedDeviceId = value.DeviceID;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void UpdateBatteryIcon(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != "LastUpdate")
+            {
+                return;
+            }
+
+            view.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(sender as LogiDevice);
+        }
 
         public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
 
@@ -70,14 +106,17 @@ namespace LGSTrayGUI
         private HIDDeviceManager hidDeviceManager;
 
         public delegate void UpdateDeviceListDelegate(IEnumerable<LogiDevice> val);
-        public MainWindowViewModel()
+        public MainWindowViewModel(MainWindow view)
         {
+            this.view = view;
         }
 
         public async Task LoadViewModel()
         {
             ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
             ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
+
+            PropertyChanged += UpdateSelectedDeviceOnLaunch;
 
             ghubDevices.CollectionChanged += (o, e) => {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
@@ -102,7 +141,7 @@ namespace LGSTrayGUI
             updateTimer = new System.Timers.Timer();
             updateTimer.Elapsed += async (s, e) => { await ghubDeviceManager.UpdateDevicesAsync(); };
             updateTimer.Elapsed += async (s, e) => { await hidDeviceManager.UpdateDevicesAsync(); };
-            updateTimer.Interval = 10000;
+            updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
 
             HttpServer.LoadConfig();
@@ -111,6 +150,26 @@ namespace LGSTrayGUI
                 httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices));
                 httpThread.IsBackground = true;
                 httpThread.Start();
+            }
+        }
+
+        private void UpdateSelectedDeviceOnLaunch(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(LogiDevicesFlat))
+            {
+                return;
+            }
+
+            if (SelectedDevice != null)
+            {
+                return;
+            }
+
+
+            LogiDevice found = LogiDevicesFlat.FirstOrDefault(x => x.DeviceID == Properties.Settings.Default.LastSelectedDeviceId);
+            if (found != null)
+            {
+                SelectedDevice = found;
             }
         }
     }

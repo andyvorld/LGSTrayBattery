@@ -89,7 +89,7 @@ namespace LGSTrayHID
                 var logiDeviceHid = GetLogiDeviceHID();
                 logiDeviceHid.DeviceName = deviceName;
                 logiDeviceHid.DeviceType = deviceType;
-                logiDeviceHid.DeviceID = deviceName.GetHashCode().ToString("X", NumberFormatInfo.InvariantInfo);
+                logiDeviceHid.DeviceID = deviceName.GetStableHashCode().ToString("X", NumberFormatInfo.InvariantInfo);
             }
 
             batteryStatusIdx = await GetFeatureIdx(0x01, HIDFeatureID.BATTERY_STATUS);

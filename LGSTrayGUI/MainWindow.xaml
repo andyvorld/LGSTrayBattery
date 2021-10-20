@@ -51,7 +51,6 @@
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                     </MenuItem>
-                    <MenuItem Header="Rescan Devices"/>
                     <MenuItem Header="Autostart with Windows" 
                               IsCheckable="True"
                               IsChecked="{Binding AutoStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

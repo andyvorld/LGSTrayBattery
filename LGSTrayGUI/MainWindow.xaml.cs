@@ -36,7 +36,7 @@ namespace LGSTrayGUI
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
             this.TaskbarIcon.Icon = TrayIconTools.ErrorIcon();
-            this.viewModel = new MainWindowViewModel();
+            this.viewModel = new MainWindowViewModel(this);
             this.DataContext = viewModel;
             _ = this.viewModel.LoadViewModel();
         }
@@ -96,7 +96,7 @@ namespace LGSTrayGUI
                 return;
             }
 
-            this.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(selectedDevice);
+            //this.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(selectedDevice);
         }
     }
 }

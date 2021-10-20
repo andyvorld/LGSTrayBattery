@@ -102,7 +102,7 @@ namespace LGSTrayGHUB
             else
             {
             }
-            Debug.WriteLine(msg);
+            //Debug.WriteLine(msg);
         }
         public override async Task LoadDevicesAsync()
         {
