@@ -16,9 +16,6 @@ namespace LGSTrayHID
         // Magic number to prevent clashing with LGHUB's 0x0E
         private const byte MAGIC_SW_ID = 0X0A;
 
-        // Seconds
-        private const double MIN_UPDATE_PERIOD_S = 60;
-
         private IDevice _hiddevice;
         public string HIDDeviceId { get => _hiddevice.DeviceId; }
         private CancellationTokenSource cancellationTokenSource = new();
@@ -152,7 +149,7 @@ namespace LGSTrayHID
 
         public async Task UpdateBattery()
         {
-            if (DateTime.Now < GetLogiDeviceHID().LastUpdate.AddSeconds(MIN_UPDATE_PERIOD_S))
+            if (!GetLogiDeviceHID().BatteryStatExpired)
             {
                 return;
             }

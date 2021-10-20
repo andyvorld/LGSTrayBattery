@@ -16,18 +16,19 @@ namespace LGSTrayCore
     }
     public abstract class LogiDevice : INotifyPropertyChanged
     {
+        private const double MIN_UPDATE_PERIOD_S = 60;
+
         protected DeviceType _deviceType = DeviceType.Mouse;
         public DeviceType DeviceType { get; set; }
         public string DeviceID { get; set; } = "NOT_FOUND";
         public string DeviceName { get; set; } = "NOT_FOUND";
         public abstract double BatteryPercentage { get; set; }
         public DateTime LastUpdate { get; private set; } = DateTime.MinValue;
-
         public bool BatteryStatExpired
         {
             get
             {
-                return DateTime.Now > LastUpdate.AddSeconds(60);
+                return DateTime.Now > LastUpdate.AddSeconds(MIN_UPDATE_PERIOD_S);
             }
         }
 
