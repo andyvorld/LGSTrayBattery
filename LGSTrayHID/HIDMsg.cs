@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Device.Net;
 using Hid.Net;
@@ -15,11 +16,30 @@ namespace LGSTrayHID
         BATTERY_STATUS = 0x1000,
         BATTERY_VOLTAGE = 0x1001
     }
+
+    public struct HIDPPProfile
+    {
+        public string deviceName;
+        public LGSTrayCore.DeviceType deviceType;
+        public byte deviceNameIdx;
+        public byte batteryStatusIdx;
+        public byte batteryVoltageIdx;
+    }
     public static class HIDMsg
     {
-        public static async Task<TransferResult?> WriteReadyTimeoutAsync(this IDevice device, byte[] payload, UInt16 timeout = 11500)
+        public static async Task<TransferResult?> WriteReadTimeoutAsync(this IDevice device, byte[] payload, UInt16 timeout = 5000)
         {
-            var updateTask = device.WriteAndReadAsync(payload);
+            Task<TransferResult?> updateTask = Task.Run(async () => {
+                TransferResult? output = null;
+                try
+                {
+                    output = await device.WriteAndReadAsync(payload);
+                }
+                catch
+                {
+                }
+                return output;
+            });
 
             await Task.WhenAny(updateTask, Task.Delay(timeout));
 
@@ -35,6 +55,97 @@ namespace LGSTrayHID
             return null;
         }
 
+        public static async Task<HIDPPProfile?> InitializeHIDPPAsync(IDevice device)
+        {
+            HIDPPProfile output = new HIDPPProfile();
+
+            int version;
+            await Task.Delay(10000);
+            version = await GetProtocolAsync(device, 0x01);
+
+            // Magic number for HID++ 1.0, not supported
+            if (version == -1)
+            {
+                Debug.WriteLine($"{device.DeviceId} failed to response to GetProtocol");
+                device.Dispose();
+                return null;
+            }
+            if (version == 0x8f)
+            {
+                Debug.WriteLine($"{device.DeviceId} is HID++ 1.0, not supported");
+                return null;
+            }
+
+            byte[] payload;
+            output.deviceNameIdx = await GetFeatureIdx(device, 0x01, HIDFeatureID.DEVICE_NAME);
+            if (output.deviceNameIdx != 0)
+            {
+                payload = CreateHIDMsg(0x01, output.deviceNameIdx, 0x02);
+                output.deviceType = (LGSTrayCore.DeviceType)((HidData)(await device.WriteReadTimeoutAsync(payload))).Param(0);
+
+                payload = CreateHIDMsg(0x01, output.deviceNameIdx, 0x00);
+                int nameLength = ((HIDMsg.HidData)(await device.WriteReadTimeoutAsync(payload))).Param(0);
+                byte[] nameBuffer = new byte[nameLength];
+                for (byte i = 0; i < nameLength; i += 15)
+                {
+                    payload = CreateHIDMsg(0x01, output.deviceNameIdx, 0x01, new byte[] { i });
+                    var res = await device.WriteReadTimeoutAsync(payload);
+
+                    Buffer.BlockCopy(res?.Data, 4, nameBuffer, i, Math.Min(nameLength - i, 15));
+                }
+                output.deviceName = Encoding.ASCII.GetString(nameBuffer);
+            }
+
+            output.batteryStatusIdx = await GetFeatureIdx(device, 0x01, HIDFeatureID.BATTERY_STATUS);
+            if (output.batteryStatusIdx == 0)
+            {
+                output.batteryVoltageIdx = await GetFeatureIdx(device, 0x01, HIDFeatureID.BATTERY_VOLTAGE);
+            }
+
+            return output;
+        }
+
+        public static async Task<double> UpdateBattery(IDevice device, HIDPPProfile profile)
+        {
+            if (profile.batteryStatusIdx != 0)
+            {
+                return await UpdateBatteryStatus(device, profile);
+            }
+            else if (profile.batteryVoltageIdx != 0)
+            {
+                return await UpdateBatteryVoltage(device, profile);
+            }
+
+            return double.NaN;
+        }
+
+        private async static Task<double> UpdateBatteryStatus(IDevice device, HIDPPProfile profile)
+        {
+            byte[] payload = CreateHIDMsg(0x01, profile.batteryStatusIdx, 0x00);
+            var resData = await device.WriteReadTimeoutAsync(payload);
+
+            if (resData != null)
+            {
+                return ((HIDMsg.HidData)resData).Param(0);
+            }
+
+            return double.NaN;
+        }
+
+        private async static Task<double> UpdateBatteryVoltage(IDevice device, HIDPPProfile profile)
+        {
+            byte[] payload = CreateHIDMsg(0x01, profile.batteryVoltageIdx, 0x00);
+            var resData = await device.WriteReadTimeoutAsync(payload);
+
+            if (resData != null)
+            {
+                var tmp = (HIDMsg.HidData)resData;
+                return 0.001 * ((tmp.Param(0) << 8) + tmp.Param(1));
+            }
+
+            return double.NaN;
+        }
+
         public static async Task<int> GetProtocolAsync(IDevice device, byte deviceId)
         {
             byte[] payload = CreateBlankHIDMsg();
@@ -42,10 +153,10 @@ namespace LGSTrayHID
             payload[2] = 0x00;
             payload[3] = 0x10;
 
-            Task<TransferResult> task = device.WriteAndReadAsync(payload);
-            if (await Task.WhenAny(task, Task.Delay(500)) == task)
+            var version = await device.WriteReadTimeoutAsync(payload);
+            if (version != null)
             {
-                return ((HidData)task.Result).Param(0);
+                return ((HidData)version).Param(0);
             }
 
             return -1;
@@ -60,7 +171,7 @@ namespace LGSTrayHID
             payload[4] = (byte) ((featureId & 0xFF00) >> 8);
             payload[5] = (byte) ((featureId & 0x00FF));
 
-            var res = await device.WriteAndReadAsync(payload);
+            var res = await device.WriteReadTimeoutAsync(payload);
 
             return ((HidData)res).Param(0);
         }
