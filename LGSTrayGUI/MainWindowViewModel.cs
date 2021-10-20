@@ -12,6 +12,8 @@ using System.Linq;
 using PropertyChanged;
 using System.Windows;
 using System;
+using System.IO;
+using System.Diagnostics;
 
 namespace LGSTrayGUI
 {
@@ -43,7 +45,7 @@ namespace LGSTrayGUI
 
                 if (value)
                 {
-                    registryKey.SetValue("LGSTrayGUI", Assembly.GetEntryAssembly().Location);
+                    registryKey.SetValue("LGSTrayGUI", Path.Combine(AppContext.BaseDirectory, Process.GetCurrentProcess().MainModule.FileName));
                 }
                 else
                 {
@@ -78,10 +80,10 @@ namespace LGSTrayGUI
             ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
 
             ghubDevices.CollectionChanged += (o, e) => {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LogiDevicesFlat"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
             };
             hidDevices.CollectionChanged += (o, e) => {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("LogiDevicesFlat"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
             };
 
             LogiDevices.Add(ghubDevices);
@@ -103,11 +105,11 @@ namespace LGSTrayGUI
             //updateTimer.Interval = 10000;
             //updateTimer.Start();
 
-            while (true)
-            {
-                await hidDeviceManager.UpdateDevicesAsync();
-                await Task.Delay(1000);
-            }
+            //while (true)
+            //{
+            //    await hidDeviceManager.UpdateDevicesAsync();
+            //    await Task.Delay(1000);
+            //}
 
             HttpServer.LoadConfig();
             if (HttpServer.ServerEnabled)
