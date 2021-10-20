@@ -33,7 +33,17 @@ namespace LGSTrayCore
         }
 
         [DependsOn("DeviceName", "BatteryPercentage", "LastUpdate")]
-        public string TooltipString { get => $"{DeviceName}, {BatteryPercentage:f2}% at {LastUpdate}"; }
+        public string TooltipString
+        {
+            get
+            {
+#if DEBUG
+                return $"{DeviceName}, {BatteryPercentage:f2}% at {LastUpdate}";
+#else
+                return $"{DeviceName}, {BatteryPercentage:f2}%";
+#endif
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
