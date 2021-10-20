@@ -63,8 +63,4 @@
     </None>
   </ItemGroup>
 
-  <Target Name="PostBuild" AfterTargets="AfterPublish">
-    <Exec Command="cd $(TargetDir)&#xD;&#xA;del *.xml" />
-  </Target>
-
 </Project>
