@@ -14,19 +14,20 @@ namespace LGSTrayHID
 {
     public class HIDDeviceManager : LogiDeviceManager
     {
+        private const uint LOGITECH_VENDOR_ID = 0x046D;
+
         private DeviceListener _deviceListener;
-        private readonly Dictionary<IDevice, HIDPPProfile> _hidppMap = new Dictionary<IDevice, HIDPPProfile>();
-        private readonly Dictionary<string, LogiDeviceHID> _logiDeviceMap = new Dictionary<string, LogiDeviceHID>();
+        private HashSet<LogiDeviceHandler> logiDeviceHandlers = new HashSet<LogiDeviceHandler>();
 
         public HIDDeviceManager(ICollection<LogiDevice> logiDevices) : base(logiDevices)
         {
         }
         public override async Task LoadDevicesAsync()
         {
-            var legacyHid = new FilterDeviceDefinition(vendorId: 0x046D, usagePage: 0xFF00)
+            var legacyHid = new FilterDeviceDefinition(vendorId: LOGITECH_VENDOR_ID, usagePage: 0xFF00)
                             .CreateWindowsHidDeviceFactory();
 
-            var modernHid = new FilterDeviceDefinition(vendorId: 0x046D, usagePage: 0xFF43)
+            var modernHid = new FilterDeviceDefinition(vendorId: LOGITECH_VENDOR_ID, usagePage: 0xFF43)
                             .CreateWindowsHidDeviceFactory();
 
             var factories = legacyHid.Aggregate(modernHid);
@@ -40,38 +41,17 @@ namespace LGSTrayHID
             _deviceListener.DeviceDisconnected += _deviceListener_DeviceDisconnected;
 
             _deviceListener.Start();
-
-            _deviceListener.Stop();
         }
 
         public override async Task UpdateDevicesAsync()
         {
-            Task[] taskQueue = new Task[_hidppMap.Keys.Count()];
-
-            foreach (var it in _hidppMap.Keys.Select((x, i) => new { index = i, item = x }))
+            List<Task> tasks = new();
+            foreach (var device in logiDeviceHandlers)
             {
-                var device = it.item;
-                var hidppProfile = _hidppMap[device];
-                taskQueue[it.index] = Task.Run(async () => {
-                    if (!device.IsInitialized)
-                    {
-                        return;
-                    }
-
-                    double ret = await HIDMsg.UpdateBattery(device, hidppProfile);
-
-                    var logiDevice = _logiDeviceMap[hidppProfile.deviceName];
-                    if (hidppProfile.batteryStatusIdx != 0)
-                    {
-                        logiDevice.BatteryPercentage = ret;
-                    }
-                    if (hidppProfile.batteryVoltageIdx != 0)
-                    {
-                        logiDevice.BatteryVoltage = ret;
-                    }
-                });
+                tasks.Add(device.UpdateBattery());
             }
-            await Task.WhenAll(taskQueue);
+
+            await Task.WhenAll(tasks);
         }
 
         #region PrivateMethods
@@ -87,50 +67,25 @@ namespace LGSTrayHID
 
             Debug.WriteLine($"{deviceDef.DeviceId} has connected");
 
-            HIDPPProfile? hidppProfile;
-            try
+            var tmp = await LogiDeviceHandler.CreateNewHandler(e.Device);
+            if (tmp == null)
             {
-                hidppProfile = await HIDMsg.InitializeHIDPPAsync(e.Device);
-
-            }
-            catch (Exception)
-            {
-                Debug.WriteLine("Failed to initialize HID++ device, ignoring...");
+                e.Device.Dispose();
+                Debug.WriteLine($"{deviceDef.DeviceId} invalid protocol version, ignoring...");
                 return;
             }
 
-            if (hidppProfile == null)
-            {
-                e.Device.Close();
-                Debug.WriteLine("Device is not HID++ 2.0, ignoring...");
-                return;
-            }
-
-            Debug.WriteLine($"{hidppProfile?.deviceName} has initialized");
-            _hidppMap[e.Device] = (HIDPPProfile) hidppProfile;
-            
-            if (!_logiDeviceMap.ContainsKey(hidppProfile?.deviceName))
-            {
-                var logiDevice = new LogiDeviceHID()
-                {
-                    DeviceName = hidppProfile?.deviceName,
-                    DeviceID = deviceDef.DeviceId.GetHashCode().ToString(),
-                    DeviceType = hidppProfile?.deviceType ?? LGSTrayCore.DeviceType.Mouse
-                };
-
-                _logiDeviceMap[hidppProfile?.deviceName] = logiDevice;
-                _LogiDevices.Add(logiDevice);
-            }
+            Debug.WriteLine($"{tmp.DeviceName} has initialized");
+            logiDeviceHandlers.Add(tmp);
+            tmp.StartRead();
+            _LogiDevices.Add(tmp.GetLogiDeviceHID());
         }
 
         private void _deviceListener_DeviceDisconnected(object sender, DeviceEventArgs e)
         {
             Debug.WriteLine($"{e.Device.ConnectedDeviceDefinition.DeviceId} has disconnected");
 
-            if (_hidppMap.ContainsKey(e.Device))
-            {
-                _hidppMap.Remove(e.Device);
-            }
+            logiDeviceHandlers.RemoveWhere(x => x.HIDDeviceId == e.Device.DeviceId);
         }
         #endregion
     }

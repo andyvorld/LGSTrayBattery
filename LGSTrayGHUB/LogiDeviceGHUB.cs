@@ -9,16 +9,30 @@ namespace LGSTrayGHUB
 {
     public class LogiDeviceGHUB : LogiDevice
     {
-        private string _deviceID;
+        //private string _deviceID;
 
-        private string _deviceName;
+        //private string _deviceName;
 
         private double _batteryPercentage;
-        public override string DeviceID { get => _deviceID; set => _deviceID = value; }
-        public override string DeviceName { get => _deviceName; set => _deviceName = value; }
-        public override double BatteryPercentage { get => _batteryPercentage; set => _batteryPercentage = value; }
+        //public override string DeviceID { get => _deviceID; set => _deviceID = value; }
+        //public override string DeviceName { get => _deviceName; set => _deviceName = value; }
+        public override double BatteryPercentage
+        {
+            get
+            {
+                return _batteryPercentage;
+            }
+
+            set
+            {
+                _batteryPercentage = value;
+                UpdateLastUpdateTimestamp();
+            }
+        }
         public bool Charging { get; set; }
         public double Mileage { get; set; }
+
+        public bool HasBattery { get; set; } = true;
 
         public override string GetXmlData()
         {

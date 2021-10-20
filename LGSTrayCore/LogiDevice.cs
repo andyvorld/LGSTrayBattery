@@ -18,14 +18,28 @@ namespace LGSTrayCore
     {
         protected DeviceType _deviceType = DeviceType.Mouse;
         public DeviceType DeviceType { get; set; }
-        public abstract string DeviceID { get; set; }
-        public abstract string DeviceName { get; set; }
+        public string DeviceID { get; set; } = "NOT_FOUND";
+        public string DeviceName { get; set; } = "NOT_FOUND";
         public abstract double BatteryPercentage { get; set; }
+        public DateTime LastUpdate { get; private set; } = DateTime.MinValue;
 
-        public string TooltipString { get => $"{DeviceName}, {BatteryPercentage:f2}%"; }
+        public bool BatteryStatExpired
+        {
+            get
+            {
+                return DateTime.Now > LastUpdate.AddSeconds(60);
+            }
+        }
+
+        [DependsOn("DeviceName", "BatteryPercentage", "LastUpdate")]
+        public string TooltipString { get => $"{DeviceName}, {BatteryPercentage:f2}% at {LastUpdate}"; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public abstract string GetXmlData();
+        public void UpdateLastUpdateTimestamp()
+        {
+            LastUpdate = DateTime.Now;
+        }
     }
 }

@@ -12,14 +12,27 @@ namespace LGSTrayHID
 {
     public class LogiDeviceHID : LogiDevice
     {
-        private static IPowerModel powerModel = new PowerModel_3deg();
-        private string _deviceName = "NOT_FOUND";
-        private string _deviceId = "NOT_FOUND";
-        public override string DeviceID { get => _deviceId; set => _deviceId = value; }
-        public override string DeviceName { get => _deviceName; set => _deviceName = value; }
+        private static readonly IPowerModel powerModel = new PowerModel_3deg();
+        //private string _deviceName = "NOT_FOUND";
+        //private string _deviceId = "NOT_FOUND";
+        //public override string DeviceID { get => _deviceId; set => _deviceId = value; }
+        //public override string DeviceName { get => _deviceName; set => _deviceName = value; }
 
         private double _batteryPercentage = double.NaN;
-        public override double BatteryPercentage { get => _batteryPercentage; set => _batteryPercentage = value; }
+        public override double BatteryPercentage
+        {
+            get
+            {
+                return _batteryPercentage;
+            }
+
+            set
+            {
+                _batteryPercentage = value;
+                Debug.WriteLine($"batt updated - {BatteryPercentage}%");
+                UpdateLastUpdateTimestamp();
+            }
+        }
 
         private double _batteryVoltage = double.NaN;
         public double BatteryVoltage
@@ -32,7 +45,7 @@ namespace LGSTrayHID
             {
                 _batteryVoltage = value;
                 BatteryPercentage = 100*powerModel.GetCapacity(_batteryVoltage);
-                Debug.WriteLine($"batt updated - {BatteryPercentage}%");
+                UpdateLastUpdateTimestamp(); ;
             }
         }
         public override string GetXmlData()

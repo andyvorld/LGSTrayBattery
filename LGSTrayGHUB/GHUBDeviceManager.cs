@@ -20,6 +20,11 @@ namespace LGSTrayGHUB
         private WebsocketClient _ws = null;
         public GHUBDeviceManager(ICollection<LogiDevice> logiDevices) : base(logiDevices)
         {
+
+        }
+
+        private async Task InitialiseWS()
+        {
             var url = new Uri("ws://localhost:9010");
 
             var factory = new Func<ClientWebSocket>(() =>
@@ -31,6 +36,7 @@ namespace LGSTrayGHUB
                 client.Options.SetRequestHeader("Cache-Control", "no-cache");
                 client.Options.SetRequestHeader("Sec-WebSocket-Extensions", "permessage-deflate; client_max_window_bits");
                 client.Options.SetRequestHeader("Sec-WebSocket-Protocol", "json");
+                client.Options.AddSubProtocol("json");
                 return client;
             });
 
@@ -42,18 +48,7 @@ namespace LGSTrayGHUB
 
             Debug.WriteLine($"Trying to connect to LGHUB_agent, at {url}");
 
-            int retries = 0;
-            while (!_ws.IsRunning)
-            {
-                _ws.Start();
-                Thread.Sleep(100);
-                retries++;
-
-                if (retries > 5)
-                {
-                    break;
-                }
-            }
+            await _ws.Start();
 
             if (_ws.IsRunning)
             {
@@ -95,6 +90,10 @@ namespace LGSTrayGHUB
                 {
                     _UpdateDevice(ghubmsg.payload);
                 }
+                else if (ghubmsg.result["code"]?.ToString() == "NO_SUCH_PATH")
+                {
+                    _FreezeDevice(ghubmsg);
+                }
             }
             else if (ghubmsg.path == "/battery/state/changed")
             {
@@ -107,6 +106,11 @@ namespace LGSTrayGHUB
         }
         public override async Task LoadDevicesAsync()
         {
+            if (_ws == null)
+            {
+                await InitialiseWS();
+            }
+
             _ws.Send(JsonConvert.SerializeObject(new
             {
                 msgId = "",
@@ -143,7 +147,7 @@ namespace LGSTrayGHUB
 
         public override async Task UpdateDevicesAsync()
         {
-            foreach (var device in _LogiDevices)
+            foreach (var device in _LogiDevices.Select(x => x as LogiDeviceGHUB).Where(x => x.BatteryStatExpired && x.HasBattery))
             {
                 _ws.Send(JsonConvert.SerializeObject(new
                 {
@@ -168,6 +172,19 @@ namespace LGSTrayGHUB
             device.BatteryPercentage = payload["percentage"].ToObject<double>();
             device.Mileage = payload["mileage"].ToObject<double>();
             device.Charging = payload["charging"].ToObject<bool>();
+        }
+
+        private void _FreezeDevice(GHUBMsg msg)
+        {
+            var match = Regex.Match(msg.path, ".+?(dev[0-9]+).+");
+            LogiDeviceGHUB device = _LogiDevices.FirstOrDefault(x => x.DeviceID == match.Groups[1].Value) as LogiDeviceGHUB;
+
+            if (device == null)
+            {
+                return;
+            }
+
+            device.HasBattery = false;
         }
     }
 }

@@ -100,16 +100,10 @@ namespace LGSTrayGUI
             //updateDeviceList(LogiDevicesFlat);
 
             updateTimer = new System.Timers.Timer();
-            //updateTimer.Elapsed += (s, e) => { ghubDeviceManager.UpdateDevicesAsync().Wait(1000); };
-            //updateTimer.Elapsed += async (s, e) => { await hidDeviceManager.UpdateDevicesAsync(); };
-            //updateTimer.Interval = 10000;
-            //updateTimer.Start();
-
-            //while (true)
-            //{
-            //    await hidDeviceManager.UpdateDevicesAsync();
-            //    await Task.Delay(1000);
-            //}
+            updateTimer.Elapsed += async (s, e) => { await ghubDeviceManager.UpdateDevicesAsync(); };
+            updateTimer.Elapsed += async (s, e) => { await hidDeviceManager.UpdateDevicesAsync(); };
+            updateTimer.Interval = 10000;
+            updateTimer.Start();
 
             HttpServer.LoadConfig();
             if (HttpServer.ServerEnabled)

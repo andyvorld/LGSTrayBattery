@@ -9,6 +9,7 @@
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         xmlns:tb="http://www.hardcodet.net/taskbar"
+        d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
         Title="MainWindow" Height="0" Width="0">
     <Window.Resources>
         <local:DevicePrefixConverter x:Key="DevicePrefixConverter"/>
@@ -17,7 +18,7 @@
     <Grid>
         <tb:TaskbarIcon
             x:Name="TaskbarIcon"
-            ToolTipText="{Binding SelectedDevice.TooltipString, UpdateSourceTrigger=PropertyChanged}"
+            ToolTipText="{Binding SelectedDevice.TooltipString}"
             >
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
