@@ -5,19 +5,24 @@
 
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
 
-## New Features
+## New Features to V1
+- Retargetted from .Net Framework 4.6 to .Net 5
+    - Dropped 32Bit Windows
 - New reactive Icons
     - Now reacts to light/dark theme
     - Now reacts to what type of device you currently have selected (Supports mouse, keyboards and headsets)
-- Native HID Battery percentages now uses a formula rather old xml files
+- Native HID Battery percentages now uses a formula rather than old xml files
     - Assuming they use 3.7V lipo batteries, if you are getting weird battery percentages or voltage readings < 3.5V, please open an issue
-- Smarter polling (Planned)
+- Updated HID backend to detect plugging in wireless devices
+- Smarter polling
     - When successful don't update for a long delay, else check back frequently till an update
+- "Persistant" Data
+    - Device battery percentages should persists even if said device is disconnected, battery percentages will then be updated on reconnection
 
 ## Known Missing features
 - Force update battery percentage
 - Force rescan of devices
-- Reselect last device on startup
+
 ## Features
 ### Tray Indicator
 ![](https://i.imgur.com/g5e3jsz.png)
@@ -42,12 +47,6 @@ Send a GET/HTTP request to `{tcpAddr}:{tcpPort}/devices`, for the list of device
 With the `deviceID`, a GET/HTTP request to `{tcpAddr}:{tcpPort}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
 
 ## Known Issues
-- Logitech gaming mouses do not natively have a way of reporting battery level, but rather voltage levels. A voltage to percentage lookup table is available for some mouses from Logitech Gaming Software and are included in `PowerModel`. However newer mice have their files embedded within Logitech G Hub and it is not possible to retrieve them without owning said mice. It is possible to dump an `.xml` file within `PowerModel` for support. [Refer to this issue in libratbag.](https://github.com/libratbag/piper/issues/222#issuecomment-487557251)
-
-    - Without the `.xml` file, the tray will display `?` with the tooltip giving `NaN%` with a valid voltage.
-
-    - Using this [automated tool](https://github.com/andyvorld/LGSTrayBattery_GHUB_dump) for automated extraction of `.xml` files. (Working as of 24/02/2021)
-
 - Does not support mice that uses HID++ 1.0 protocols. (Older than 2012?)
 
 - Does not work on mice that uses "Unified Battery Reporting". (Newer than late 2020?)
