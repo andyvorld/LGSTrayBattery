@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -128,19 +128,19 @@ namespace LGSTrayGUI
             LogiDevices.Add(ghubDevices);
             LogiDevices.Add(hidDevices);
 
+            updateTimer = new System.Timers.Timer();
             ghubDeviceManager = new GHUBDeviceManager(ghubDevices);
-            var t1 = ghubDeviceManager.LoadDevicesAsync();
+            _ = ghubDeviceManager.LoadDevicesAsync().ContinueWith(_ =>
+            {
+                updateTimer.Elapsed += async (s, e) => { await ghubDeviceManager.UpdateDevicesAsync(); };
+            });
 
             hidDeviceManager = new HIDDeviceManager(hidDevices);
-            var t2 = hidDeviceManager.LoadDevicesAsync();
-
-            await Task.WhenAll(t1, t2);
-
-            //updateDeviceList(LogiDevicesFlat);
-
-            updateTimer = new System.Timers.Timer();
-            updateTimer.Elapsed += async (s, e) => { await ghubDeviceManager.UpdateDevicesAsync(); };
+            _ = hidDeviceManager.LoadDevicesAsync().ContinueWith(_ =>
+            {
             updateTimer.Elapsed += async (s, e) => { await hidDeviceManager.UpdateDevicesAsync(); };
+            });
+
             updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
 
