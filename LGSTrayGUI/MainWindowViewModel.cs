@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -114,6 +114,9 @@ namespace LGSTrayGUI
         {
             RegisterDeviceManager<HIDDeviceManager>();
             RegisterDeviceManager<GHUBDeviceManager>();
+
+            // Watch when LogiDevicesFlat gets updated to auto select
+            PropertyChanged += UpdateSelectedDeviceOnLaunch;
 
             updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
