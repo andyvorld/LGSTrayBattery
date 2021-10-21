@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -150,7 +150,7 @@ namespace LGSTrayGUI
             T deviceManager = (T)Activator.CreateInstance(typeof(T), managedDevices);
             _ = deviceManager.LoadDevicesAsync().ContinueWith(_ =>
             {
-                updateTimer.Elapsed += async (s, e) => { await deviceManager.UpdateDevicesAsync(); };
+                updateTimer.Elapsed += async (s, e) => { await deviceManager?.UpdateDevicesAsync(); };
             });
 
             _deviceManagers.Add(deviceManager);
@@ -158,21 +158,16 @@ namespace LGSTrayGUI
 
         private void UpdateSelectedDeviceOnLaunch(object sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(LogiDevicesFlat))
+            if (SelectedDevice != null || e.PropertyName != nameof(LogiDevicesFlat))
             {
                 return;
             }
-
-            if (SelectedDevice != null)
-            {
-                return;
-            }
-
 
             LogiDevice found = LogiDevicesFlat.FirstOrDefault(x => x.DeviceID == Properties.Settings.Default.LastSelectedDeviceId);
             if (found != null)
             {
                 SelectedDevice = found;
+                // Deregister event?
             }
         }
     }
