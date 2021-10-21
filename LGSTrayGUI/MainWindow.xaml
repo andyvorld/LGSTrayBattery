@@ -19,6 +19,7 @@
         <tb:TaskbarIcon
             x:Name="TaskbarIcon"
             ToolTipText="{Binding SelectedDevice.TooltipString}"
+            TrayMouseDoubleClick="RescanDevices_OnClick"
             >
             <tb:TaskbarIcon.ContextMenu>
                 <ContextMenu>
@@ -51,6 +52,7 @@
                             </DataTemplate>
                         </MenuItem.ItemTemplate>
                     </MenuItem>
+                    <MenuItem Header="Rescan devices" Click="RescanDevices_OnClick"/>
                     <MenuItem Header="Autostart with Windows" 
                               IsCheckable="True"
                               IsChecked="{Binding AutoStart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

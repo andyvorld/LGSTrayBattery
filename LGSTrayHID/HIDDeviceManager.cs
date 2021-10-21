@@ -36,6 +36,7 @@ namespace LGSTrayHID
 
             _LogiDevices.Clear();
 
+            _deviceListener?.Dispose();
             _deviceListener = new DeviceListener(factories, 1000, null);
             _deviceListener.DeviceInitialized += _deviceListener_DeviceInitialized;
             _deviceListener.DeviceDisconnected += _deviceListener_DeviceDisconnected;

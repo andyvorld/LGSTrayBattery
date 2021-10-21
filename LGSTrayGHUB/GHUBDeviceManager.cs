@@ -117,8 +117,6 @@ namespace LGSTrayGHUB
                 verb = "GET",
                 path = "/devices/list"
             }));
-
-            await Task.Delay(0).ConfigureAwait(false);
         }
 
         private void _loadDevices(JObject payload)

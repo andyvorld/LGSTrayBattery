@@ -98,5 +98,10 @@ namespace LGSTrayGUI
 
             //this.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(selectedDevice);
         }
+
+        private void RescanDevices_OnClick(object sender, RoutedEventArgs e)
+        {
+            this.viewModel.RescanDevices();
+        }
     }
 }

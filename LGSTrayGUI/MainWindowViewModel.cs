@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,7 +61,9 @@ namespace LGSTrayGUI
         }
 
         private Thread httpThread;
-        private System.Timers.Timer updateTimer;
+        private readonly System.Timers.Timer updateTimer = new();
+
+        private readonly List<LogiDeviceManager> _deviceManagers = new List<LogiDeviceManager>();
 
         private ICollection<ObservableCollection<LogiDevice>> _logiDevices = new List<ObservableCollection<LogiDevice>>();
         public ICollection<ObservableCollection<LogiDevice>> LogiDevices { get { return this._logiDevices; } }
@@ -102,9 +104,6 @@ namespace LGSTrayGUI
 
         public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
 
-        private GHUBDeviceManager ghubDeviceManager;
-        private HIDDeviceManager hidDeviceManager;
-
         public delegate void UpdateDeviceListDelegate(IEnumerable<LogiDevice> val);
         public MainWindowViewModel(MainWindow view)
         {
@@ -113,33 +112,8 @@ namespace LGSTrayGUI
 
         public async Task LoadViewModel()
         {
-            ObservableCollection<LogiDevice> ghubDevices = new ObservableCollection<LogiDevice>();
-            ObservableCollection<LogiDevice> hidDevices = new ObservableCollection<LogiDevice>();
-
-            PropertyChanged += UpdateSelectedDeviceOnLaunch;
-
-            ghubDevices.CollectionChanged += (o, e) => {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
-            };
-            hidDevices.CollectionChanged += (o, e) => {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
-            };
-
-            LogiDevices.Add(ghubDevices);
-            LogiDevices.Add(hidDevices);
-
-            updateTimer = new System.Timers.Timer();
-            ghubDeviceManager = new GHUBDeviceManager(ghubDevices);
-            _ = ghubDeviceManager.LoadDevicesAsync().ContinueWith(_ =>
-            {
-                updateTimer.Elapsed += async (s, e) => { await ghubDeviceManager.UpdateDevicesAsync(); };
-            });
-
-            hidDeviceManager = new HIDDeviceManager(hidDevices);
-            _ = hidDeviceManager.LoadDevicesAsync().ContinueWith(_ =>
-            {
-            updateTimer.Elapsed += async (s, e) => { await hidDeviceManager.UpdateDevicesAsync(); };
-            });
+            RegisterDeviceManager<HIDDeviceManager>();
+            RegisterDeviceManager<GHUBDeviceManager>();
 
             updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
@@ -151,6 +125,32 @@ namespace LGSTrayGUI
                 httpThread.IsBackground = true;
                 httpThread.Start();
             }
+        }
+
+        public void RescanDevices()
+        {
+            foreach (var deviceManager in _deviceManagers)
+            {
+                _ = deviceManager.LoadDevicesAsync();
+            }
+        }
+
+        private void RegisterDeviceManager<T>() where T : LogiDeviceManager
+        {
+            ObservableCollection<LogiDevice> managedDevices = new();
+            managedDevices.CollectionChanged += (o, e) => {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
+            };
+
+            LogiDevices.Add(managedDevices);
+
+            T deviceManager = (T)Activator.CreateInstance(typeof(T), managedDevices);
+            _ = deviceManager.LoadDevicesAsync().ContinueWith(_ =>
+            {
+                updateTimer.Elapsed += async (s, e) => { await deviceManager.UpdateDevicesAsync(); };
+            });
+
+            _deviceManagers.Add(deviceManager);
         }
 
         private void UpdateSelectedDeviceOnLaunch(object sender, PropertyChangedEventArgs e)
