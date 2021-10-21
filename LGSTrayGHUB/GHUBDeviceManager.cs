@@ -48,13 +48,20 @@ namespace LGSTrayGHUB
 
             Debug.WriteLine($"Trying to connect to LGHUB_agent, at {url}");
 
-            await _ws.Start();
-
-            if (_ws.IsRunning)
+            try
             {
-                Debug.WriteLine($"Connected to LGHUB_agent");
+                await _ws.StartOrFail();
 
             }
+            catch (Websocket.Client.Exceptions.WebsocketException)
+            {
+                Debug.WriteLine("Failed to connect to LGHUB_agent");
+                _ws?.Dispose();
+                _ws = null;
+                return;
+            }
+
+            Debug.WriteLine($"Connected to LGHUB_agent");
 
             _ws.Send(JsonConvert.SerializeObject(new
             {
@@ -108,7 +115,14 @@ namespace LGSTrayGHUB
         {
             if (_ws == null)
             {
+                // Check if LGHUB_agent is back
                 await InitialiseWS();
+            }
+
+            if (_ws == null)
+            {
+                // LGHUB_agent is not back
+                return;
             }
 
             _ws.Send(JsonConvert.SerializeObject(new
