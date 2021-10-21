@@ -38,7 +38,7 @@ namespace LGSTrayGUI
             this.TaskbarIcon.Icon = TrayIconTools.ErrorIcon();
             this.viewModel = new MainWindowViewModel(this);
             this.DataContext = viewModel;
-            _ = this.viewModel.LoadViewModel();
+            this.viewModel.LoadViewModel();
         }
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)

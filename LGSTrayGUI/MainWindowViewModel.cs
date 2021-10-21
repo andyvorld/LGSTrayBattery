@@ -110,7 +110,7 @@ namespace LGSTrayGUI
             this.view = view;
         }
 
-        public async Task LoadViewModel()
+        public void LoadViewModel()
         {
             RegisterDeviceManager<HIDDeviceManager>();
             RegisterDeviceManager<GHUBDeviceManager>();
