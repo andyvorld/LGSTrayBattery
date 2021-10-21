@@ -75,6 +75,9 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 - Native HID and GHUB do not provide similar percentages, this is due to how native and GHUB calculates percentages from the device's voltages. Native uses an average curve of a 3.7V lipo battery, while GHUB will use a lookup table specific to the device.
 
 ### Native HID
+- If the device is sleeping or disconnected, the program will not detect it even if the reciever is plugged in, usually occuring at boot
+    - Current fix, restart the program or force a rescan via a double click or context menu
+
 - Does not support mice that uses HID++ 1.0 protocols. (Older than 2012?)
 
 - Does not work on mice that uses "Unified Battery Reporting". (Newer than late 2020?)
