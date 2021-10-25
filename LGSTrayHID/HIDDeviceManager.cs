@@ -61,7 +61,7 @@ namespace LGSTrayHID
             var deviceDef = e.Device.ConnectedDeviceDefinition;
             if (deviceDef.WriteBufferSize != 20 || deviceDef.ReadBufferSize != 20)
             {
-                e.Device.Dispose();
+                e.Device.Close();
                 Debug.WriteLine("Device is not HID++ Long, ignoring...");
                 return;
             }
@@ -71,7 +71,7 @@ namespace LGSTrayHID
             var tmp = await LogiDeviceHandler.CreateNewHandler(e.Device);
             if (tmp == null)
             {
-                e.Device.Dispose();
+                e.Device.Close();
                 Debug.WriteLine($"{deviceDef.DeviceId} invalid protocol version, ignoring...");
                 return;
             }
