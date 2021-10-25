@@ -65,13 +65,17 @@ namespace LGSTrayGUI
                         break;
                 }
 
-                if (logiDevice.BatteryPercentage > 60)
+                if (logiDevice.BatteryPercentage > 70)
                 {
                     indicator = Properties.Resources.Indicator_100;
                 }
-                else if (logiDevice.BatteryPercentage > 20)
+                else if (logiDevice.BatteryPercentage > 40)
                 {
                     indicator = Properties.Resources.Indicator_50;
+                }
+                else if (logiDevice.BatteryPercentage > 20)
+                {
+                    indicator = Properties.Resources.Indicator_30;
                 }
                 else if (logiDevice.BatteryPercentage > 0)
                 {

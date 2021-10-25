@@ -123,6 +123,16 @@ namespace LGSTrayGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Indicator_30 {
+            get {
+                object obj = ResourceManager.GetObject("Indicator_30", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Indicator_50 {
             get {
                 object obj = ResourceManager.GetObject("Indicator_50", resourceCulture);
