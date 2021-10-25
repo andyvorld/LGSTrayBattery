@@ -80,8 +80,8 @@ namespace LGSTrayGUI
                 if (_SelectedDevice != null)
                 {
                     _SelectedDevice.PropertyChanged -= UpdateBatteryIcon;
-
                 }
+
                 _SelectedDevice = value;
                 _SelectedDevice.PropertyChanged += UpdateBatteryIcon;
                 UpdateBatteryIcon(value, new PropertyChangedEventArgs("LastUpdate"));
