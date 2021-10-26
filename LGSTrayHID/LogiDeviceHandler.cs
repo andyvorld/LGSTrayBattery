@@ -116,23 +116,32 @@ namespace LGSTrayHID
             var cancellationToken = cancellationTokenSource.Token;
             while (true)
             {
-                var res = _hiddevice.ReadAsync(cancellationToken);
-                await res;
-                if (res.IsCanceled)
+                try
                 {
-                    break;
-                }
+                    var res = _hiddevice.ReadAsync(cancellationToken);
+                    await res;
 
-                HidData hidData = res.Result;
+                    if (res.IsCanceled)
+                    {
+                        break;
+                    }
+
+                    HidData hidData = res.Result;
                 
-                if (batteryStatusIdx != 0 && hidData.FeatureIndex == batteryStatusIdx)
-                {
-                    GetLogiDeviceHID().BatteryPercentage = hidData.Param(0);
-                }
+                    if (batteryStatusIdx != 0 && hidData.FeatureIndex == batteryStatusIdx)
+                    {
+                        GetLogiDeviceHID().BatteryPercentage = hidData.Param(0);
+                    }
 
-                if (batteryVoltageIdx != 0 && hidData.FeatureIndex == batteryVoltageIdx)
+                    if (batteryVoltageIdx != 0 && hidData.FeatureIndex == batteryVoltageIdx)
+                    {
+                        GetLogiDeviceHID().BatteryVoltage = 0.001 * ((hidData.Param(0) << 8) + hidData.Param(1));
+                    }
+                }
+                catch (System.IO.IOException)
                 {
-                    GetLogiDeviceHID().BatteryVoltage = 0.001 * ((hidData.Param(0) << 8) + hidData.Param(1));
+                    cancellationTokenSource.Cancel();
+                    return;
                 }
             }
         }
