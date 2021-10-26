@@ -5,13 +5,21 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Device.Net" Version="4.2.1" />
-    <PackageReference Include="Hid.Net" Version="4.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.7" />
     <PackageReference Include="System.Collections" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Device.Net">
+      <HintPath>ExternDLL\Device.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Hid.Net">
+      <HintPath>ExternDLL\Hid.Net.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
