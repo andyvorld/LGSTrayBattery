@@ -79,7 +79,12 @@ namespace LGSTrayHID
             Debug.WriteLine($"{tmp.DeviceName} has initialized");
             logiDeviceHandlers.Add(tmp);
             tmp.StartRead();
-            _LogiDevices.Add(tmp.GetLogiDeviceHID());
+
+            var tmpLogi = tmp.GetLogiDeviceHID();
+            if (!_LogiDevices.Contains(tmpLogi))
+            {
+                _LogiDevices.Add(tmpLogi);
+            }
         }
 
         private void _deviceListener_DeviceDisconnected(object sender, DeviceEventArgs e)
