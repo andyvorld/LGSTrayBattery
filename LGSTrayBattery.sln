@@ -1,9 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.1169
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayBattery", "LGSTrayBattery\LGSTrayBattery.csproj", "{CE875F60-DEF1-44AC-A9B2-666947D7529F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGHUB", "LGSTrayGHUB\LGSTrayGHUB.csproj", "{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayHID", "LGSTrayHID\LGSTrayHID.csproj", "{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGUI", "LGSTrayGUI\LGSTrayGUI.csproj", "{1E330388-BF15-4076-A088-6735DCD68255}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +23,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CE875F60-DEF1-44AC-A9B2-666947D7529F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CE875F60-DEF1-44AC-A9B2-666947D7529F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CE875F60-DEF1-44AC-A9B2-666947D7529F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CE875F60-DEF1-44AC-A9B2-666947D7529F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E330388-BF15-4076-A088-6735DCD68255}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E330388-BF15-4076-A088-6735DCD68255}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E330388-BF15-4076-A088-6735DCD68255}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E330388-BF15-4076-A088-6735DCD68255}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

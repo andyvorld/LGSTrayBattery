@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Websocket.Client" Version="4.3.38" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
+  </ItemGroup>
+
+</Project>
