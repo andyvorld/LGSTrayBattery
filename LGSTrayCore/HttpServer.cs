@@ -138,7 +138,7 @@ namespace LGSTrayCore
                         }
 
                         string response = $"HTTP/1.1 {statusCode}\r\n";
-                        response += $"ContentType: {contentType}\r\n";
+                        response += $"Content-Type: {contentType}\r\n";
                         response += $"Access-Control-Allow-Origin: *\r\n";
                         response += "Cache-Control: no-store, must-revalidate\r\n";
                         response += "Pragma: no-cache\r\n";
