@@ -1,12 +1,9 @@
-# LGS Tray Battery (WIP Revamp Branch)
-~~A tray app used to track battery levels of wireless Logitech mouse.~~
-
-~~**Does not support mice that uses "Unified Battery Reporting" (newer than 2020), I currently do not have access to the hardware and hence will not be able to implement it. If needed I have an alternative program at https://github.com/andyvorld/LGSTrayBattery_GHUB, which requires G HUB running in the background (more specifically `lghub_agent.exe`).**~~
+# LGS Tray Battery
 
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
 
 ## New Features to V1
-- Retargetted from .Net Framework 4.6 to .Net 5
+- Retargetted from .Net Framework 4.6 to .Net 6
     - Dropped 32Bit Windows
 - New reactive Icons
     - Now reacts to light/dark theme
