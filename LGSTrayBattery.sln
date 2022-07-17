@@ -1,21 +1,21 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31702.278
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayGHUB", "LGSTrayGHUB\LGSTrayGHUB.csproj", "{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGHUB", "LGSTrayGHUB\LGSTrayGHUB.csproj", "{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayHID", "LGSTrayHID\LGSTrayHID.csproj", "{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayHID", "LGSTrayHID\LGSTrayHID.csproj", "{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayGUI", "LGSTrayGUI\LGSTrayGUI.csproj", "{1E330388-BF15-4076-A088-6735DCD68255}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGUI", "LGSTrayGUI\LGSTrayGUI.csproj", "{1E330388-BF15-4076-A088-6735DCD68255}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
