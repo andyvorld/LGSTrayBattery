@@ -3,7 +3,7 @@ import os
 import os.path
 import glob
 
-TARGET_VER = '2.0.6'
+TARGET_VER = '2.0.7'
 
 TARGET_PROJ = 'LGSTrayGUI'
 PUB_PROFILES = [
