@@ -18,6 +18,8 @@ namespace LGSTrayGHUB
     public class GHUBDeviceManager : LogiDeviceManager
     {
         private WebsocketClient _ws = null;
+
+        private const string DEVICE_REGEX = @"dev[0-9a-zA-Z]+";
         public GHUBDeviceManager(ICollection<LogiDevice> logiDevices) : base(logiDevices)
         {
 
@@ -91,7 +93,7 @@ namespace LGSTrayGHUB
                 _loadDevices(ghubmsg.payload);
             }
             //else if (ghubmsg.path.StartsWith("/battery_state/"))
-            else if (Regex.IsMatch(ghubmsg.path, @"\/battery\/dev[0-9]+\/state"))
+            else if (Regex.IsMatch(ghubmsg.path, $"\\/battery\\/{DEVICE_REGEX}\\/state"))
             {
                 if (ghubmsg.result["code"]?.ToString() == "SUCCESS")
                 {
@@ -188,14 +190,14 @@ namespace LGSTrayGHUB
 
         private void _FreezeDevice(GHUBMsg msg)
         {
-            var match = Regex.Match(msg.path, ".+?(dev[0-9]+).+");
+            var match = Regex.Match(msg.path, $".+?({DEVICE_REGEX}).+");
             LogiDeviceGHUB device = _LogiDevices.FirstOrDefault(x => x.DeviceID == match.Groups[1].Value) as LogiDeviceGHUB;
 
             if (device == null)
             {
                 return;
             }
-
+ 
             device.HasBattery = false;
         }
     }
