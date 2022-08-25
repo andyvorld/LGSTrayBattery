@@ -17,17 +17,18 @@ namespace LGSTrayGHUB
 {
     public class GHUBDeviceManager : LogiDeviceManager
     {
-        private WebsocketClient _ws = null;
+        protected WebsocketClient _ws = null;
 
+        private const string WEBSOCKET_SERVER = "ws://localhost:9010";
         private const string DEVICE_REGEX = @"dev[0-9a-zA-Z]+";
         public GHUBDeviceManager(ICollection<LogiDevice> logiDevices) : base(logiDevices)
         {
 
         }
 
-        private async Task InitialiseWS()
+        protected virtual async Task InitialiseWS()
         {
-            var url = new Uri("ws://localhost:9010");
+            var url = new Uri(WEBSOCKET_SERVER);
 
             var factory = new Func<ClientWebSocket>(() =>
             {
@@ -80,7 +81,7 @@ namespace LGSTrayGHUB
             }));
         }
 
-        private void ParseSocketMsg(ResponseMessage msg)
+        protected void ParseSocketMsg(ResponseMessage msg)
         {
             GHUBMsg ghubmsg = JsonConvert.DeserializeObject<GHUBMsg>(msg.Text);
 
@@ -135,7 +136,7 @@ namespace LGSTrayGHUB
             }));
         }
 
-        private void _loadDevices(JObject payload)
+        protected virtual void _loadDevices(JObject payload)
         {
             _LogiDevices.Clear();
 
@@ -161,7 +162,7 @@ namespace LGSTrayGHUB
 
         public override async Task UpdateDevicesAsync()
         {
-            foreach (var device in _LogiDevices.Select(x => x as LogiDeviceGHUB).Where(x => x.BatteryStatExpired && x.HasBattery))
+            foreach (var device in _LogiDevices.Where(x => x.BatteryStatExpired && x.HasBattery))
             {
                 _ws.Send(JsonConvert.SerializeObject(new
                 {
@@ -174,7 +175,7 @@ namespace LGSTrayGHUB
             await Task.Delay(0).ConfigureAwait(false);
         }
 
-        private void _UpdateDevice(JObject payload)
+        protected virtual void _UpdateDevice(JObject payload)
         {
             LogiDeviceGHUB device = _LogiDevices.FirstOrDefault(x => x.DeviceID == payload["deviceId"].ToString()) as LogiDeviceGHUB;
 
