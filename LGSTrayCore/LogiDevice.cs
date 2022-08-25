@@ -22,6 +22,7 @@ namespace LGSTrayCore
         public DeviceType DeviceType { get; set; }
         public string DeviceID { get; set; } = "NOT_FOUND";
         public string DeviceName { get; set; } = "NOT_FOUND";
+        public bool HasBattery { get; set; } = true;
         public abstract double BatteryPercentage { get; set; }
         public DateTime LastUpdate { get; private set; } = DateTime.MinValue;
         public bool BatteryStatExpired
@@ -46,6 +47,11 @@ namespace LGSTrayCore
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public void InvokePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            PropertyChanged?.Invoke(sender, e);
+        }
 
         public abstract string GetXmlData();
         public void UpdateLastUpdateTimestamp()
