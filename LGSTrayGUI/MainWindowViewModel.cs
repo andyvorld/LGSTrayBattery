@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -112,8 +112,18 @@ namespace LGSTrayGUI
 
         public void LoadViewModel()
         {
+            if (AppSettings.Setting.DeviceManager.HID_NET)
+            {
             RegisterDeviceManager<HIDDeviceManager>();
+            }
+            if (AppSettings.Setting.DeviceManager.GHUB)
+            {
             RegisterDeviceManager<GHUBDeviceManager>();
+            }
+            if (AppSettings.Setting.DeviceManager.Native)
+            {
+                RegisterDeviceManager<NativeDeviceManager>();
+            }
 
             // Watch when LogiDevicesFlat gets updated to auto select
             PropertyChanged += UpdateSelectedDeviceOnLaunch;
@@ -121,10 +131,9 @@ namespace LGSTrayGUI
             updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
 
-            HttpServer.LoadConfig();
-            if (HttpServer.ServerEnabled)
+            if (AppSettings.Setting.HTTPServer.serverEnable)
             {
-                httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices));
+                httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices, AppSettings.Setting.HTTPServer.IPEndPoint));
                 httpThread.IsBackground = true;
                 httpThread.Start();
             }
