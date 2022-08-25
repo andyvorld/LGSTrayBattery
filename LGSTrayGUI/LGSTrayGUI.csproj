@@ -35,6 +35,7 @@
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
     <ProjectReference Include="..\LGSTrayGHUB\LGSTrayGHUB.csproj" />
     <ProjectReference Include="..\LGSTrayHID\LGSTrayHID.csproj" />
+    <ProjectReference Include="..\LGSTrayNative\LGSTrayNative.csproj" />
   </ItemGroup>
 
   <ItemGroup>
