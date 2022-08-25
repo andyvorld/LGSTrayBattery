@@ -12,65 +12,23 @@ using IniParser.Model;
 
 namespace LGSTrayCore
 {
-    public class HttpServer
+    public static class HttpServer
     {
-        public static bool ServerEnabled = false;
-        private static string _tcpAddr;
-        private static int _tcpPort;
-
-        public static void LoadConfig()
-        {
-            var parser = new FileIniDataParser();
-
-            if (!File.Exists("./HttpConfig.ini"))
-            {
-                File.Create("./HttpConfig.ini").Close();
-            }
-
-            IniData data = parser.ReadFile("./HttpConfig.ini");
-
-            if (!bool.TryParse(data["HTTPServer"]["serverEnable"], out ServerEnabled))
-            {
-                data["HTTPServer"]["serverEnable"] = "false";
-            }
-
-            if (!int.TryParse(data["HTTPServer"]["tcpPort"], out _tcpPort))
-            {
-                data["HTTPServer"]["tcpPort"] = "12321";
-            }
-
-            _tcpAddr = data["HTTPServer"]["tcpAddr"];
-            if (_tcpAddr == null)
-            {
-                data["HTTPServer"]["tcpAddr"] = "localhost";
-            }
-
-            parser.WriteFile("./HttpConfig.ini", data);
-        }
-
-        public static void ServeLoop(IEnumerable<IEnumerable<LogiDevice>> logiDevices)
+        public static void ServeLoop(IEnumerable<IEnumerable<LogiDevice>> logiDevices, IPEndPoint localEndPoint)
         {
             Debug.WriteLine("\nHttp Server starting");
 
-            IPAddress ipAddress;
-            if (!IPAddress.TryParse(_tcpAddr, out ipAddress))
+            Socket listener = new Socket(localEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            try
             {
-                try
-                {
-                    IPHostEntry host = Dns.GetHostEntry(_tcpAddr);
-                    ipAddress = host.AddressList[0];
-                }
-                catch (SocketException)
-                {
-                    Debug.WriteLine("Invalid hostname, defaulting to loopback");
-                    ipAddress = IPAddress.Loopback;
-                }
+                listener.Bind(localEndPoint);
+            }
+            catch (SocketException)
+            {
+                Debug.WriteLine($"Unable to bind to {localEndPoint}");
+                return;
             }
 
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, _tcpPort);
-
-            Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(localEndPoint);
             listener.Listen(10);
 
             Debug.WriteLine($"Http Server listening on {localEndPoint}\n");
