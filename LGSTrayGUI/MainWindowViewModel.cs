@@ -1,4 +1,4 @@
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -84,7 +84,7 @@ namespace LGSTrayGUI
 
                 _SelectedDevice = value;
                 _SelectedDevice.PropertyChanged += UpdateBatteryIcon;
-                UpdateBatteryIcon(value, new PropertyChangedEventArgs("LastUpdate"));
+                _SelectedDevice.InvokePropertyChanged(value, new PropertyChangedEventArgs("LastUpdate"));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedDevice)));
 
                 Properties.Settings.Default.LastSelectedDeviceId = value.DeviceID;
@@ -114,11 +114,11 @@ namespace LGSTrayGUI
         {
             if (AppSettings.Setting.DeviceManager.HID_NET)
             {
-            RegisterDeviceManager<HIDDeviceManager>();
+                RegisterDeviceManager<HIDDeviceManager>();
             }
             if (AppSettings.Setting.DeviceManager.GHUB)
             {
-            RegisterDeviceManager<GHUBDeviceManager>();
+                RegisterDeviceManager<GHUBDeviceManager>();
             }
             if (AppSettings.Setting.DeviceManager.Native)
             {
