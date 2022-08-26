@@ -25,8 +25,6 @@ namespace LGSTrayGHUB
         }
         public bool Charging { get; set; }
 
-        public bool HasBattery { get; set; } = true;
-
         public override string GetXmlData()
         {
             return
