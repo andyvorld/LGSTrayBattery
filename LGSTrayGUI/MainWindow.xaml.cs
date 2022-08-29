@@ -52,7 +52,7 @@ namespace LGSTrayGUI
 
         private void ExitButton_OnClick(object sender, RoutedEventArgs e)
         {
-            Environment.Exit(0);
+            Application.Current.Shutdown();
         }
 
         public static T GetChildOfType<T>(DependencyObject depObj) where T : DependencyObject
