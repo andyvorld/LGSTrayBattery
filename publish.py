@@ -3,7 +3,7 @@ import os
 import os.path
 import glob
 
-TARGET_VER = '2.0.7'
+TARGET_VER = '2.0.8'
 
 TARGET_PROJ = 'LGSTrayGUI'
 PUB_PROFILES = [
@@ -14,14 +14,15 @@ PUB_PROFILES = [
 FILE_TYPES = [
     '*.exe',
     '*.pdb',
-    '*.dll'
+    '*.dll',
+    '*.ini'
 ]
 
 def fileList(zipFolder):
     output = list()
 
     for fileType in FILE_TYPES:
-        output += (glob.glob(os.path.join(zipFolder, fileType)))
+        output += (glob.glob(os.path.join(zipFolder, fileType), recursive=True))
 
     return output
 
