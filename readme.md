@@ -39,31 +39,58 @@ Icon changes to match devices type (Current supported: mouse, keyboard and heads
 Icon changes to match light/dark system theme
 
 ### Http/Web "server" api
-By default the running of the http server is disabled, to enable modify `HttpConfig.ini` and change `serverEnable = false` to `serverEnable = true`. The IP address and port used for bindings are under `tcpAddr` and `tcpPort` respectively with the defaults being `localhost` and `12321`.
+By default the running of the http server is disabled, to enable modify `appsettings.ini` and change `serverEnable = false` to `serverEnable = true`. The IP address and port used for bindings are under `tcpAddr` and `tcpPort` respectively with the defaults being `localhost` and `12321`.
 
 `tcpAddr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `0.0.0.0` to allow for external access to the devices. If an invalid hostname is provided, the server will fall back to binding on `127.0.0.1`.
 
 ![image](https://user-images.githubusercontent.com/24492062/138280886-1929b49b-b4a3-454d-8371-80fd41df8e66.png)
 
-Send a GET/HTTP request to `{tcpAddr}:{tcpPort}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
+Send a HTTP/GET request to `{tcpAddr}:{tcpPort}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
 
 ![image](https://user-images.githubusercontent.com/24492062/138281030-f40ba805-69bf-48ac-a126-6f58f9ca7828.png)
 
-With the `deviceID`, a GET/HTTP request to `{tcpAddr}:{tcpPort}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
+With the `deviceID`, a HTTP/GET request to `{tcpAddr}:{tcpPort}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
 
 Device ids starting with `dev` originates from tapping into Logitech GHUB's own drivers, while random numbers are from the natively implement HID++ code. Thus, there are some fields that different between the two,
 
-|                 | GHUB | Native |
-|-----------------|------|--------|
-| device_id       | ✔️   | ✔️     |
-| device_name     | ✔️   | ✔️     |
-| device_type     | ✔️   | ✔️     |
-| battery_percent | ✔️   | ✔️     |
-| battery_voltage | ❌   | ✔️*    |
-| mileage         | ✔️   | ❌     |
-| charging        | ✔️   | ❌     |
+|                 | GHUB | Native (HID.NET) | Native (HIDPP_Bat_Mon) |
+|-----------------|------|------------------|------------------------|
+| device_id       | ✔️   | ✔️              | ✔️                    |
+| device_name     | ✔️   | ✔️              | ✔️                    |
+| device_type     | ✔️   | ✔️              | ✔️                    |
+| battery_percent | ✔️   | ✔️              | ✔️                    |
+| battery_voltage | ❌   | ✔️*             | ✔️                    |
+| mileage         | ✔️   | ❌              | ❌                    |
+| charging        | ✔️   | ❌              | ✔️**                  |
 
 \* - Depends on the device
+
+\** - Device ID will change, (potentially useless) as some devices switches to a wired mode creating a new device ID (Tested with G403)
+
+## HID++ Device Sources
+As of v2.0.8, there are now 3 sources in which the program will pull battery status,
+
+- Logitech G HUB via Websockets
+- Native HID, C#/HID.NET (May be broken in Windows 11?, default disabled)
+- Native HID, C++/hidapi via Websockets (Native in settings, also known as HIDPP_Bat_Mon)
+
+These sources can be individually disabled/enabled before runtime via `appsettings.ini`, in the `DeviceManager` section,
+
+```
+[DeviceManager]
+GHUB = true
+HID_NET = false
+Native = true
+```
+
+*GHUB is Logitech G HUB, HID_NET is C# with HID.NET, Native is HIDPP_Bat_Mon*
+
+### Differences between HID.NET and HIDPP_Bat_Mon
+HIDPP_Bat_Mon is a HID++ battery monitor rewritten in C++ with HIDAPI, and it differs from HID.NET in the following ways,
+- Hot plugging is not supported, currently requires a restart of the program to update new HID++ devices
+- Ability to see more than 1 devices per unifying reciever (Coded in, have not been tested)
+- Ability to parse Unifying Receiver Battery Reporting (1004) (Coded in, have not been tested)
+- Detect if device is charging (No notification tray UI changes, and as mention aboved may be useless as some devices in charging move switches device ID)
 
 ## Known Issues
 ### Common
@@ -71,7 +98,7 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 
 - Native HID and GHUB do not provide similar percentages, this is due to how native and GHUB calculates percentages from the device's voltages. Native uses an average curve of a 3.7V lipo battery, while GHUB will use a lookup table specific to the device.
 
-### Native HID
+### Native HID (HID.NET)
 - If the device is sleeping or disconnected, the program will not detect it even if the reciever is plugged in, usually occuring at boot
     - Current fix, restart the program or force a rescan via a double click or context menu
 
@@ -80,6 +107,10 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 - Does not work on mice that uses "Unified Battery Reporting". (Newer than late 2020?)
 
 - For unifying receiver devices, currently the program only polls the first device.
+
+### Native HID (HIDPP_Bat_Mon)
+- Currently hardcoded to use port 9020
+  - Should refactor into a `.dll` library rather than a websocket shim
 
 ### GHUB
 - Future GHUB version may change IPC protocol/endpoints (current websocket)
