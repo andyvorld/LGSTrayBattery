@@ -25,7 +25,7 @@ namespace LGSTrayGUI
 
                 configuration.AddIniFile("appsettings.ini", optional: true, reloadOnChange: true);
 
-                AppSettings.Setting = configuration.Build().Get<AppSettings.AppSettingsInstace>();
+                AppSettings.Settings = configuration.Build().Get<AppSettings.AppSettingsInstace>();
             }).Build();
 
             await host.RunAsync();

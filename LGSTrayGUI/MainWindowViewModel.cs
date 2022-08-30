@@ -112,17 +112,19 @@ namespace LGSTrayGUI
             this.view = view;
         }
 
-        public void LoadViewModel()
+        public async Task LoadViewModel()
         {
-            if (AppSettings.Setting.DeviceManager.HID_NET)
+            AppSettings.AppSettingsInstace settings = await AppSettings.GetSettings();
+
+            if (settings.DeviceManager.HID_NET)
             {
                 RegisterDeviceManager<HIDDeviceManager>();
             }
-            if (AppSettings.Setting.DeviceManager.GHUB)
+            if (settings.DeviceManager.GHUB)
             {
                 RegisterDeviceManager<GHUBDeviceManager>();
             }
-            if (AppSettings.Setting.DeviceManager.Native)
+            if (settings.DeviceManager.Native)
             {
                 string hidpp_mon = Path.Combine(
                     AppDomain.CurrentDomain.BaseDirectory,
@@ -154,9 +156,9 @@ namespace LGSTrayGUI
             updateTimer.Interval = BATTERY_UPDATE_PERIOD_MS;
             updateTimer.Start();
 
-            if (AppSettings.Setting.HTTPServer.serverEnable)
+            if (settings.HTTPServer.serverEnable)
             {
-                httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices, AppSettings.Setting.HTTPServer.IPEndPoint));
+                httpThread = new Thread(() => HttpServer.ServeLoop(_logiDevices, settings.HTTPServer.IPEndPoint));
                 httpThread.IsBackground = true;
                 httpThread.Start();
             }

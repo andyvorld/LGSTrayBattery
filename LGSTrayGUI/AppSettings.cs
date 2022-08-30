@@ -11,7 +11,17 @@ namespace LGSTrayGUI
 {
     public static class AppSettings
     {
-        public static AppSettingsInstace Setting { get; set; }
+        public static AppSettingsInstace Settings { private get; set; }
+
+        public static async Task<AppSettingsInstace> GetSettings()
+        {
+            while (Settings == null)
+            {
+                await Task.Delay(25);
+            }
+
+            return Settings;
+        }
         public class AppSettingsInstace
         {
             public HTTPServerSettings HTTPServer { get; set; }
