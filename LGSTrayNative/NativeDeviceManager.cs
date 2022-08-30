@@ -48,8 +48,7 @@ namespace LGSTrayGHUB
 
             try
             {
-                await _ws.StartOrFail();
-
+                await _ws.Start();
             }
             catch (Websocket.Client.Exceptions.WebsocketException)
             {
