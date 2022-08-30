@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -17,6 +19,12 @@ namespace LGSTrayGUI
     {
         public async void App_Startup(object sender, StartupEventArgs e)
         {
+            string dir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            if (dir != null)
+            {
+                Directory.SetCurrentDirectory(dir);
+            }
+
             using IHost host = Host.CreateDefaultBuilder(e.Args).ConfigureAppConfiguration((hostingContext, configuration) =>
             {
                 configuration.Sources.Clear();

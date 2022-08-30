@@ -31,7 +31,6 @@ namespace LGSTrayGUI
 
         public MainWindow()
         {
-            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
             InitializeComponent();
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
