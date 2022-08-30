@@ -38,13 +38,15 @@ namespace LGSTrayGUI
             this.TaskbarIcon.Icon = TrayIconTools.ErrorIcon();
             this.viewModel = new MainWindowViewModel(this);
             this.DataContext = viewModel;
-            this.viewModel.LoadViewModel();
+            _ = this.viewModel.LoadViewModel();
         }
 
         private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
-            using (StreamWriter writer = new StreamWriter("./Crashlog.log", false))
+            long unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            using (StreamWriter writer = new StreamWriter($"./crashlog_{unixTime}.log", false))
             {
                 writer.WriteLine(e.ToString());
             }
