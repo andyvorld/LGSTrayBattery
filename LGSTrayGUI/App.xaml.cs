@@ -36,6 +36,9 @@ namespace LGSTrayGUI
                 AppSettings.Settings = configuration.Build().Get<AppSettings.AppSettingsInstace>();
             }).Build();
 
+            MainWindow mw = new();
+            mw.Show();
+
             await host.RunAsync();
         }
     }
