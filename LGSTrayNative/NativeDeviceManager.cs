@@ -32,7 +32,10 @@ namespace LGSTrayGHUB
         {
             foreach (var dev in _LogiDevices)
             {
-                LGSTrayNative_bridge.Update_device_battery(dev.DeviceID);
+                if (dev.BatteryStatExpired)
+                {
+                    LGSTrayNative_bridge.Update_device_battery(dev.DeviceID);
+                }
             }
 
             return Task.CompletedTask;
