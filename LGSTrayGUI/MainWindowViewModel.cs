@@ -133,8 +133,15 @@ namespace LGSTrayGUI
 
                 view.Closing += (object sender, CancelEventArgs args) =>
                 {
-                    nativeHIDDaemon.Kill();
-                    nativeHIDDaemon.WaitForExit();
+                    try
+                    {
+                        nativeHIDDaemon?.Kill();
+                        nativeHIDDaemon?.WaitForExit();
+                    }
+                    catch
+                    {
+
+                    }
                 };
 
                 nativeHIDDaemon = new Process();
