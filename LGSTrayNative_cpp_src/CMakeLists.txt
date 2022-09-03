@@ -11,7 +11,7 @@ project("libHidTest")
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/external/hidapi-win")
 
-add_library(LGSTrayHID_lib SHARED
+add_library(LGSTrayNative_lib SHARED
 	"src/LGSTrayHID_lib.cpp" 
 	"src/HIDDevice.cpp" 
 	"src/HIDPPMsg.cpp"
@@ -19,16 +19,16 @@ add_library(LGSTrayHID_lib SHARED
 )
 
 target_link_libraries(
-	LGSTrayHID_lib PUBLIC
+	LGSTrayNative_lib PUBLIC
 	hidapi_win
 )
 target_include_directories(
-	LGSTrayHID_lib PUBLIC 
+	LGSTrayNative_lib PUBLIC 
 	"include"
 )
 
 if(MSVC)
-	target_compile_options(LGSTrayHID_lib 
+	target_compile_options(LGSTrayNative_lib 
 		PRIVATE "/external:anglebrackets"
 		PRIVATE "/external:W0"
 	)
@@ -45,5 +45,5 @@ target_include_directories(
 
 target_link_libraries(
 	lib_test
-	PUBLIC LGSTrayHID_lib
+	PUBLIC LGSTrayNative_lib
 )
