@@ -1,6 +1,7 @@
 ﻿using LGSTrayCore;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,26 @@ namespace LGSTrayGHUB
             set
             {
                 _batteryPercentage = value;
+                Debug.WriteLine($"batt updated - {BatteryPercentage}%");
                 UpdateLastUpdateTimestamp();
             }
         }
+
+        private double _batteryVoltage;
+        public double BatteryVoltage
+        {
+            get
+            {
+                return _batteryVoltage;
+            }
+
+            set
+            {
+                _batteryVoltage = value;
+                UpdateLastUpdateTimestamp(); ;
+            }
+        }
+
         public bool Charging { get; set; }
 
         public override string GetXmlData()
@@ -33,6 +51,7 @@ namespace LGSTrayGHUB
                 $"<device_id>{DeviceID}</device_id>" +
                 $"<device_name>{DeviceName}</device_name>" +
                 $"<device_type>{DeviceType}</device_type>" +
+                $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>" +
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
                 $"<charging>{Charging}</charging>" +
                 $"</xml>"
