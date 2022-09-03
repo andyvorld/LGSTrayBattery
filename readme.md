@@ -8,7 +8,7 @@ A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/and
 - New reactive Icons
     - Now reacts to light/dark theme
     - Now reacts to what type of device you currently have selected (Supports mouse, keyboards and headsets)
-- Native HID Battery percentages now uses a formula rather than old xml files
+- Native HID Battery percentages now uses a look up table rather than old xml files
     - Assuming they use 3.7V lipo batteries, if you are getting weird battery percentages or voltage readings < 3.5V, please open an issue
 - Updated HID backend to detect plugging in wireless devices
 - Smarter polling
@@ -71,8 +71,8 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 As of v2.0.8, there are now 3 sources in which the program will pull battery status,
 
 - Logitech G HUB via Websockets
-- Native HID, C#/HID.NET (May be broken in Windows 11?, default disabled)
-- Native HID, C++/hidapi via Websockets (Native in settings, also known as HIDPP_Bat_Mon)
+- Native HID, C#/HID.NET (Might be broken in Windows 11?, default disabled)
+- Native HID, C++/hidapi via PInvoke (Called "Native" in settings)
 
 These sources can be individually disabled/enabled before runtime via `appsettings.ini`, in the `DeviceManager` section,
 
@@ -83,14 +83,15 @@ HID_NET = false
 Native = true
 ```
 
-*GHUB is Logitech G HUB, HID_NET is C# with HID.NET, Native is HIDPP_Bat_Mon*
+*GHUB is Logitech G HUB, HID_NET is C# with HID.NET, Native is C++/hidapi*
 
-### Differences between HID.NET and HIDPP_Bat_Mon
-HIDPP_Bat_Mon is a HID++ battery monitor rewritten in C++ with HIDAPI, and it differs from HID.NET in the following ways,
-- Hot plugging is not supported, currently requires a restart of the program to update new HID++ devices
-- Ability to see more than 1 devices per unifying reciever (Coded in, have not been tested)
+### Differences between HID.NET and hidapi
+The hidapi backend is rewritten in C++, and it differs from HID.NET in the following ways,
+- Hot plugging is not supported, currently requires a manual selection of rescan devices to trigger a scan of newly connected devices
+- Ability to see more than 1 devices per unifying reciever
+    - Tested with a KB+M on a unifying dongle
 - Ability to parse Unifying Receiver Battery Reporting (1004) (Coded in, have not been tested)
-- Detect if device is charging (No notification tray UI changes, and as mention aboved may be useless as some devices in charging move switches device ID)
+- Detect if device is charging (No notification tray UI changes, and as mention aboved may be useless as some devices in charging move switches device ID, the webserver xml output should show it)
 
 ## Known Issues
 ### Common
@@ -108,15 +109,16 @@ HIDPP_Bat_Mon is a HID++ battery monitor rewritten in C++ with HIDAPI, and it di
 
 - For unifying receiver devices, currently the program only polls the first device.
 
-### Native HID (HIDPP_Bat_Mon)
-- Currently hardcoded to use port 9020
-  - Should refactor into a `.dll` library rather than a websocket shim
+### Native HID (C++/hidapi)
+- Hotplug not supported
 
 ### GHUB
 - Future GHUB version may change IPC protocol/endpoints (current websocket)
 
 ## Working with
 - G403 Wireless
+- MX Anywhere 2
+- Wireless Keyboard Dell KB714
 ### Community Tested
 - G604 Lightspeed Wireless
 - MX Vertical
