@@ -1,7 +1,7 @@
 #pragma once
 #define EXTERN_DLL_EXPORT extern "C" __declspec(dllexport)
 
-// Device_ID, Battery Percent, Charing_Flag, Milage, Battery Voltage
+// Device_ID, Battery Percent, Charging_flag, Milage, Battery mV
 typedef void (*Battery_update_callback)(const char*, int, bool, double, int);
 
 // Device_ID, Device Type, Device Name
