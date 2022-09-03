@@ -25,7 +25,8 @@ else()
 	set(hidapi_win_LIB_DIR "${hidapi_win_SOURCE_DIR}/x86")
 endif()
 
-add_library(hidapi_win INTERFACE)
+add_library(hidapi_win SHARED IMPORTED GLOBAL)
 target_include_directories(hidapi_win INTERFACE "${hidapi_win_SOURCE_DIR}/include/")
-target_link_libraries(hidapi_win INTERFACE "${hidapi_win_LIB_DIR}/hidapi.lib")
-file(COPY "${hidapi_win_LIB_DIR}/hidapi.dll" DESTINATION ${CMAKE_BINARY_DIR})
+
+set_property(TARGET hidapi_win PROPERTY IMPORTED_IMPLIB "${hidapi_win_LIB_DIR}/hidapi.lib")
+set_property(TARGET hidapi_win PROPERTY IMPORTED_LOCATION "${hidapi_win_LIB_DIR}/hidapi.dll")
