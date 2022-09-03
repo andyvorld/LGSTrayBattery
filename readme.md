@@ -111,6 +111,7 @@ The hidapi backend is rewritten in C++, and it differs from HID.NET in the follo
 
 ### Native HID (C++/hidapi)
 - Hotplug not supported
+- Device and protocol discovery changed from the HID.NET method, some devices like the G533 headsets might not be detected.
 
 ### GHUB
 - Future GHUB version may change IPC protocol/endpoints (current websocket)
