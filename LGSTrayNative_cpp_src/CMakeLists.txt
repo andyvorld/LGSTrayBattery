@@ -6,6 +6,7 @@ include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 project("libHidTest")
 
@@ -33,6 +34,11 @@ if(MSVC)
 		PRIVATE "/external:W0"
 	)
 endif(MSVC)
+
+add_custom_command (TARGET LGSTrayNative_lib POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:hidapi_win> $<TARGET_FILE_DIR:LGSTrayNative_lib>
+)
 
 add_executable(lib_test
 	"src/main.cpp"
