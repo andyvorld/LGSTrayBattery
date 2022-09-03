@@ -34,21 +34,21 @@ int main() {
 
 	std::this_thread::sleep_for(5s);
 
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 30; ++i) {
 		Update_device_battery(temp.c_str());
+		std::this_thread::sleep_for(1s);
 	}
 
-	std::this_thread::sleep_for(5s);
 
-	Load_devices();
+	//Load_devices();
 
-	std::this_thread::sleep_for(5s);
+	//std::this_thread::sleep_for(5s);
 
-	for (int i = 0; i < 3; ++i) {
-		Update_device_battery(temp.c_str());
-	}
+	//for (int i = 0; i < 3; ++i) {
+	//	Update_device_battery(temp.c_str());
+	//}
 
-	std::this_thread::sleep_for(5s);
+	//std::this_thread::sleep_for(5s);
 
 	return 0;
 }

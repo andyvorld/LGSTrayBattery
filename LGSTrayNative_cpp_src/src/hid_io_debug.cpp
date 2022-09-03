@@ -8,6 +8,9 @@ namespace hid_debug {
 		if (length < 1) {
 			return;
 		}
+		else if (length > 20) {
+			return;
+		}
 
 		std::lock_guard lock(print_mutex);
 
