@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Visibility="Hidden"
         ShowInTaskbar="False"
+        ShowActivated="False"
         ResizeMode="NoResize"
         xmlns:tb="http://www.hardcodet.net/taskbar"
         d:DataContext="{d:DesignInstance local:MainWindowViewModel}"
