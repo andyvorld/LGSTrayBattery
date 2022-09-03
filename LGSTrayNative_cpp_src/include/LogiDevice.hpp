@@ -18,7 +18,8 @@ namespace LGSTrayHID {
 		Touchpad,
 		Trackball,
 		Presenter,
-		Receiver
+		Receiver,
+		Headset
 	};		
 
 	inline const char* LogiDeviceTypeEnumToString(LogiDeviceType type) {
@@ -42,6 +43,8 @@ namespace LGSTrayHID {
 			return "PRESENTER";
 		case Receiver:
 			return "RECEIVER";
+		case Headset:
+			return "HEADSET";
 		default:
 			return "MOUSE";
 		}
