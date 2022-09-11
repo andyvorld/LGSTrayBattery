@@ -37,6 +37,7 @@ namespace LGSTrayGUI
             }).Build();
 
             MainWindow mw = new();
+            mw.ShowActivated = false;
             mw.Show();
 
             await host.RunAsync();

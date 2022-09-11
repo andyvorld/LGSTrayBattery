@@ -8,13 +8,26 @@
     <NeutralLanguage>en</NeutralLanguage>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <Version>2.0.8</Version>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+    <AllowedReferenceRelatedFileExtensions>
+      .pdb;
+      .dll.config
+    </AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <NoWarn>1701;1702;CA1416</NoWarn>
     <AllowedReferenceRelatedFileExtensions>
       .pdb;
@@ -76,19 +89,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="HIDPP_Bat_Mon\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="..\HIDPP_Bat_Mon\hidapi.dll" Link="HIDPP_Bat_Mon\hidapi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\HIDPP_Bat_Mon\hidpp_mon.exe" Link="HIDPP_Bat_Mon\hidpp_mon.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

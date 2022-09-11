@@ -63,8 +63,6 @@ namespace LGSTrayGUI
         private Thread httpThread;
         private readonly System.Timers.Timer updateTimer = new();
 
-        private Process nativeHIDDaemon;
-
         private readonly List<LogiDeviceManager> _deviceManagers = new List<LogiDeviceManager>();
 
         private ICollection<ObservableCollection<LogiDevice>> _logiDevices = new List<ObservableCollection<LogiDevice>>();
@@ -126,34 +124,6 @@ namespace LGSTrayGUI
             }
             if (settings.DeviceManager.Native)
             {
-                string hidpp_mon = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "HIDPP_Bat_Mon/hidpp_mon.exe"
-                );
-
-                view.Closing += (object sender, CancelEventArgs args) =>
-                {
-                    try
-                    {
-                        nativeHIDDaemon?.Kill();
-                        nativeHIDDaemon?.WaitForExit();
-                    }
-                    catch
-                    {
-
-                    }
-                };
-
-                nativeHIDDaemon = new Process();
-                nativeHIDDaemon.StartInfo = new ProcessStartInfo(hidpp_mon)
-                {
-                    Arguments = "9020",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
-
-                nativeHIDDaemon.Start();
                 RegisterDeviceManager<NativeDeviceManager>();
             }
 

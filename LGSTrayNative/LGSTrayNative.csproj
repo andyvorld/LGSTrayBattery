@@ -1,14 +1,32 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+    <Content Include="..\LGSTrayNative_cpp\Debug\LGSTrayNative_lib.dll" Link="LGSTrayNative_lib.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\LGSTrayNative_cpp\Debug\hidapi.dll" Link="hidapi.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <Content Include="..\LGSTrayNative_cpp\Release\LGSTrayNative_lib.dll" Link="LGSTrayNative_lib.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\LGSTrayNative_cpp\Release\hidapi.dll" Link="hidapi.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
-    <ProjectReference Include="..\LGSTrayGHUB\LGSTrayGHUB.csproj" />
   </ItemGroup>
 
 </Project>
