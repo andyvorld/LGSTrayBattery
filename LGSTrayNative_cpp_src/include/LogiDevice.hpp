@@ -65,6 +65,8 @@ namespace LGSTrayHID {
 		uint8_t _device_name_step = 0;
 		uint8_t _device_name_count = 0;
 
+		uint8_t _device_info_idx = 0;
+
 		uint8_t _battery_step = 0;
 		uint8_t _battery_1000_idx = 0;
 		uint8_t _battery_1001_idx = 0;
@@ -79,6 +81,7 @@ namespace LGSTrayHID {
 		void check_proto_ver_cb(std::unique_ptr<uint8_t[]> buf);
 		void feature_set_cb(std::unique_ptr<uint8_t[]> buf);
 		void device_name_cb(std::unique_ptr<uint8_t[]> buf);
+		void device_info_cb(std::unique_ptr<uint8_t[]> buf);
 		void battery_status_cb(std::unique_ptr<uint8_t[]> buf);
 
 		static inline Battery_update_cb battery_update_cb;
@@ -87,7 +90,7 @@ namespace LGSTrayHID {
 
 	public:
 		std::string device_name;
-		const std::string dev_id;
+		std::string dev_id;
 		LogiDeviceType device_type;
 
 		std::atomic<int> battery_voltage = -1;

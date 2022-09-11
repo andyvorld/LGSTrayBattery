@@ -29,6 +29,7 @@ namespace LGSTrayHID {
 
 		this->_write_cb = [this](std::unique_ptr<uint8_t[]> buf) { this->feature_set_cb(std::move(buf)); };
 
+		// Find feature index of 0x0005 Device name
 		uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x00, 0x05, 0x00 };
 		hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 	}
@@ -52,7 +53,14 @@ namespace LGSTrayHID {
 
 			this->_write_cb = [this](std::unique_ptr<uint8_t[]> buf) { this->device_name_cb(std::move(buf)); };
 
-			uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, _device_name_idx, 0x00 | SW_ID, 0x00, 0x05, 0x00 };
+			uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, _device_name_idx, 0x00 | SW_ID, 0x00, 0x00, 0x00 };
+			hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
+		}
+		else if (_device_info_idx == 0) {
+			_device_info_idx = msg.get_result_data()[0];
+
+			this->_write_cb = [this](std::unique_ptr<uint8_t[]> buf) { this->device_info_cb(std::move(buf));  };
+			uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, _device_info_idx, 0x00 | SW_ID, 0x00, 0x00, 0x00 };
 			hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 		}
 		else if (_battery_step == 0) {
@@ -61,6 +69,7 @@ namespace LGSTrayHID {
 			if (_battery_1000_idx == 0) {
 				_battery_step++;
 
+				// Find feature index of 0x1001 Battery Voltage
 				uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x01, 0x00 };
 				hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 			}
@@ -74,6 +83,7 @@ namespace LGSTrayHID {
 			if (_battery_1001_idx == 0) {
 				_battery_step++;
 
+				// Find feature index of 0x1004 Unified Battery
 				uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x04, 0x00 };
 				hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 			}
@@ -162,9 +172,49 @@ namespace LGSTrayHID {
 
 			this->_write_cb = [this](std::unique_ptr<uint8_t[]> buf) { this->feature_set_cb(std::move(buf)); };
 
-			uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x00, 0x00 };
+			// Find feature index of 0x0003 Device FW Info
+			uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x00, 0x03, 0x00 };
 			hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 		}
+	}
+
+	void LogiDevice::device_info_cb(std::unique_ptr<uint8_t[]> buf)	{
+		HIDPPMsg_20 msg(std::move(buf));
+
+		if (msg.get_feature_index() != _device_info_idx) {
+			// Ignore if not device name response
+			return;
+		}
+
+		if (msg.get_sw_id() != SW_ID) {
+			// Ignore if not tagged by SW_ID
+			return;
+		}
+
+		const uint8_t *payload = msg.get_result_data();
+		uint8_t nullCount = 0;
+
+		std::ostringstream os;
+
+		for (size_t i = 0; i < 4; ++i) {
+			os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[1 + i]);
+			nullCount += (payload[1 + i] == 0);
+		}
+
+		for (size_t i = 0; i < 6; ++i) {
+			os << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(payload[7 + i]);
+			nullCount += (payload[7 + i] == 0);
+		}
+
+		if (nullCount < 10) {
+			this->dev_id = "dev" + os.str();
+		}
+
+		this->_write_cb = [this](std::unique_ptr<uint8_t[]> buf) { this->feature_set_cb(std::move(buf)); };
+
+		// Find feature index of 0x1000 Battery Status
+		uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x00, 0x00 };
+		hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 	}
 
 	void LogiDevice::battery_status_cb(std::unique_ptr<uint8_t[]> buf) {
