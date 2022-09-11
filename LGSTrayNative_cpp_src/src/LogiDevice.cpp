@@ -74,7 +74,7 @@ namespace LGSTrayHID {
 			if (_battery_1001_idx == 0) {
 				_battery_step++;
 
-				uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x01, 0x00 };
+				uint8_t wbuf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, 0x00, 0x00 | SW_ID, 0x10, 0x04, 0x00 };
 				hid_write(_long_dev.get(), wbuf, HIDPP_LONG_SIZE);
 			}
 			else {
@@ -266,13 +266,15 @@ namespace LGSTrayHID {
 	void LogiDevice::update_battery()
 	{
 		uint8_t battery_idx = _battery_1000_idx | _battery_1001_idx | _battery_1004_idx;
-
 		if (battery_idx == 0) {
 			// STUB: Battery protocol not known
 			return;
 		}
 
-		uint8_t buf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, battery_idx,  0x00 | SW_ID };
+		// Get battery status of 1004, is at 0x10
+		uint8_t function_idx = (battery_idx == _battery_1004_idx) ? 0x10 : 0x00;
+
+		uint8_t buf[HIDPP_LONG_SIZE] = { HIDPP_LONG, dev_idx, battery_idx,  function_idx | SW_ID };
 		hid_write(this->_long_dev.get(), buf, HIDPP_LONG_SIZE);
 	}
 
