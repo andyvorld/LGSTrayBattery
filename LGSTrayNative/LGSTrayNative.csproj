@@ -18,10 +18,10 @@
 
   <ItemGroup Condition="'$(Configuration)'=='Release'">
     <Content Include="..\LGSTrayNative_cpp\Release\LGSTrayNative_lib.dll" Link="LGSTrayNative_lib.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\LGSTrayNative_cpp\Release\hidapi.dll" Link="hidapi.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
