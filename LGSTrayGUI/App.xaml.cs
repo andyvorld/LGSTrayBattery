@@ -21,9 +21,9 @@ namespace LGSTrayGUI
     {
         public async void App_Startup(object sender, StartupEventArgs e)
         {
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
-
             Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 
             using IHost host = Host.CreateDefaultBuilder(e.Args).ConfigureAppConfiguration((hostingContext, configuration) =>
             {
@@ -48,8 +48,7 @@ namespace LGSTrayGUI
             Exception e = (Exception)args.ExceptionObject;
             long unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-            string dir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
-            using (StreamWriter writer = new StreamWriter(dir + $"/crashlog_{unixTime}.log", false))
+            using (StreamWriter writer = new StreamWriter($"./crashlog_{unixTime}.log", false))
             {
                 writer.WriteLine(e.ToString());
 
