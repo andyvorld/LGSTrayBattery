@@ -19,7 +19,7 @@ namespace LGSTrayGUI
     {
         public async void App_Startup(object sender, StartupEventArgs e)
         {
-            string dir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
             if (dir != null)
             {
                 Directory.SetCurrentDirectory(dir);
@@ -41,6 +41,20 @@ namespace LGSTrayGUI
             mw.Show();
 
             await host.RunAsync();
+        }
+
+        private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            long unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            string dir = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+            using (StreamWriter writer = new StreamWriter(dir + $"/crashlog_{unixTime}.log", false))
+            {
+                writer.WriteLine(e.ToString());
+
+                Console.WriteLine(e.ToString());
+            }
         }
     }
 }
