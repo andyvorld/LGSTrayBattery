@@ -124,6 +124,7 @@ The hidapi backend is rewritten in C++, and it differs from HID.NET in the follo
 - G604 Lightspeed Wireless
 - MX Vertical
 - G703 Lightspeed Wireless
+- G502 Lightspeed Wireless
 
 ## Acknowledgements
 This project began as a task with me messing around with my mouse for battery tracking.
