@@ -43,7 +43,8 @@ namespace LGSTrayHID {
 
 			//std::this_thread::sleep_for(500ms);
 
-			for (uint8_t i = 0; i <= -1; ++i) {
+			// Force check 10 devices.
+			for (uint8_t i = 0; i <= 10; ++i) {
 				uint8_t buf[short_buf_size] = { 0x10, i, 0x00, 0x10 | 0x00, 0x00, 0x00, 0x00 };
 				hid_write(this->_short_dev.get(), buf, short_buf_size);
 			}
