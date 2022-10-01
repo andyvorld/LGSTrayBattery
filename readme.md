@@ -124,6 +124,7 @@ The hidapi backend is rewritten in C++, and it differs from HID.NET in the follo
 - G604 Lightspeed Wireless
 - MX Vertical
 - G703 Lightspeed Wireless
+- G502 Lightspeed Wireless
 
 ## How to Build project
 Run `prepare_project.bat` to generate the C++ Visual studio project that can be linked with the C# project.
