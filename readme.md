@@ -125,6 +125,11 @@ The hidapi backend is rewritten in C++, and it differs from HID.NET in the follo
 - MX Vertical
 - G703 Lightspeed Wireless
 
+## How to Build project
+Run `prepare_project.bat` to generate the C++ Visual studio project that can be linked with the C# project.
+
+Open the `LGSTrayNative_cpp_src` folder in Visual studio to modify the low level C++ libraries directly.
+
 ## Acknowledgements
 This project began as a task with me messing around with my mouse for battery tracking.
 
