@@ -2,8 +2,7 @@ import zipfile
 import os
 import os.path
 import glob
-
-TARGET_VER = '2.1.0'
+import xml.etree.ElementTree as ET
 
 TARGET_PROJ = 'LGSTrayGUI'
 PUB_PROFILES = [
@@ -17,6 +16,9 @@ FILE_TYPES = [
     '*.dll',
     '*.ini'
 ]
+
+proj = ET.parse(f'./{TARGET_PROJ}/{TARGET_PROJ}.csproj').getroot()
+TARGET_VER = proj[0].findtext('Version')
 
 def fileList(zipFolder):
     output = list()
@@ -46,4 +48,5 @@ def main():
         createZip(zipPath, zipFolder)
 
 if __name__ == "__main__":
+    print("Build the publish profiles within Visual Studio first.")
     main()
