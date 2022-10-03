@@ -9,6 +9,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <Version>2.0.8</Version>
     <Platforms>AnyCPU;x64</Platforms>
+	<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
