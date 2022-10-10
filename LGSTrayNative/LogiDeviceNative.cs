@@ -54,6 +54,7 @@ namespace LGSTrayGHUB
                 $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>" +
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
                 $"<charging>{Charging}</charging>" +
+                $"<data_source>LogiDeviceNative</data_source>" +
                 $"</xml>"
                 ;
         }
