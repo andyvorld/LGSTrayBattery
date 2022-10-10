@@ -66,7 +66,9 @@ namespace LGSTrayCore
                                 }
 
                                 content += "<br><hr>";
-                                content += $"<i>LGSTray version: {Assembly.GetEntryAssembly().GetName().Version}</i><br>";
+
+                                var version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                                content += $"<i>LGSTray version: {version}</i><br>";
                                 content += "</html>";
                                 break;
                             case "device":
