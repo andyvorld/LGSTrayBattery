@@ -153,6 +153,11 @@ namespace LGSTrayGUI
         {
             ObservableCollection<LogiDevice> managedDevices = new();
             managedDevices.CollectionChanged += (o, e) => {
+                if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
+                    if(SelectedDevice != null) {
+                        SelectedDevice.InvokePropertyChanged(null, new PropertyChangedEventArgs("LastUpdate"));
+                    }
+                }
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
             };
 
@@ -169,11 +174,6 @@ namespace LGSTrayGUI
 
         private void UpdateSelectedDeviceOnLaunch(object sender, PropertyChangedEventArgs e)
         {
-            if (SelectedDevice != null || e.PropertyName != nameof(LogiDevicesFlat))
-            {
-                return;
-            }
-
             LogiDevice found = LogiDevicesFlat.FirstOrDefault(x => x.DeviceID == Properties.Settings.Default.LastSelectedDeviceId);
             if (found != null)
             {
