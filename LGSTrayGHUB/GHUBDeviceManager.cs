@@ -139,21 +139,28 @@ namespace LGSTrayGHUB
         {
             _LogiDevices.Clear();
 
-            foreach (var deviceToken in payload["deviceInfos"])
+            try 
             {
-                if (!Enum.TryParse(deviceToken["deviceType"].ToString(), true, out DeviceType deviceType))
+                foreach (var deviceToken in payload["deviceInfos"])
                 {
-                    deviceType = DeviceType.Mouse;
+                    if (!Enum.TryParse(deviceToken["deviceType"].ToString(), true, out DeviceType deviceType))
+                    {
+                        deviceType = DeviceType.Mouse;
+                    }
+
+                    LogiDeviceGHUB device = new LogiDeviceGHUB()
+                    {
+                        DeviceID = deviceToken["id"].ToString(),
+                        DeviceName = deviceToken["extendedDisplayName"].ToString(),
+                        DeviceType = deviceType
+                    };
+
+                    _LogiDevices.Add(device);
                 }
-
-                LogiDeviceGHUB device = new LogiDeviceGHUB()
-                {
-                    DeviceID = deviceToken["id"].ToString(),
-                    DeviceName = deviceToken["extendedDisplayName"].ToString(),
-                    DeviceType = deviceType
-                };
-
-                _LogiDevices.Add(device);
+            } catch (Exception e) {
+                if(e is NullReferenceException || e is JsonReaderException) {
+                    Debug.WriteLine("Failed to parse device list, LGHUB_agent is probably starting up");
+                }
             }
 
             UpdateDevicesAsync().Wait();

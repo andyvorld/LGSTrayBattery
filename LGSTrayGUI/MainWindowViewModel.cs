@@ -169,11 +169,6 @@ namespace LGSTrayGUI
 
         private void UpdateSelectedDeviceOnLaunch(object sender, PropertyChangedEventArgs e)
         {
-            if (SelectedDevice != null || e.PropertyName != nameof(LogiDevicesFlat))
-            {
-                return;
-            }
-
             LogiDevice found = LogiDevicesFlat.FirstOrDefault(x => x.DeviceID == Properties.Settings.Default.LastSelectedDeviceId);
             if (found != null)
             {
