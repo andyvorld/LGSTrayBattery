@@ -153,11 +153,6 @@ namespace LGSTrayGUI
         {
             ObservableCollection<LogiDevice> managedDevices = new();
             managedDevices.CollectionChanged += (o, e) => {
-                if(e.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Reset) {
-                    if(SelectedDevice != null) {
-                        SelectedDevice.InvokePropertyChanged(null, new PropertyChangedEventArgs("LastUpdate"));
-                    }
-                }
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LogiDevicesFlat)));
             };
 
