@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using IniParser;
@@ -64,6 +65,10 @@ namespace LGSTrayCore
                                     content += $"{logiDevice.DeviceName} : <a href=\"/device/{logiDevice.DeviceID}\">{logiDevice.DeviceID}</a><br>";
                                 }
 
+                                content += "<br><hr>";
+
+                                var version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+                                content += $"<i>LGSTray version: {version}</i><br>";
                                 content += "</html>";
                                 break;
                             case "device":

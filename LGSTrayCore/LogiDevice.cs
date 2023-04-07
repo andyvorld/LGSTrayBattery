@@ -29,7 +29,11 @@ namespace LGSTrayCore
         {
             get
             {
+#if DEBUG
+                return true;
+#else
                 return DateTime.Now > LastUpdate.AddSeconds(MIN_UPDATE_PERIOD_S);
+#endif
             }
         }
 

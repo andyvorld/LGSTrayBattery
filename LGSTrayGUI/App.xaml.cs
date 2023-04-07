@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -22,6 +24,9 @@ namespace LGSTrayGUI
         public async void App_Startup(object sender, StartupEventArgs e)
         {
             Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
 

@@ -42,6 +42,7 @@ namespace LGSTrayGHUB
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
                 $"<mileage>{Mileage:f2}</mileage>" +
                 $"<charging>{Charging}</charging>" +
+                $"<data_source>LogiDeviceGHUB</data_source>" +
                 $"</xml>"
                 ;
         }

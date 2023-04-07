@@ -58,6 +58,7 @@ namespace LGSTrayHID
                 $"<device_type>{DeviceType}</device_type>" +
                 $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>" +
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
+                $"<data_source>LogiDeviceHID</data_source>" +
                 $"</xml>"
                 ;
         }
