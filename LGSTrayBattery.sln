@@ -1,83 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.2.32630.192
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGHUB", "LGSTrayGHUB\LGSTrayGHUB.csproj", "{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayHID", "LGSTrayHID\LGSTrayHID.csproj", "{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707} = {4E21B9E6-ECAE-421E-B409-E3B56C8E0707}
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayGUI", "LGSTrayGUI\LGSTrayGUI.csproj", "{1E330388-BF15-4076-A088-6735DCD68255}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayNative", "LGSTrayNative\LGSTrayNative.csproj", "{521E1546-9D0F-4796-B580-40B9021DC4F7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C} = {0E866D65-E37B-3AF7-9752-96A2079E9A1C}
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LGSTrayNative_cpp", "LGSTrayNative_cpp", "{8F2CA364-1016-48C3-826F-3E3811CFF57B}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "LGSTrayNative_cpp\ALL_BUILD.vcxproj", "{8959DC18-BD1F-3028-8CE4-3A96AB6B8818}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LGSTrayNative_lib", "LGSTrayNative_cpp\LGSTrayNative_lib.vcxproj", "{0E866D65-E37B-3AF7-9752-96A2079E9A1C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "LGSTrayNative_cpp\ZERO_CHECK.vcxproj", "{2A095F50-03CA-32DD-A607-F20208164A81}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release|x64 = Release|x64
-	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Debug|x64.ActiveCfg = Debug|x64
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Debug|x64.Build.0 = Debug|x64
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Release|x64.ActiveCfg = Release|x64
-		{4E21B9E6-ECAE-421E-B409-E3B56C8E0707}.Release|x64.Build.0 = Release|x64
-		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Debug|x64.ActiveCfg = Debug|x64
-		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Debug|x64.Build.0 = Debug|x64
-		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Release|x64.ActiveCfg = Release|x64
-		{0D39C2F6-A290-494C-BE75-7DC2D7DD4D5A}.Release|x64.Build.0 = Release|x64
-		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Debug|x64.ActiveCfg = Debug|x64
-		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Debug|x64.Build.0 = Debug|x64
-		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Release|x64.ActiveCfg = Release|x64
-		{80DE42D4-0F9D-4873-84A3-D1CDF6F516B7}.Release|x64.Build.0 = Release|x64
-		{1E330388-BF15-4076-A088-6735DCD68255}.Debug|x64.ActiveCfg = Debug|x64
-		{1E330388-BF15-4076-A088-6735DCD68255}.Debug|x64.Build.0 = Debug|x64
-		{1E330388-BF15-4076-A088-6735DCD68255}.Release|x64.ActiveCfg = Release|x64
-		{1E330388-BF15-4076-A088-6735DCD68255}.Release|x64.Build.0 = Release|x64
-		{521E1546-9D0F-4796-B580-40B9021DC4F7}.Debug|x64.ActiveCfg = Debug|x64
-		{521E1546-9D0F-4796-B580-40B9021DC4F7}.Debug|x64.Build.0 = Debug|x64
-		{521E1546-9D0F-4796-B580-40B9021DC4F7}.Release|x64.ActiveCfg = Release|x64
-		{521E1546-9D0F-4796-B580-40B9021DC4F7}.Release|x64.Build.0 = Release|x64
-		{8959DC18-BD1F-3028-8CE4-3A96AB6B8818}.Debug|x64.ActiveCfg = Debug|x64
-		{8959DC18-BD1F-3028-8CE4-3A96AB6B8818}.Debug|x64.Build.0 = Debug|x64
-		{8959DC18-BD1F-3028-8CE4-3A96AB6B8818}.Release|x64.ActiveCfg = Release|x64
-		{8959DC18-BD1F-3028-8CE4-3A96AB6B8818}.Release|x64.Build.0 = Release|x64
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C}.Debug|x64.ActiveCfg = Debug|x64
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C}.Debug|x64.Build.0 = Debug|x64
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C}.Release|x64.ActiveCfg = Release|x64
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C}.Release|x64.Build.0 = Release|x64
-		{2A095F50-03CA-32DD-A607-F20208164A81}.Debug|x64.ActiveCfg = Debug|x64
-		{2A095F50-03CA-32DD-A607-F20208164A81}.Debug|x64.Build.0 = Debug|x64
-		{2A095F50-03CA-32DD-A607-F20208164A81}.Release|x64.ActiveCfg = Release|x64
-		{2A095F50-03CA-32DD-A607-F20208164A81}.Release|x64.Build.0 = Release|x64
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{8959DC18-BD1F-3028-8CE4-3A96AB6B8818} = {8F2CA364-1016-48C3-826F-3E3811CFF57B}
-		{0E866D65-E37B-3AF7-9752-96A2079E9A1C} = {8F2CA364-1016-48C3-826F-3E3811CFF57B}
-		{2A095F50-03CA-32DD-A607-F20208164A81} = {8F2CA364-1016-48C3-826F-3E3811CFF57B}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {A32B6C11-E123-4701-A0A1-0AD0BEF8B5C8}
 	EndGlobalSection
 EndGlobal
