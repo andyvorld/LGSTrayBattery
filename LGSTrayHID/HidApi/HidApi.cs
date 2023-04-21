@@ -1,8 +1,9 @@
-﻿global using HidDevicePtr = System.IntPtr;
+﻿//global using HidDevicePtr = System.IntPtr;
 using System.Runtime.InteropServices;
 
 namespace LGSTrayHID.HidApi
 {
+
     internal static partial class HidApi
     {
         [LibraryImport("hidapi", EntryPoint = "hid_init")]
@@ -18,9 +19,15 @@ namespace LGSTrayHID.HidApi
         internal static unsafe partial void HidFreeEnumeration(HidDeviceInfo* devs);
 
         [LibraryImport("hidapi", EntryPoint = "hid_open_path")]
-        internal static unsafe partial HidDevicePtr HidOpenPath(byte* path);
+        internal static unsafe partial nint HidOpenPath(byte* path);
 
         [LibraryImport("hidapi", EntryPoint = "hid_close")]
-        internal static unsafe partial void HidClose(HidDevicePtr dev);
+        internal static unsafe partial void HidClose(nint dev);
+
+        [LibraryImport("hidapi", EntryPoint = "hid_write")]
+        internal static unsafe partial int HidWrite(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, nuint length);
+
+        [LibraryImport("hidapi", EntryPoint = "hid_read_timeout")]
+        internal static unsafe partial int HidReadTimeOut(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, nuint length, int milliseconds);
     }
 }

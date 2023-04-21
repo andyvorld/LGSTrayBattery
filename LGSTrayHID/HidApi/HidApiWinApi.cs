@@ -10,6 +10,6 @@ namespace LGSTrayHID.HidApi
     internal static partial class HidApiWinApi
     {
         [LibraryImport("hidapi", EntryPoint = "hid_winapi_get_container_id")]
-        internal static unsafe partial int HidWinApiGetContainerId(HidDevicePtr dev, Guid* container_id);
+        internal static unsafe partial int HidWinApiGetContainerId(nint dev, Guid* container_id);
     }
 }

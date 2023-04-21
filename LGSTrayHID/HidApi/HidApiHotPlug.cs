@@ -24,7 +24,7 @@ namespace LGSTrayHID.HidApi
     [Flags]
     internal enum HidApiHotPlugFlag
     {
-        None = 0,
+        NONE = 0,
         /** Arm the callback and fire it for all matching currently attached devices. */
         HID_API_HOTPLUG_ENUMERATE = (1 << 0)
     }
