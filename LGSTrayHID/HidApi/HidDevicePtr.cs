@@ -33,14 +33,14 @@ namespace LGSTrayHID.HidApi
         {
             var ret = HidReadTimeOut(this, buffer, (nuint)count, timeout);
 #if DEBUG
-            PrintBuffer($"0x{_ptr:X} - R", buffer);
+            PrintBuffer($"0x{_ptr:X} - R", buffer, ret < 1);
 #endif
             return ret;
         }
 
 #if DEBUG
         private static int count = 0;
-        private static Channel<string> _channel = Channel.CreateUnbounded<string>();
+        private static readonly Channel<string> _channel = Channel.CreateUnbounded<string>();
 
         static HidDevicePtr()
         {
@@ -55,8 +55,13 @@ namespace LGSTrayHID.HidApi
             t1.Start();
         }
 
-        private static void PrintBuffer(string prefix, byte[] buffer)
+        private static void PrintBuffer(string prefix, byte[] buffer, bool ignore = false)
         {
+            if (ignore)
+            {
+                return;
+            }
+
             var arr = string.Join(" ", Array.ConvertAll(buffer, x => x.ToString("X02")));
             var str = $"{count:d04} - {prefix}: {arr}";
             _channel.Writer.TryWrite(str);
