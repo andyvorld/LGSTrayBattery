@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="hidapi.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -12,10 +12,13 @@ using static LGSTrayHID.HidApi.HidApi;
 
 namespace LGSTrayHID
 {
-    public class HidppDevices
+    public class HidppDevices : IDisposable
     {
         public const byte SW_ID = 0x0A;
         private byte PING_PAYLOAD = 0x55;
+
+        private bool _isReading = true;
+        private const int READ_TIMEOUT = 100;
 
         private readonly Dictionary<ushort, HidppDevice> _deviceCollection = new();
 
@@ -39,7 +42,32 @@ namespace LGSTrayHID
             get => _devLong;
         }
 
+        private int _disposeCount = 0;
+        public bool Disposed => _disposeCount > 0;
+
         public HidppDevices() { }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (Interlocked.Increment(ref _disposeCount) == 1)
+            {
+                _isReading = false;
+
+                _devShort = IntPtr.Zero;
+                _devLong = IntPtr.Zero;
+            }
+        }
+
+        ~HidppDevices()
+        {
+            Dispose(disposing: false);
+        }
 
         public async Task SetDevShort(nint devShort)
         { 
@@ -64,9 +92,11 @@ namespace LGSTrayHID
         private async Task ReadThread(HidDevicePtr dev, int bufferSize)
         {
             byte[] buffer = new byte[bufferSize];
-            while(true)
+            while(_isReading)
             {
-                var ret = dev.Read(buffer, bufferSize, 100);
+                var ret = dev.Read(buffer, bufferSize, READ_TIMEOUT);
+                if (!_isReading) { break; }
+
                 if (ret < 0)
                 {
                     break;
@@ -109,6 +139,8 @@ namespace LGSTrayHID
 
         public async Task<byte[]> WriteRead10(HidDevicePtr hidDevicePtr, byte[] buffer, int timeout = 100)
         {
+            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+
             bool locked = await _semaphore.WaitAsync(100);
             if (!locked)
             {
@@ -147,6 +179,8 @@ namespace LGSTrayHID
 
         public async Task<Hidpp20> WriteRead20(HidDevicePtr hidDevicePtr, Hidpp20 buffer, int timeout = 100, bool ignoreHID10 = true)
         {
+            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+
             bool locked = await _semaphore.WaitAsync(100);
             if (!locked)
             {
@@ -191,6 +225,8 @@ namespace LGSTrayHID
 
         public async Task<bool> Ping20(byte deviceId, int timeout = 100, bool ignoreHIDPP10 = true)
         {
+            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+
             byte pingPayload = ++PING_PAYLOAD;
             Hidpp20 buffer = new byte[7] { 0x10, deviceId, 0x00, 0x10 | SW_ID, 0x00, 0x00, pingPayload };
             Hidpp20 ret = await WriteRead20(_devShort, buffer, timeout, ignoreHIDPP10);

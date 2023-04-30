@@ -1,4 +1,5 @@
-﻿using LGSTrayHID.Features;
+﻿using LGSTrayCore;
+using LGSTrayHID.Features;
 using LGSTrayHID.HidApi;
 using System;
 using System.Collections.Generic;
@@ -142,23 +143,59 @@ namespace LGSTrayHID
                 if (_featureMap.ContainsKey(featureIdItr))
                 {
                     Console.WriteLine($"0x{featureIdItr:X} - {featureDesc} Found");
-
-                    (double, int) asdf = (0, 0);
-                    if (featureIdItr == 0x1000)
-                    {
-                        asdf = await Battery1000.GetBatteryAsync(this);
-                    }
-                    else if (featureIdItr == 0x1001)
-                    {
-                        asdf = await Battery1001.GetBatteryAsync(_parent, _deviceIdx, _featureMap[0x1001]);
-
-                    }
-
-                    Console.WriteLine($"{asdf.Item1}%, {asdf.Item2} mV");
                 }
             }
             Console.WriteLine("---");
 
+            LogiDevice? logiDevice = LogiDeviceCollection.Instance.Devices.SingleOrDefault(x => x.DeviceId == Identifier);
+            if (logiDevice == null)
+            {
+                logiDevice = new()
+                {
+                    DeviceId = Identifier,
+                    DeviceName = DeviceName,
+                    DeviceType = (DeviceType)DeviceType
+                };
+
+                LogiDeviceCollection.Instance.Devices.Add(logiDevice);
+            }
+
+            Func<Task<BatteryUpdateReturn?>>? GetBatteryAsync;
+
+            if (FeatureMap.ContainsKey(0x1000))
+            {
+                GetBatteryAsync = () => Battery1000.GetBatteryAsync(this);
+            }
+            else if (FeatureMap.ContainsKey(0x1001))
+            {
+                GetBatteryAsync = () => Battery1001.GetBatteryAsync(this);
+            }
+            else if (FeatureMap.ContainsKey(0x1004))
+            {
+                GetBatteryAsync = () => Battery1004.GetBatteryAsync(this);
+            }
+            else
+            {
+                logiDevice.HasBattery = false;
+                return;
+            }
+
+            logiDevice.UpdateBatteryFunc = async () =>
+            {
+                if (Parent.Disposed) { return; }
+
+                try
+                {
+                    BatteryUpdateReturn? newStatus = await GetBatteryAsync.Invoke();
+
+                    if (newStatus == null) { return; }
+
+                    logiDevice.BatteryPercentage = newStatus.Value.batteryPercentage;
+                    logiDevice.BatteryVoltage = newStatus.Value.batteryMVolt;
+                    logiDevice.LastUpdate = DateTime.Now;
+                }
+                catch (Exception) { }
+            };
         }
     }
 }

@@ -1,23 +1,10 @@
-﻿using LGSTrayHID.HidApi;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LGSTrayCore;
+using static LGSTrayCore.PowerSupplyStatus;
 
 namespace LGSTrayHID.Features
 {
     public static class Battery1001
     {
-        public enum PowerSupplyStatus : ushort
-        {
-            POWER_SUPPLY_STATUS_DISCHARGING = 0,
-            POWER_SUPPLY_STATUS_CHARGING,
-            POWER_SUPPLY_STATUS_FULL,
-            POWER_SUPPLY_STATUS_NOT_CHARGING,
-            POWER_SUPPLY_STATUS_UNKNOWN
-        }
-
         static readonly int[] _mvLUT = new[] {
             4186, 4156, 4143, 4133, 4122, 4113, 4103, 4094, 4086, 4075,
             4067, 4059, 4051, 4043, 4035, 4027, 4019, 4011, 4003, 3997,
@@ -44,10 +31,12 @@ namespace LGSTrayHID.Features
             return 0;
         }
 
-        public static async Task<(double, int)> GetBatteryAsync(HidppDevices device, byte deviceIdx, byte featureId)
+        public static async Task<BatteryUpdateReturn?> GetBatteryAsync(HidppDevice device)
         {
-            Hidpp20 buffer = new byte[7] { 0x10, deviceIdx, featureId, 0x00 | HidppDevices.SW_ID, 0x00, 0x00, 0x00 };
-            Hidpp20 ret = await device.WriteRead20(device.DevShort, buffer, 10000);
+            Hidpp20 buffer = new byte[7] { 0x10, device.DeviceIdx, device.FeatureMap[0x1001], 0x00 | HidppDevices.SW_ID, 0x00, 0x00, 0x00 };
+            Hidpp20 ret = await device.Parent.WriteRead20(device.Parent.DevShort, buffer);
+
+            if (ret.Length == 0) { return null; }
 
             int mv = (ret.GetParam(0) << 8) + ret.GetParam(1);
             double batPercent = LookupBatPercent(mv);
@@ -58,20 +47,18 @@ namespace LGSTrayHID.Features
             {
                 status = (flags & 0x07) switch
                 {
-                    0 => PowerSupplyStatus.POWER_SUPPLY_STATUS_FULL,
-                    1 => PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING,
-                    2 => PowerSupplyStatus.POWER_SUPPLY_STATUS_NOT_CHARGING,
-                    _ => PowerSupplyStatus.POWER_SUPPLY_STATUS_UNKNOWN,
+                    0 => POWER_SUPPLY_STATUS_FULL,
+                    1 => POWER_SUPPLY_STATUS_CHARGING,
+                    2 => POWER_SUPPLY_STATUS_NOT_CHARGING,
+                    _ => POWER_SUPPLY_STATUS_UNKNOWN,
                 };
             }
             else
             {
-                status = PowerSupplyStatus.POWER_SUPPLY_STATUS_DISCHARGING;
+                status = POWER_SUPPLY_STATUS_DISCHARGING;
             }
 
-            Console.WriteLine(status.ToString());
-
-            return (batPercent, mv);
+            return new BatteryUpdateReturn(batPercent, status, mv);
         }
     }
 }

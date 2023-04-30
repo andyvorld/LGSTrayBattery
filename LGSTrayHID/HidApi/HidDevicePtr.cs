@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿#define PRINT
+using System.Threading.Channels;
 using static LGSTrayHID.HidApi.HidApi;
 
 namespace LGSTrayHID.HidApi
@@ -19,7 +20,7 @@ namespace LGSTrayHID.HidApi
 
         public async Task<int> WriteAsync(byte[] buffer)
         {
-#if DEBUG
+#if DEBUG && PRINT
             PrintBuffer($"0x{_ptr:X} - W", buffer);
 #endif
             //await semaphoreWrite.WaitAsync();
@@ -32,13 +33,13 @@ namespace LGSTrayHID.HidApi
         public int Read(byte[] buffer, int count, int timeout)
         {
             var ret = HidReadTimeOut(this, buffer, (nuint)count, timeout);
-#if DEBUG
+#if DEBUG && PRINT
             PrintBuffer($"0x{_ptr:X} - R", buffer, ret < 1);
 #endif
             return ret;
         }
 
-#if DEBUG
+#if DEBUG && PRINT
         private static int count = 0;
         private static readonly Channel<string> _channel = Channel.CreateUnbounded<string>();
 

@@ -7,6 +7,8 @@ using static LGSTrayHID.HidApi.HidApiWinApi;
 using static LGSTrayHID.HidApi.HidApiHotPlug;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using LGSTrayCore;
+using System.Diagnostics;
 
 namespace LGSTrayHID
 {
@@ -35,7 +37,12 @@ namespace LGSTrayHID
             {
                 dev = HidOpenPath((deviceInfo).Path);
 
-                _ = HidWinApiGetContainerId(dev, &containerId);
+                Task.Run(() =>
+                {
+                    Guid containerId = new();
+                    _ = HidWinApiGetContainerId(IntPtr.Zero, &containerId);
+                });
+
                 //Console.WriteLine(containerId.ToString());
                 //Console.WriteLine("x{0:X04}", (deviceInfo).Usage);
                 //Console.WriteLine("x{0:X04}", (deviceInfo).UsagePage);
@@ -43,22 +50,22 @@ namespace LGSTrayHID
             }
 
 
-            if (!context.DeviceMap.ContainsKey(containerId))
-            {
-                context.DeviceMap[containerId] = new();
-                containerMap[devPath] = containerId;
-            }
+            //if (!context.DeviceMap.ContainsKey(containerId))
+            //{
+            //    context.DeviceMap[containerId] = new();
+            //    containerMap[devPath] = containerId;
+            //}
 
-            Guid _containerId = new (containerId.ToByteArray());
-            switch (messageType)
-            {
-                case HidppMessageType.SHORT:
-                    await context.DeviceMap[_containerId].SetDevShort(dev);
-                    break;
-                case HidppMessageType.LONG:
-                    await context.DeviceMap[_containerId].SetDevLong(dev);
-                    break;
-            }
+            //Guid _containerId = new (containerId.ToByteArray());
+            //switch (messageType)
+            //{
+            //    case HidppMessageType.SHORT:
+            //        await context.DeviceMap[_containerId].SetDevShort(dev);
+            //        break;
+            //    case HidppMessageType.LONG:
+            //        await context.DeviceMap[_containerId].SetDevLong(dev);
+            //        break;
+            //}
 
             return 0;
         }
@@ -110,6 +117,7 @@ namespace LGSTrayHID
 
             if (containerMap.TryGetValue(devPath, out var containerId))
             {
+                context.DeviceMap[containerId].Dispose();
                 context.DeviceMap.Remove(containerId);
                 containerMap.Remove(devPath);
             }
@@ -123,10 +131,61 @@ namespace LGSTrayHID
 
         private static HidApiHotPlugEventCallbackFn asdf;
 
+        static Semaphore _sem = new(0, 1, @"Local\LGSTray/daemonSync");
+
+        static async Task Daemon()
+        {
+            Console.WriteLine("Daemon");
+
+            _sem.Release();
+
+            unsafe
+            {
+                Guid tmp;
+                HidWinApiGetContainerId(0, &tmp);
+            }
+        }
+
         static async Task Main(string[] args)
         {
             Console.WriteLine("Hello, World!");
 
+            if (args.Contains("--daemon"))
+            {
+                await Daemon();
+                return;
+            }
+
+            var fork = new Process();
+            {
+                fork.StartInfo = new ProcessStartInfo()
+                {
+                    UseShellExecute = false,
+                    FileName = Environment.ProcessPath,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                };
+                fork.StartInfo.ArgumentList.Add("--daemon");
+
+                fork.EnableRaisingEvents = true;
+                fork.Exited += delegate { Console.WriteLine("Fork died"); };
+
+                fork.Start();
+                fork.OutputDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
+                fork.BeginOutputReadLine();
+
+                _sem.WaitOne();
+            }
+
+            Console.WriteLine(Environment.ProcessPath);
+
+            while (true)
+            {
+                await Task.Delay(1000);
+            }
+
+            return;
             unsafe
             {
                 asdf = (_, dev, eventType, _) =>
@@ -149,6 +208,20 @@ namespace LGSTrayHID
                 HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_ARRIVED, HidApiHotPlugFlag.HID_API_HOTPLUG_ENUMERATE, asdf, IntPtr.Zero, (int*) IntPtr.Zero);
                 HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_LEFT, HidApiHotPlugFlag.NONE, DeviceLeft, IntPtr.Zero, (int*)IntPtr.Zero);
             }
+
+            var tmp = LogiDeviceCollection.Instance.Devices;
+
+            new Thread(async () =>
+            {
+                while (true)
+                {
+                    foreach (var device in tmp)
+                    {
+                        await device.UpdateBatteryAsync();
+                    }
+                    await Task.Delay(10000);
+                }
+            }).Start();
 
             while (true)
             {

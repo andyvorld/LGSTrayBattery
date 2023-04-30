@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LGSTrayIPC": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
