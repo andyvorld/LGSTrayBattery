@@ -60,9 +60,16 @@ namespace LGSTrayCore
                                 contentType = "text/html";
                                 content = "<html>";
 
+                                content += "<b>By Device ID</b><br>";
                                 foreach (var logiDevice in devices)
                                 {
                                     content += $"{logiDevice.DeviceName} : <a href=\"/device/{logiDevice.DeviceID}\">{logiDevice.DeviceID}</a><br>";
+                                }
+
+                                content += "<br><b>By Device Name</b><br>";
+                                foreach (var logiDevice in devices)
+                                {
+                                    content += $"<a href=\"/device/{Uri.EscapeDataString(logiDevice.DeviceName)}\">{logiDevice.DeviceName}</a><br>";
                                 }
 
                                 content += "<br><hr>";
@@ -81,6 +88,9 @@ namespace LGSTrayCore
                                 {
                                     LogiDevice targetDevice =
                                         devices.FirstOrDefault(x => x.DeviceID == request[1]);
+
+                                    targetDevice ??=
+                                        devices.FirstOrDefault(x => Uri.EscapeDataString(x.DeviceName) == request[1]);
 
                                     if (targetDevice == null)
                                     {
