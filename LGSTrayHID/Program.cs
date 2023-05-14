@@ -148,87 +148,109 @@ namespace LGSTrayHID
 
         static async Task Main(string[] args)
         {
+            Random rng = new Random();
+
+            List<byte> string1 = new();
+            List<byte> string2 = new();
+
+            for (int i = 0; i < 256; i++)
+            {
+                string1.Add((byte)(97 + rng.Next(26)));
+                string2.Add((byte)(97 + rng.Next(26)));
+            }
+
+            MessageStructs.UpdateStruct asdf = new()
+            {
+                deviceId = Encoding.ASCII.GetString(string1.ToArray()),
+                batteryPercentage = 50,
+                status = PowerSupplyStatus.POWER_SUPPLY_STATUS_FULL,
+                batteryMVolt = 3400
+            };
+
+            var bytearr = asdf.ToByteArray();
+            var zxcv = MessageStructs.UpdateStruct.FromByteArray(bytearr);
+
             Console.WriteLine("Hello, World!");
 
-            if (args.Contains("--daemon"))
-            {
-                await Daemon();
-                return;
-            }
+            //if (args.Contains("--daemon"))
+            //{
+            //    await Daemon();
+            //    return;
+            //}
 
-            var fork = new Process();
-            {
-                fork.StartInfo = new ProcessStartInfo()
-                {
-                    UseShellExecute = false,
-                    FileName = Environment.ProcessPath,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                };
-                fork.StartInfo.ArgumentList.Add("--daemon");
+            //var fork = new Process();
+            //{
+            //    fork.StartInfo = new ProcessStartInfo()
+            //    {
+            //        UseShellExecute = false,
+            //        FileName = Environment.ProcessPath,
+            //        CreateNoWindow = true,
+            //        RedirectStandardOutput = true,
+            //        RedirectStandardError = true,
+            //    };
+            //    fork.StartInfo.ArgumentList.Add("--daemon");
 
-                fork.EnableRaisingEvents = true;
-                fork.Exited += delegate { Console.WriteLine("Fork died"); };
+            //    fork.EnableRaisingEvents = true;
+            //    fork.Exited += delegate { Console.WriteLine("Fork died"); };
 
-                fork.Start();
-                fork.OutputDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
-                fork.BeginOutputReadLine();
+            //    fork.Start();
+            //    fork.OutputDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
+            //    fork.BeginOutputReadLine();
 
-                _sem.WaitOne();
-            }
+            //    _sem.WaitOne();
+            //}
 
-            Console.WriteLine(Environment.ProcessPath);
+            //Console.WriteLine(Environment.ProcessPath);
 
-            while (true)
-            {
-                await Task.Delay(1000);
-            }
+            //while (true)
+            //{
+            //    await Task.Delay(1000);
+            //}
 
             return;
-            unsafe
-            {
-                asdf = (_, dev, eventType, _) =>
-                {
-                    if (eventType == HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_ARRIVED)
-                    {
-                        queue.Add(*dev);
-                    }
-                    else
-                    {
-                        string path = (*dev).GetPath();
+            //unsafe
+            //{
+            //    asdf = (_, dev, eventType, _) =>
+            //    {
+            //        if (eventType == HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_ARRIVED)
+            //        {
+            //            queue.Add(*dev);
+            //        }
+            //        else
+            //        {
+            //            string path = (*dev).GetPath();
 
-                    }
+            //        }
 
-                    return 0;
-                };
+            //        return 0;
+            //    };
 
-                int ret = HidInit();
+            //    int ret = HidInit();
 
-                HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_ARRIVED, HidApiHotPlugFlag.HID_API_HOTPLUG_ENUMERATE, asdf, IntPtr.Zero, (int*) IntPtr.Zero);
-                HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_LEFT, HidApiHotPlugFlag.NONE, DeviceLeft, IntPtr.Zero, (int*)IntPtr.Zero);
-            }
+            //    HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_ARRIVED, HidApiHotPlugFlag.HID_API_HOTPLUG_ENUMERATE, asdf, IntPtr.Zero, (int*) IntPtr.Zero);
+            //    HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_LEFT, HidApiHotPlugFlag.NONE, DeviceLeft, IntPtr.Zero, (int*)IntPtr.Zero);
+            //}
 
-            var tmp = LogiDeviceCollection.Instance.Devices;
+            //var tmp = LogiDeviceCollection.Instance.Devices;
 
-            new Thread(async () =>
-            {
-                while (true)
-                {
-                    foreach (var device in tmp)
-                    {
-                        await device.UpdateBatteryAsync();
-                    }
-                    await Task.Delay(10000);
-                }
-            }).Start();
+            //new Thread(async () =>
+            //{
+            //    while (true)
+            //    {
+            //        foreach (var device in tmp)
+            //        {
+            //            await device.UpdateBatteryAsync();
+            //        }
+            //        await Task.Delay(10000);
+            //    }
+            //}).Start();
 
-            while (true)
-            {
-                var dev = queue.Take();
+            //while (true)
+            //{
+            //    var dev = queue.Take();
 
-                await _PrintDevice(dev);
-            }
+            //    await _PrintDevice(dev);
+            //}
         }
     }
 }

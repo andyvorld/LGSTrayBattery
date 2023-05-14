@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
+    <ProjectReference Include="..\LGSTrayIPC\LGSTrayIPC.csproj" />
   </ItemGroup>
 
   <ItemGroup>
