@@ -1,6 +1,7 @@
 ﻿using LGSTrayCore;
 using LGSTrayHID.Features;
 using LGSTrayHID.HidApi;
+using LGSTrayHID.MessageStructs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace LGSTrayHID
     public class HidppDevice
     {
         private readonly SemaphoreSlim _initSemaphore = new(1,1);
+        private Func<Task<BatteryUpdateReturn?>>? _getBatteryAsync;
 
         public string DeviceName { get; private set;} = string.Empty;
         public int DeviceType { get; private set; } = 3;
@@ -147,55 +149,51 @@ namespace LGSTrayHID
             }
             Console.WriteLine("---");
 
-            LogiDevice? logiDevice = LogiDeviceCollection.Instance.Devices.SingleOrDefault(x => x.DeviceId == Identifier);
-            if (logiDevice == null)
-            {
-                logiDevice = new()
-                {
-                    DeviceId = Identifier,
-                    DeviceName = DeviceName,
-                    DeviceType = (DeviceType)DeviceType
-                };
-
-                LogiDeviceCollection.Instance.Devices.Add(logiDevice);
-            }
-
-            Func<Task<BatteryUpdateReturn?>>? GetBatteryAsync;
-
             if (FeatureMap.ContainsKey(0x1000))
             {
-                GetBatteryAsync = () => Battery1000.GetBatteryAsync(this);
+                _getBatteryAsync = () => Battery1000.GetBatteryAsync(this);
             }
             else if (FeatureMap.ContainsKey(0x1001))
             {
-                GetBatteryAsync = () => Battery1001.GetBatteryAsync(this);
+                _getBatteryAsync = () => Battery1001.GetBatteryAsync(this);
             }
             else if (FeatureMap.ContainsKey(0x1004))
             {
-                GetBatteryAsync = () => Battery1004.GetBatteryAsync(this);
-            }
-            else
-            {
-                logiDevice.HasBattery = false;
-                return;
+                _getBatteryAsync = () => Battery1004.GetBatteryAsync(this);
             }
 
-            logiDevice.UpdateBatteryFunc = async () =>
-            {
-                if (Parent.Disposed) { return; }
+            HidppManagerContext.Instance.SignalDeviceEvent(
+                IPCMessageType.INIT,
+                new InitMessage(Identifier, DeviceName, _getBatteryAsync != null, (DeviceType)DeviceType)
+            );
 
-                try
+            await Task.Delay(1000);
+
+            _ = Task.Run(async () =>
+            {
+                while (true)
                 {
-                    BatteryUpdateReturn? newStatus = await GetBatteryAsync.Invoke();
-
-                    if (newStatus == null) { return; }
-
-                    logiDevice.BatteryPercentage = newStatus.Value.batteryPercentage;
-                    logiDevice.BatteryVoltage = newStatus.Value.batteryMVolt;
-                    logiDevice.LastUpdate = DateTime.Now;
+                    await Task.Delay(1000);
+                    await UpdateBattery();
                 }
-                catch (Exception) { }
-            };
+            });
+        }
+
+        public async Task UpdateBattery()
+        {
+            if (Parent.Disposed) { return; }
+            if (_getBatteryAsync == null) { return; }
+
+            var ret = await _getBatteryAsync.Invoke();
+
+            if (ret == null) { return; }
+
+            var batStatus = ret.Value;
+
+            HidppManagerContext.Instance.SignalDeviceEvent(
+                IPCMessageType.UPDATE,
+                new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt)
+            );
         }
     }
 }

@@ -8,206 +8,134 @@ using static LGSTrayHID.HidApi.HidApiHotPlug;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using LGSTrayCore;
+using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
+using MessagePipe;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace LGSTrayHID
 {
     internal class Program
     {
-        static readonly HidppManagerContext context = new();
+        //static readonly HidppManagerService context = new();
 
-        //static fixed HidHotPlugCallbackHandle callback_handle;
+        //static async Task<int> _PrintDevice(HidDeviceInfo deviceInfo)
+        //{
+        //    var messageType = (deviceInfo).GetHidppMessageType();
+        //    switch (messageType)
+        //    {
+        //        case HidppMessageType.NONE:
+        //        case HidppMessageType.VERY_LONG:
+        //            return 0;
+        //    }
 
-        static async Task<int> _PrintDevice(HidDeviceInfo deviceInfo)
-        {
-            var messageType = (deviceInfo).GetHidppMessageType();
-            switch (messageType)
-            {
-                case HidppMessageType.NONE:
-                case HidppMessageType.VERY_LONG:
-                    return 0;
-            }
+        //    string devPath = (deviceInfo).GetPath();
+        //    Console.WriteLine(devPath);
 
-            string devPath = (deviceInfo).GetPath();
-            Console.WriteLine(devPath);
+        //    Guid containerId = new();
+        //    HidDevicePtr dev;
+        //    unsafe
+        //    {
+        //        dev = HidOpenPath((deviceInfo).Path);
 
-            Guid containerId = new();
-            HidDevicePtr dev;
-            unsafe
-            {
-                dev = HidOpenPath((deviceInfo).Path);
+        //        Task.Run(() =>
+        //        {
+        //            Guid containerId = new();
+        //            _ = HidWinApiGetContainerId(IntPtr.Zero, &containerId);
+        //        });
 
-                Task.Run(() =>
-                {
-                    Guid containerId = new();
-                    _ = HidWinApiGetContainerId(IntPtr.Zero, &containerId);
-                });
-
-                //Console.WriteLine(containerId.ToString());
-                //Console.WriteLine("x{0:X04}", (deviceInfo).Usage);
-                //Console.WriteLine("x{0:X04}", (deviceInfo).UsagePage);
-                Console.WriteLine();
-            }
+        //        //Console.WriteLine(containerId.ToString());
+        //        //Console.WriteLine("x{0:X04}", (deviceInfo).Usage);
+        //        //Console.WriteLine("x{0:X04}", (deviceInfo).UsagePage);
+        //        Console.WriteLine();
+        //    }
 
 
-            //if (!context.DeviceMap.ContainsKey(containerId))
-            //{
-            //    context.DeviceMap[containerId] = new();
-            //    containerMap[devPath] = containerId;
-            //}
+        //    //if (!context.DeviceMap.ContainsKey(containerId))
+        //    //{
+        //    //    context.DeviceMap[containerId] = new();
+        //    //    containerMap[devPath] = containerId;
+        //    //}
 
-            //Guid _containerId = new (containerId.ToByteArray());
-            //switch (messageType)
-            //{
-            //    case HidppMessageType.SHORT:
-            //        await context.DeviceMap[_containerId].SetDevShort(dev);
-            //        break;
-            //    case HidppMessageType.LONG:
-            //        await context.DeviceMap[_containerId].SetDevLong(dev);
-            //        break;
-            //}
+        //    //Guid _containerId = new (containerId.ToByteArray());
+        //    //switch (messageType)
+        //    //{
+        //    //    case HidppMessageType.SHORT:
+        //    //        await context.DeviceMap[_containerId].SetDevShort(dev);
+        //    //        break;
+        //    //    case HidppMessageType.LONG:
+        //    //        await context.DeviceMap[_containerId].SetDevLong(dev);
+        //    //        break;
+        //    //}
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
-        static unsafe int PrintDevice(HidHotPlugCallbackHandle callbackHandle, HidDeviceInfo* deviceInfo, HidApiHotPlugEvent hidApiHotPlugEvent, nint userData)
-        {
-            return 0;
-            //return _PrintDevice(*deviceInfo);
-            //var messageType = (*deviceInfo).GetHidppMessageType();
-            //switch (messageType)
-            //{
-            //    case HidppMessageType.NONE:
-            //    case HidppMessageType.VERY_LONG:
-            //        return 0;
-            //}
+        //static unsafe int DeviceLeft(HidHotPlugCallbackHandle callbackHandle, HidDeviceInfo* deviceInfo, HidApiHotPlugEvent hidApiHotPlugEvent, nint userData)
+        //{
+        //    string devPath = (*deviceInfo).GetPath();
 
-            //Console.WriteLine((*deviceInfo).GetPath());
-
-            //var dev = HidOpenPath((*deviceInfo).Path);
-
-            //Guid containerId = new();
-            //_ = HidWinApiGetContainerId(dev, &containerId);
-            //Console.WriteLine(containerId.ToString());
-            //Console.WriteLine("x{0:X04}", (*deviceInfo).Usage);
-            //Console.WriteLine("x{0:X04}", (*deviceInfo).UsagePage);
-            //Console.WriteLine();
-
-            //if (!context.DeviceMap.ContainsKey(containerId))
-            //{
-            //    context.DeviceMap[containerId] = new();
-            //}
-
-            //switch (messageType)
-            //{
-            //    case HidppMessageType.SHORT:
-            //        context.DeviceMap[containerId].DevShort = dev;
-            //        break;
-            //    case HidppMessageType.LONG:
-            //        context.DeviceMap[containerId].DevLong = dev;
-            //        break;
-            //}
-
-            //return 0;
-        }
-
-        static unsafe int DeviceLeft(HidHotPlugCallbackHandle callbackHandle, HidDeviceInfo* deviceInfo, HidApiHotPlugEvent hidApiHotPlugEvent, nint userData)
-        {
-            string devPath = (*deviceInfo).GetPath();
-
-            if (containerMap.TryGetValue(devPath, out var containerId))
-            {
-                context.DeviceMap[containerId].Dispose();
-                context.DeviceMap.Remove(containerId);
-                containerMap.Remove(devPath);
-            }
+        //    if (containerMap.TryGetValue(devPath, out var containerId))
+        //    {
+        //        context.DeviceMap[containerId].Dispose();
+        //        context.DeviceMap.Remove(containerId);
+        //        containerMap.Remove(devPath);
+        //    }
 
 
-            return 0;
-        }
+        //    return 0;
+        //}
 
-        private static readonly Dictionary<string, Guid> containerMap = new();
-        private static readonly BlockingCollection<HidDeviceInfo> queue = new();
+        //private static readonly Dictionary<string, Guid> containerMap = new();
+        //private static readonly BlockingCollection<HidDeviceInfo> queue = new();
 
-        private static HidApiHotPlugEventCallbackFn asdf;
+        //private static HidApiHotPlugEventCallbackFn asdf;
 
-        static Semaphore _sem = new(0, 1, @"Local\LGSTray/daemonSync");
+        //static Semaphore _sem = new(0, 1, @"Local\LGSTray/daemonSync");
 
-        static async Task Daemon()
-        {
-            Console.WriteLine("Daemon");
+        //static async Task Daemon()
+        //{
+        //    Console.WriteLine("Daemon");
 
-            _sem.Release();
+        //    _sem.Release();
 
-            unsafe
-            {
-                Guid tmp;
-                HidWinApiGetContainerId(0, &tmp);
-            }
-        }
+        //    unsafe
+        //    {
+        //        Guid tmp;
+        //        HidWinApiGetContainerId(0, &tmp);
+        //    }
+        //}
 
         static async Task Main(string[] args)
         {
-            Random rng = new Random();
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureLogging(logger =>
+                {
+                    logger.ClearProviders();
+                })
+                .ConfigureServices((ctx, services) =>
+                {
+                    services.AddMessagePipe();
+                    services.AddMessagePipeNamedPipeInterprocess("LGSTray");
+                    services.AddHostedService<HidppManagerService>();
+                })
+                .Build();
 
-            List<byte> string1 = new();
-            List<byte> string2 = new();
-
-            for (int i = 0; i < 256; i++)
+            _ = Task.Run(async () =>
             {
-                string1.Add((byte)(97 + rng.Next(26)));
-                string2.Add((byte)(97 + rng.Next(26)));
-            }
+                bool ret = int.TryParse(args.ElementAtOrDefault(0), out int parentPid);
+                if (!ret) { return; }
 
-            MessageStructs.UpdateStruct asdf = new()
-            {
-                deviceId = Encoding.ASCII.GetString(string1.ToArray()),
-                batteryPercentage = 50,
-                status = PowerSupplyStatus.POWER_SUPPLY_STATUS_FULL,
-                batteryMVolt = 3400
-            };
+                await Process.GetProcessById(parentPid).WaitForExitAsync();
 
-            var bytearr = asdf.ToByteArray();
-            var zxcv = MessageStructs.UpdateStruct.FromByteArray(bytearr);
+                CancellationTokenSource cts = new(5000);
+                await host.StopAsync(cts.Token);
 
-            Console.WriteLine("Hello, World!");
+                Environment.Exit(0);
+            });
 
-            //if (args.Contains("--daemon"))
-            //{
-            //    await Daemon();
-            //    return;
-            //}
-
-            //var fork = new Process();
-            //{
-            //    fork.StartInfo = new ProcessStartInfo()
-            //    {
-            //        UseShellExecute = false,
-            //        FileName = Environment.ProcessPath,
-            //        CreateNoWindow = true,
-            //        RedirectStandardOutput = true,
-            //        RedirectStandardError = true,
-            //    };
-            //    fork.StartInfo.ArgumentList.Add("--daemon");
-
-            //    fork.EnableRaisingEvents = true;
-            //    fork.Exited += delegate { Console.WriteLine("Fork died"); };
-
-            //    fork.Start();
-            //    fork.OutputDataReceived += (sender, args) => { Console.WriteLine(args.Data); };
-            //    fork.BeginOutputReadLine();
-
-            //    _sem.WaitOne();
-            //}
-
-            //Console.WriteLine(Environment.ProcessPath);
-
-            //while (true)
-            //{
-            //    await Task.Delay(1000);
-            //}
-
-            return;
+            await host.RunAsync();
             //unsafe
             //{
             //    asdf = (_, dev, eventType, _) =>

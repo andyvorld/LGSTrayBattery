@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "LGSTrayUI": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    },
+    "LGSTrayUI - Debug Native": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

@@ -9,8 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MessagePipe.Interprocess" Version="1.7.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
-    <ProjectReference Include="..\LGSTrayIPC\LGSTrayIPC.csproj" />
   </ItemGroup>
 
   <ItemGroup>

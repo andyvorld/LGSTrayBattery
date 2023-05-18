@@ -18,7 +18,7 @@ namespace LGSTrayHID.HidApi
 
         public static implicit operator HidDevicePtr(nint ptr) => new(ptr);
 
-        public async Task<int> WriteAsync(byte[] buffer)
+        public Task<int> WriteAsync(byte[] buffer)
         {
 #if DEBUG && PRINT
             PrintBuffer($"0x{_ptr:X} - W", buffer);
@@ -27,7 +27,7 @@ namespace LGSTrayHID.HidApi
             var ret = HidWrite(this, buffer, (nuint)buffer.Length);
             //semaphoreWrite.Release();
 
-            return ret;
+            return Task.FromResult(ret);
         }
 
         public int Read(byte[] buffer, int count, int timeout)

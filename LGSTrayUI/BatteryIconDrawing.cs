@@ -43,12 +43,12 @@ namespace LGSTrayUI
         {
             return Color.FromArgb(0xEE, 0xEE, 0xEE);
 
-            return device.DeviceType switch
-            {
-                DeviceType.Keyboard => Color.FromArgb(0xA1, 0xE4, 0x4D),
-                DeviceType.Headset => Color.FromArgb(0xFA, 0x79, 0x21),
-                _ => Color.FromArgb(0xBB, 0x86, 0xFC),
-            };
+            //return device.DeviceType switch
+            //{
+            //    DeviceType.Keyboard => Color.FromArgb(0xA1, 0xE4, 0x4D),
+            //    DeviceType.Headset => Color.FromArgb(0xFA, 0x79, 0x21),
+            //    _ => Color.FromArgb(0xBB, 0x86, 0xFC),
+            //};
         }
 
         private static Bitmap GetBatteryValue(LogiDevice device)
@@ -73,6 +73,14 @@ namespace LGSTrayUI
             {
                 return Resources.Indicator_100;
             }
+        }
+
+        public static void DrawUnknown(TaskbarIcon taskbarIcon)
+        {
+            DrawIcon(taskbarIcon, new()
+            {
+                BatteryPercentage = -1,
+            });
         }
 
         public static void DrawIcon(TaskbarIcon taskbarIcon, LogiDevice device)
@@ -116,8 +124,9 @@ namespace LGSTrayUI
             using Bitmap b = new(ImageSize, ImageSize);
             using Graphics g = Graphics.FromImage(b);
 
+            string displayString = (device.BatteryPercentage < 0) ? "?" : $"{device.BatteryPercentage:f0}";
             g.DrawString(
-                $"{device.BatteryPercentage:f0}",
+                displayString,
                 new Font("Segoe UI", (int) (0.8 * ImageSize), GraphicsUnit.Pixel),
                 new SolidBrush(GetDeviceColor(device)),
                 ImageSize/2, ImageSize/2,

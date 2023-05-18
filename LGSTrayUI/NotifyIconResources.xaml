@@ -7,13 +7,14 @@
 			<MenuItem.ItemContainerStyle>
 				<Style TargetType="MenuItem">
 					<Setter Property="IsCheckable" Value="True"/>
+                    <Setter Property="IsChecked" Value="{Binding IsChecked}"/>
 					<Setter Property="StaysOpenOnClick" Value="True"/>
-					<Setter Property="Command">
-						<Setter.Value>
-							<Binding Path="DataContext.DeviceClickedCommand" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
-						</Setter.Value>
-					</Setter>
-					<Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}" />
+                    <Setter Property="Command">
+                        <Setter.Value>
+                            <Binding Path="DataContext.DeviceClickedCommand" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}" />
 				</Style>
 			</MenuItem.ItemContainerStyle>
 			<MenuItem.ItemTemplate>
@@ -24,12 +25,10 @@
 				</DataTemplate>
 			</MenuItem.ItemTemplate>
 		</MenuItem>
-		<Separator />
-		<MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
-        <ContextMenu.DataContext>
-            <local:NotifyIconViewModel />
-        </ContextMenu.DataContext>
-	</ContextMenu>
+        <MenuItem Header="Display Numeric Icon" IsCheckable="True" IsChecked="{Binding NumericDisplay}" />
+        <Separator />
+        <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
+    </ContextMenu>
 
     <tb:TaskbarIcon x:Key="NotifyIcon"
                     ContextMenu="{StaticResource SysTrayMenu}">

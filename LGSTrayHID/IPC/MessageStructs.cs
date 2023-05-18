@@ -1,73 +1,71 @@
 ﻿using LGSTrayCore;
-using System.Text;
+using MessagePack;
 
 namespace LGSTrayHID.MessageStructs
 {
-    public enum MessageType : byte
+    public enum IPCMessageType : byte
     {
         HEARTBEAT = 0,
         INIT,
-        UPDATE 
+        UPDATE,
     }
 
-    public struct InitStruct
+    [MessagePackObject]
+    public struct HeartbeatMessage
     {
+
+    }
+
+    [Union(0, typeof(InitMessage))]
+    [Union(1, typeof(UpdateMessage))]
+    public abstract class IPCMessage
+    {
+        [Key(0)]
         public string deviceId;
+
+        public IPCMessage(string deviceId)
+        {
+            this.deviceId = deviceId;
+        }
+    }
+
+    [MessagePackObject]
+    public class InitMessage : IPCMessage
+    {
+        [Key(1)]
         public string deviceName;
+
+        [Key(2)]
         public bool hasBattery;
 
-        public static InitStruct FromByteArray(byte[] bytes)
+        [Key(3)]
+        public DeviceType deviceType;
+
+        public InitMessage(string deviceId, string deviceName, bool hasBattery, DeviceType deviceType) : base(deviceId)
         {
-            return new()
-            {
-                deviceId = Encoding.ASCII.GetString(bytes.AsSpan(1, 256)).TrimEnd('\0'),
-                deviceName = Encoding.ASCII.GetString(bytes.AsSpan(1 + 256, 256)).TrimEnd('\0'),
-                hasBattery = bytes.ElementAt(1 + 256 + 256) != 0,
-            };
-        }
-
-        public byte[] ToByteArray()
-        {
-            byte[] output = new byte[1 + 256 + 256 + 1];
-
-            output[0] = (byte) MessageType.INIT;
-            Encoding.ASCII.GetBytes(deviceId).CopyTo(output, 1);
-            Encoding.ASCII.GetBytes(deviceName).CopyTo(output, 1 + 256);
-            output[1 + 256 + 256] = (byte) (hasBattery ? 1 : 0);
-
-            return output;
+            this.deviceName = deviceName;
+            this.hasBattery = hasBattery;
+            this.deviceType = deviceType;
         }
     }
 
-    public struct UpdateStruct
+    [MessagePackObject]
+    public class UpdateMessage : IPCMessage
     {
-        public string deviceId;
+        [Key(1)]
         public double batteryPercentage;
-        public PowerSupplyStatus status;
+
+        [Key(2)]
+        public PowerSupplyStatus powerSupplyStatus;
+
+        [Key(3)]
         public int batteryMVolt;
 
-        public static UpdateStruct FromByteArray(byte[] bytes)
+        public UpdateMessage(string deviceId, double batteryPercentage, PowerSupplyStatus powerSupplyStatus, int batteryMVolt) : base(deviceId)
         {
-            return new()
-            {
-                deviceId = Encoding.ASCII.GetString(bytes.AsSpan(1, 256)).TrimEnd('\0'),
-                batteryPercentage = BitConverter.ToDouble(bytes, 1 + 256),
-                status = (PowerSupplyStatus)bytes[1 + 256 + 8],
-                batteryMVolt = BitConverter.ToInt32(bytes, 1 + 256 + 8 + 1)
-            };
-        }
-
-        public byte[] ToByteArray()
-        {
-            byte[] output = new byte[1 + 256 + 8 + 1 + 4];
-
-            output[0] = (byte) MessageType.UPDATE;
-            Encoding.ASCII.GetBytes(deviceId).CopyTo(output, 1);
-            BitConverter.GetBytes(batteryPercentage).CopyTo(output, 1 + 256);
-            output[1 + 256 + 8] = (byte) status;
-            BitConverter.GetBytes(batteryMVolt).CopyTo(output, 1 + 256 + 8 +1);
-
-            return output;
+            this.batteryPercentage = batteryPercentage;
+            this.powerSupplyStatus = powerSupplyStatus;
+            this.batteryMVolt = batteryMVolt;
         }
     }
 }

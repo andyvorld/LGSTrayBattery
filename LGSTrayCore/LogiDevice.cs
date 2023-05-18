@@ -26,6 +26,9 @@ namespace LGSTrayCore
         private int _batteryVoltage;
 
         [ObservableProperty]
+        private PowerSupplyStatus _powerSupplyStatus;
+
+        [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
         private DateTime _lastUpdate = DateTime.MinValue;
 
