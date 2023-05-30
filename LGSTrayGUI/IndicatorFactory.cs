@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace LGSTrayGUI
@@ -16,6 +17,7 @@ namespace LGSTrayGUI
 
         public Bitmap DrawIndicator(int percentage)
         {
+            percentage = Math.Min(Math.Max(percentage, 0), 100); // ensure that percentage is always 0-100
             if (_cachedIndicators.ContainsKey(percentage))
                 return _cachedIndicators[percentage];
 
