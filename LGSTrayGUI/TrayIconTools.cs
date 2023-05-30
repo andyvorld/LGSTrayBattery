@@ -67,10 +67,7 @@ namespace LGSTrayGUI
                         break;
                 }
 
-                if (logiDevice.BatteryPercentage < 0)
-                    indicator = Missing;
-                else
-                    indicator = _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage);
+                indicator = logiDevice.BatteryPercentage > 0 ? _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage) : Missing;
 
                 output = MixBitmap(device, Battery, indicator);
             }
