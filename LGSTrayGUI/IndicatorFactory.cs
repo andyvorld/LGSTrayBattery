@@ -1,0 +1,61 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace LGSTrayGUI
+{
+    public class IndicatorFactory
+    {
+        private Size _imageSize = new Size(48, 48);
+
+        private int _left = 29;
+        private int _right = 43;
+        private int _top = 13;
+        private int _bottom = 41;
+
+        private Dictionary<int, Bitmap> _cachedIndicators = new Dictionary<int, Bitmap>();
+
+        public Bitmap DrawIndicator(int percentage)
+        {
+            if (_cachedIndicators.ContainsKey(percentage))
+                return _cachedIndicators[percentage];
+
+            var bitmap = new Bitmap(_imageSize.Width, _imageSize.Height);
+            using var graphics = Graphics.FromImage(bitmap);
+            
+            int height = (int)((_bottom - _top) * percentage / 100f);
+            if (height > 0)
+            {
+                Color gradientColor = GenerateColor(percentage);
+                 
+                graphics.FillRectangle(new SolidBrush(gradientColor), _left, _bottom - height, _right - _left, height);
+            }
+
+            _cachedIndicators.Add(percentage, bitmap);
+            return bitmap;
+        }
+
+        private Color GenerateColor(int percentage)
+        {
+            if (percentage <= 50)
+            {
+                int red = 255;
+                int green = (int)(percentage / 50f * 255);
+                int blue = 0;
+                return Color.FromArgb(red, green, blue);
+            }
+            else
+            {
+                int red = (int)((100 - percentage) / 50f * 255);
+                int green = 255;
+                int blue = 0;
+                return Color.FromArgb(red, green, blue);
+            }
+        }
+    }
+}

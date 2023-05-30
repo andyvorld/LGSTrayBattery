@@ -16,6 +16,8 @@ namespace LGSTrayGUI
         private static Bitmap Battery => CheckTheme.LightTheme ? Properties.Resources.Battery : Properties.Resources.Battery_dark;
         private static Bitmap Missing => CheckTheme.LightTheme ? Properties.Resources.Missing : Properties.Resources.Missing_dark;
 
+        private static IndicatorFactory _indicatorFactory = new IndicatorFactory();
+
         private static Bitmap MixBitmap(Bitmap device, Bitmap battery, Bitmap indicator)
         {
             Bitmap bitmap = new Bitmap(device.Width, device.Height);
@@ -65,26 +67,10 @@ namespace LGSTrayGUI
                         break;
                 }
 
-                if (logiDevice.BatteryPercentage > 70)
-                {
-                    indicator = Properties.Resources.Indicator_100;
-                }
-                else if (logiDevice.BatteryPercentage > 40)
-                {
-                    indicator = Properties.Resources.Indicator_50;
-                }
-                else if (logiDevice.BatteryPercentage > 20)
-                {
-                    indicator = Properties.Resources.Indicator_30;
-                }
-                else if (logiDevice.BatteryPercentage > 0)
-                {
-                    indicator = Properties.Resources.Indicator_10;
-                }
-                else
-                {
+                if (logiDevice.BatteryPercentage < 0)
                     indicator = Missing;
-                }
+                else
+                    indicator = _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage);
 
                 output = MixBitmap(device, Battery, indicator);
             }
