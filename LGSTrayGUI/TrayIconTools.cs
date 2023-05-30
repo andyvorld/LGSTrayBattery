@@ -1,4 +1,5 @@
 ﻿using LGSTrayCore;
+using LGSTrayGHUB;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,6 +15,7 @@ namespace LGSTrayGUI
         private static Bitmap Keyboard => CheckTheme.LightTheme ? Properties.Resources.Keyboard : Properties.Resources.Keyboard_dark;
         private static Bitmap Headset => CheckTheme.LightTheme ? Properties.Resources.Headset : Properties.Resources.Headset_dark;
         private static Bitmap Battery => CheckTheme.LightTheme ? Properties.Resources.Battery : Properties.Resources.Battery_dark;
+        private static Bitmap Charging => CheckTheme.LightTheme ? Properties.Resources.Charging : Properties.Resources.Charging_dark;
         private static Bitmap Missing => CheckTheme.LightTheme ? Properties.Resources.Missing : Properties.Resources.Missing_dark;
 
         private static IndicatorFactory _indicatorFactory = new IndicatorFactory();
@@ -67,7 +69,15 @@ namespace LGSTrayGUI
                         break;
                 }
 
-                indicator = logiDevice.BatteryPercentage > 0 ? _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage) : Missing;
+                if (logiDevice.BatteryPercentage == 0)
+                {
+                    if (logiDevice is LogiDeviceGHUB dev && dev.Charging || logiDevice is LogiDeviceNative dev2 && dev2.Charging)
+                        indicator = Charging;
+                    else
+                        indicator = Missing;
+                }
+                else
+                    indicator = _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage);
 
                 output = MixBitmap(device, Battery, indicator);
             }
