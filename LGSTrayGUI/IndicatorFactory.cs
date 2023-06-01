@@ -38,16 +38,16 @@ namespace LGSTrayGUI
 
         private Color GenerateColor(int percentage)
         {
-            if (percentage <= 75)
+            if (percentage <= 50)
             {
                 int red = 255;
-                int green = (int)(percentage / 75f * 255);
+                int green = (int)(percentage / 50f * 255);
                 int blue = 0;
                 return Color.FromArgb(red, green, blue);
             }
             else
             {
-                int red = (int)((100 - percentage) / 25f * 255);
+                int red = (int)((100 - percentage) / 50f * 255);
                 int green = 255;
                 int blue = 0;
                 return Color.FromArgb(red, green, blue);
