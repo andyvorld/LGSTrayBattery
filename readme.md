@@ -121,12 +121,14 @@ The hidapi backend is rewritten in C++, and it differs from HID.NET in the follo
 - MX Anywhere 2
 - Wireless Keyboard Dell KB714
 ### Community Tested
-- G604 Lightspeed Wireless
-- MX Vertical
-- G703 Lightspeed Wireless
+- G304 Lightspeed Wireless
 - G502 Lightspeed Wireless
+- G604 Lightspeed Wireless
+- G703 Lightspeed Wireless
 - G933 Gaming Wireless Headset
+- MX Vertical
 - ERGO K860 for Business
+
 
 ## How to Build project
 Run `prepare_project.bat` to generate the C++ Visual studio project that can be linked with the C# project.
