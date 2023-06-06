@@ -82,13 +82,13 @@ namespace LGSTrayGUI
                     _SelectedDevice.PropertyChanged -= UpdateBatteryIcon;
                 }
 
+                Properties.Settings.Default.LastSelectedDeviceId = value.DeviceID;
+                Properties.Settings.Default.Save();
+
                 _SelectedDevice = value;
                 _SelectedDevice.PropertyChanged += UpdateBatteryIcon;
                 _SelectedDevice.InvokePropertyChanged(value, new PropertyChangedEventArgs("LastUpdate"));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedDevice)));
-
-                Properties.Settings.Default.LastSelectedDeviceId = value.DeviceID;
-                Properties.Settings.Default.Save();
             }
         }
 
