@@ -20,16 +20,17 @@ namespace LGSTrayGUI
 
         private static IndicatorFactory _indicatorFactory = new IndicatorFactory();
 
-        private static Bitmap MixBitmap(Bitmap device, Bitmap battery, Bitmap indicator)
+        private static Bitmap MixBitmap(params Bitmap[] bitmaps)
         {
-            Bitmap bitmap = new Bitmap(device.Width, device.Height);
-            Graphics canvas = Graphics.FromImage(bitmap);
-            canvas.DrawImage(device, new Point(0, 0));
-            canvas.DrawImage(battery, new Point(0, 0));
-            canvas.DrawImage(indicator, new Point(0, 0));
+            Bitmap result = new Bitmap(bitmaps[0].Width, bitmaps[0].Height);
+            Graphics canvas = Graphics.FromImage(result);
+            foreach (var bitmap in bitmaps)
+                if (bitmap != null)
+                    canvas.DrawImage(bitmap, new Point(0, 0));
+
             canvas.Save();
 
-            return bitmap;
+            return result;
         }
 
         private static Bitmap ErrorBitMap()
@@ -50,39 +51,47 @@ namespace LGSTrayGUI
             }
             else
             {
-                Bitmap device;
-                Bitmap indicator;
+                Bitmap device = GetDeviceIcon(logiDevice);
+                Bitmap indicator = _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage);
+                Bitmap status = GetStatusIcon(logiDevice);
 
-                switch (logiDevice.DeviceType)
-                {
-                    case DeviceType.Mouse:
-                        device = Mouse;
-                        break;
-                    case DeviceType.Keyboard:
-                        device = Keyboard;
-                        break;
-                    case DeviceType.Headset:
-                        device = Headset;
-                        break;
-                    default:
-                        device = Mouse;
-                        break;
-                }
-
-                if (logiDevice.BatteryPercentage == 0)
-                {
-                    if (logiDevice is LogiDeviceGHUB dev && dev.Charging || logiDevice is LogiDeviceNative dev2 && dev2.Charging)
-                        indicator = Charging;
-                    else
-                        indicator = Missing;
-                }
-                else
-                    indicator = _indicatorFactory.DrawIndicator((int)logiDevice.BatteryPercentage);
-
-                output = MixBitmap(device, Battery, indicator);
+                output = MixBitmap(device, Battery, indicator, status);
             }
 
             return Icon.FromHandle(output.GetHicon());
+        }
+
+        private static Bitmap GetDeviceIcon(LogiDevice logiDevice)
+        {
+            Bitmap device;
+            switch (logiDevice.DeviceType)
+            {
+                case DeviceType.Mouse:
+                    device = Mouse;
+                    break;
+                case DeviceType.Keyboard:
+                    device = Keyboard;
+                    break;
+                case DeviceType.Headset:
+                    device = Headset;
+                    break;
+                default:
+                    device = Mouse;
+                    break;
+            }
+
+            return device;
+        }
+
+        private static Bitmap? GetStatusIcon(LogiDevice logiDevice)
+        {
+            if (logiDevice is LogiDeviceGHUB dev && dev.Charging || logiDevice is LogiDeviceNative dev2 && dev2.Charging)
+                return Charging;
+
+            if (logiDevice.BatteryPercentage == 0)
+                return Missing;
+
+            return null;
         }
     }
 }
