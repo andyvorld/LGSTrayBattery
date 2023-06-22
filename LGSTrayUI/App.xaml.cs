@@ -4,6 +4,7 @@ using MessagePipe;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -91,7 +92,7 @@ namespace LGSTrayUI
                     services.AddHostedService<LGSTrayHIDDaemon>();
                     services.AddSingleton<LogiDeviceCollection>();
 
-                    services.AddSingleton< MainTaskbarIconWrapper>();
+                    services.AddSingleton<MainTaskbarIconWrapper>();
                     services.AddHostedService<NotifyIconViewModel>();
                 })
                 .Build();

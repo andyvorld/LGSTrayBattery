@@ -17,7 +17,7 @@ namespace LGSTrayUI
             public int TcpPort { get; set; }
             public string ServerAddr { get; set; } = null!;
 
-            private HttpServerSettings() { }
+            public HttpServerSettings() { }
 
             public IPEndPoint IPEndPoint
             {
@@ -53,7 +53,7 @@ namespace LGSTrayUI
             public bool GHUB { get; set; }
             public bool Native { get; set; }
 
-            private DeviceManagerSettings() { }
+            public DeviceManagerSettings() { }
         }
         public DeviceManagerSettings DeviceManager { get; set; } = null!;
     }

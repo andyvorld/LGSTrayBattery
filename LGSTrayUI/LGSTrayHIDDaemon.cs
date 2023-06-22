@@ -1,7 +1,9 @@
 ﻿using LGSTrayCore;
 using LGSTrayHID.MessageStructs;
 using MessagePipe;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,6 +25,7 @@ namespace LGSTrayUI
         private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
         private readonly LogiDeviceCollection _logiDeviceCollection;
         private readonly LogiDeviceViewModelFactory _logiDeviceViewModelFactory;
+        private readonly AppSettings _appSettings;
 
         private Func<Task>? _diposeSubs;
         private bool disposedValue;
@@ -59,12 +62,14 @@ namespace LGSTrayUI
         public LGSTrayHIDDaemon(
             IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber, 
             LogiDeviceCollection logiDeviceCollection,
-            LogiDeviceViewModelFactory logiDeviceViewModelFactory
+            LogiDeviceViewModelFactory logiDeviceViewModelFactory,
+            IOptions<AppSettings> appSettings
         )
         {
             _subscriber = subscriber;
             _logiDeviceCollection = logiDeviceCollection;
             _logiDeviceViewModelFactory = logiDeviceViewModelFactory;
+            _appSettings = appSettings.Value;
         }
 
         private async Task DaemonLoop()
@@ -99,6 +104,11 @@ namespace LGSTrayUI
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            if (!_appSettings.DeviceManager.Native)
+            {
+                return;
+            }
+
             var sub1 = await _subscriber.SubscribeAsync(
                 IPCMessageType.INIT,
                 x =>
