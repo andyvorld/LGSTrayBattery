@@ -187,7 +187,7 @@ namespace LGSTrayHID
 
             HidppManagerContext.Instance.SignalDeviceEvent(
                 IPCMessageType.UPDATE,
-                new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt)
+                new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt, DateTime.Now)
             );
         }
     }

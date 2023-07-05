@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
 using LGSTrayCore;
+using LGSTrayCore.MessageStructs;
 using System;
 
 namespace LGSTrayUI
@@ -48,6 +49,26 @@ namespace LGSTrayUI
                 taskbarIcon?.Dispose();
                 taskbarIcon = null;
             }
+        }
+
+        public void UpdateState(InitMessage initMessage)
+        {
+            if (string.IsNullOrEmpty(DeviceId))
+            {
+                DeviceId = initMessage.deviceId;
+            }
+
+            DeviceName = initMessage.deviceName;
+            HasBattery = initMessage.hasBattery;
+            DeviceType = initMessage.deviceType;
+        }
+
+        public void UpdateState(UpdateMessage updateMessage)
+        {
+            BatteryPercentage = updateMessage.batteryPercentage;
+            PowerSupplyStatus = updateMessage.powerSupplyStatus;
+            BatteryVoltage = updateMessage.batteryMVolt * 1000;
+            LastUpdate = updateMessage.updateTime;
         }
     }
 }

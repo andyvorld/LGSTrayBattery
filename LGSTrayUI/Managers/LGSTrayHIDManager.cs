@@ -10,9 +10,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace LGSTrayUI
+namespace LGSTrayUI.Managers
 {
-    public class LGSTrayHIDDaemon : IHostedService, IDisposable
+    public class LGSTrayHIDManager : IHostedService, IDisposable
     {
         private readonly CancellationTokenSource _cts = new();
 
@@ -53,8 +53,8 @@ namespace LGSTrayUI
             GC.SuppressFinalize(this);
         }
 
-        public LGSTrayHIDDaemon(
-            IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber, 
+        public LGSTrayHIDManager(
+            IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber,
             LogiDeviceCollection logiDeviceCollection,
             LogiDeviceViewModelFactory logiDeviceViewModelFactory,
             IOptions<AppSettings> appSettings
@@ -112,23 +112,12 @@ namespace LGSTrayUI
                     LogiDeviceViewModel? dev = _logiDeviceCollection.Devices.SingleOrDefault(x => x.DeviceId == initMessage.deviceId);
                     if (dev != null)
                     {
-                        Application.Current.Dispatcher.BeginInvoke(() =>
-                        {
-                            dev.DeviceName = initMessage.deviceName;
-                            dev.HasBattery = initMessage.hasBattery;
-                            dev.DeviceType = initMessage.deviceType;
-                        });
+                        Application.Current.Dispatcher.BeginInvoke(() => dev.UpdateState(initMessage));
 
                         return;
                     }
 
-                    dev = _logiDeviceViewModelFactory.CreateViewModel((x) =>
-                    {
-                        x.DeviceId = initMessage.deviceId;
-                        x.DeviceName = initMessage.deviceName;
-                        x.HasBattery = initMessage.hasBattery;
-                        x.DeviceType = initMessage.deviceType;
-                    });
+                    dev = _logiDeviceViewModelFactory.CreateViewModel((x) => x.UpdateState(initMessage));
 
                     Application.Current.Dispatcher.BeginInvoke(() => _logiDeviceCollection.Devices.Add(dev));
                 },
@@ -146,16 +135,14 @@ namespace LGSTrayUI
                         var device = _logiDeviceCollection.Devices.FirstOrDefault(dev => dev.DeviceId == updateMessage.deviceId);
                         if (device == null) { return; }
 
-                        device.BatteryPercentage = updateMessage.batteryPercentage;
-                        device.PowerSupplyStatus = updateMessage.powerSupplyStatus;
-                        device.BatteryVoltage = updateMessage.batteryMVolt * 1000;
-                        device.LastUpdate = DateTime.Now;
+                        device.UpdateState(updateMessage);
                     });
                 },
                 cancellationToken
             );
 
-            _diposeSubs = async () => {
+            _diposeSubs = async () =>
+            {
                 await sub1.DisposeAsync();
                 await sub2.DisposeAsync();
             };
@@ -169,7 +156,7 @@ namespace LGSTrayUI
                     DateTime then = DateTime.Now;
                     await DaemonLoop();
 
-                    if ((DateTime.Now - then).TotalSeconds < 5)
+                    if ((DateTime.Now - then).TotalSeconds < 20)
                     {
                         fastFailCount++;
                     }

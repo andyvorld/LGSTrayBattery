@@ -1,4 +1,5 @@
-﻿using MessagePipe;
+﻿using LGSTrayUI.Managers;
+using MessagePipe;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -83,7 +84,7 @@ namespace LGSTrayUI
                     services.AddSingleton<LogiDeviceIconFactory>();
                     services.AddSingleton<LogiDeviceViewModelFactory>();
 
-                    services.AddHostedService<LGSTrayHIDDaemon>();
+                    services.AddHostedService<LGSTrayHIDManager>();
                     services.AddSingleton<LogiDeviceCollection>();
 
                     services.AddSingleton<MainTaskbarIconWrapper>();

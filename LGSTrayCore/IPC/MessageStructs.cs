@@ -54,11 +54,21 @@ namespace LGSTrayCore.MessageStructs
         [Key(3)]
         public int batteryMVolt;
 
-        public UpdateMessage(string deviceId, double batteryPercentage, PowerSupplyStatus powerSupplyStatus, int batteryMVolt) : base(deviceId)
+        [Key(4)]
+        public DateTime updateTime;
+
+        public UpdateMessage(
+            string deviceId, 
+            double batteryPercentage, 
+            PowerSupplyStatus powerSupplyStatus, 
+            int batteryMVolt, 
+            DateTime updateTime
+        ) : base(deviceId)
         {
             this.batteryPercentage = batteryPercentage;
             this.powerSupplyStatus = powerSupplyStatus;
             this.batteryMVolt = batteryMVolt;
+            this.updateTime = updateTime;
         }
     }
 }
