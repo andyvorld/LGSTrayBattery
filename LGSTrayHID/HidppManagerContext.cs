@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static LGSTrayHID.HidApi.HidApi;
+﻿using static LGSTrayHID.HidApi.HidApi;
 using static LGSTrayHID.HidApi.HidApiWinApi;
 using static LGSTrayHID.HidApi.HidApiHotPlug;
 using LGSTrayHID.HidApi;
 using System.Collections.Concurrent;
-using LGSTrayHID.MessageStructs;
+using LGSTrayCore.MessageStructs;
 
 namespace LGSTrayHID
 {

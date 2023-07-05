@@ -1,19 +1,12 @@
-﻿using LGSTrayCore;
-using MessagePack;
+﻿using MessagePack;
 
-namespace LGSTrayHID.MessageStructs
+namespace LGSTrayCore.MessageStructs
 {
     public enum IPCMessageType : byte
     {
         HEARTBEAT = 0,
         INIT,
         UPDATE,
-    }
-
-    [MessagePackObject]
-    public struct HeartbeatMessage
-    {
-
     }
 
     [Union(0, typeof(InitMessage))]
