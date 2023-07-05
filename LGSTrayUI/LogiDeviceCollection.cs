@@ -1,4 +1,5 @@
 ﻿using LGSTrayCore;
+using LGSTrayCore.MessageStructs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -6,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace LGSTrayUI
 {
@@ -48,6 +50,32 @@ namespace LGSTrayUI
             device = Devices.SingleOrDefault(x => x.DeviceId == deviceId);
 
             return device != null;
+        }
+
+        public void OnInitMessage(InitMessage initMessage)
+        {
+            LogiDeviceViewModel? dev = Devices.SingleOrDefault(x => x.DeviceId == initMessage.deviceId);
+            if (dev != null)
+            {
+                Application.Current.Dispatcher.BeginInvoke(() => dev.UpdateState(initMessage));
+
+                return;
+            }
+
+            dev = _logiDeviceViewModelFactory.CreateViewModel((x) => x.UpdateState(initMessage));
+
+            Application.Current.Dispatcher.BeginInvoke(() => Devices.Add(dev));
+        }
+
+        public void OnUpdateMessage(UpdateMessage updateMessage)
+        {
+            Application.Current.Dispatcher.BeginInvoke(() =>
+            {
+                var device = Devices.FirstOrDefault(dev => dev.DeviceId == updateMessage.deviceId);
+                if (device == null) { return; }
+
+                device.UpdateState(updateMessage);
+            });
         }
     }
 }

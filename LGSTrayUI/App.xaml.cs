@@ -85,6 +85,7 @@ namespace LGSTrayUI
                     services.AddSingleton<LogiDeviceViewModelFactory>();
 
                     services.AddHostedService<LGSTrayHIDManager>();
+                    services.AddHostedService<GHubManager>();
                     services.AddSingleton<LogiDeviceCollection>();
 
                     services.AddSingleton<MainTaskbarIconWrapper>();

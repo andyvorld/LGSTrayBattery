@@ -4,15 +4,17 @@ namespace LGSTrayCore
 {
     public partial class LogiDevice : ObservableObject
     {
+        public const string NOT_FOUND = "NOT FOUND";
+
         [ObservableProperty]
         private DeviceType _deviceType;
 
         [ObservableProperty]
-        private string _deviceId = "NOT FOUND";
+        private string _deviceId = NOT_FOUND;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
-        private string _deviceName = "NOT FOUND";
+        private string _deviceName = NOT_FOUND;
 
         [ObservableProperty]
         private bool _hasBattery = true;

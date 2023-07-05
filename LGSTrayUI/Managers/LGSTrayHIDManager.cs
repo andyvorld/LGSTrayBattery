@@ -108,18 +108,7 @@ namespace LGSTrayUI.Managers
                 x =>
                 {
                     var initMessage = (InitMessage)x;
-
-                    LogiDeviceViewModel? dev = _logiDeviceCollection.Devices.SingleOrDefault(x => x.DeviceId == initMessage.deviceId);
-                    if (dev != null)
-                    {
-                        Application.Current.Dispatcher.BeginInvoke(() => dev.UpdateState(initMessage));
-
-                        return;
-                    }
-
-                    dev = _logiDeviceViewModelFactory.CreateViewModel((x) => x.UpdateState(initMessage));
-
-                    Application.Current.Dispatcher.BeginInvoke(() => _logiDeviceCollection.Devices.Add(dev));
+                    _logiDeviceCollection.OnInitMessage(initMessage);
                 },
                 cancellationToken
             );
@@ -129,14 +118,7 @@ namespace LGSTrayUI.Managers
                 x =>
                 {
                     var updateMessage = (UpdateMessage)x;
-
-                    Application.Current.Dispatcher.BeginInvoke(() =>
-                    {
-                        var device = _logiDeviceCollection.Devices.FirstOrDefault(dev => dev.DeviceId == updateMessage.deviceId);
-                        if (device == null) { return; }
-
-                        device.UpdateState(updateMessage);
-                    });
+                    _logiDeviceCollection.OnUpdateMessage(updateMessage);
                 },
                 cancellationToken
             );

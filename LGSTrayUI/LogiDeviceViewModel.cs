@@ -53,7 +53,7 @@ namespace LGSTrayUI
 
         public void UpdateState(InitMessage initMessage)
         {
-            if (string.IsNullOrEmpty(DeviceId))
+            if (string.IsNullOrEmpty(DeviceId) || DeviceId == NOT_FOUND)
             {
                 DeviceId = initMessage.deviceId;
             }
