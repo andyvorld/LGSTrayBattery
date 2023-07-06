@@ -1,18 +1,14 @@
-﻿using LGSTrayCore;
-using LGSTrayCore.MessageStructs;
+﻿using LGSTrayCore.MessageStructs;
 using MessagePipe;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Diagnostics;
 using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Websocket.Client;
 
-namespace LGSTrayUI.Managers
+namespace LGSTrayCore.Managers
 {
     file struct GHUBMsg
     {
@@ -68,22 +64,19 @@ namespace LGSTrayUI.Managers
         private const string DEVICE_REGEX = @"dev[0-9a-zA-Z]+";
 
         private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
-        private readonly LogiDeviceCollection _logiDeviceCollection;
-        private readonly LogiDeviceViewModelFactory _logiDeviceViewModelFactory;
+        private readonly ILogiDeviceCollection _logiDeviceCollection;
         private readonly AppSettings _appSettings;
 
         protected WebsocketClient _ws = null!;
 
         public GHubManager(
             IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber,
-            LogiDeviceCollection logiDeviceCollection,
-            LogiDeviceViewModelFactory logiDeviceViewModelFactory,
+            ILogiDeviceCollection logiDeviceCollection,
             IOptions<AppSettings> appSettings
         )
         {
             _subscriber = subscriber;
             _logiDeviceCollection = logiDeviceCollection;
-            _logiDeviceViewModelFactory = logiDeviceViewModelFactory;
             _appSettings = appSettings.Value;
         }
 
@@ -173,8 +166,6 @@ namespace LGSTrayUI.Managers
             {
                 _loadDevices(ghubmsg.Payload);
             }
-
-            Console.WriteLine(ghubmsg);
         }
 
         protected void _loadDevices(JObject payload)

@@ -1,4 +1,5 @@
-﻿using LGSTrayUI.Managers;
+﻿using LGSTrayCore;
+using LGSTrayCore.Managers;
 using MessagePipe;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,7 +87,7 @@ namespace LGSTrayUI
 
                     services.AddHostedService<LGSTrayHIDManager>();
                     services.AddHostedService<GHubManager>();
-                    services.AddSingleton<LogiDeviceCollection>();
+                    services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
 
                     services.AddSingleton<MainTaskbarIconWrapper>();
                     services.AddHostedService<NotifyIconViewModel>();

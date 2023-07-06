@@ -2,25 +2,13 @@
 using MessagePipe;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
-namespace LGSTrayUI.Managers
+namespace LGSTrayCore.Managers
 {
     public class LGSTrayHIDManager : IHostedService, IDisposable
     {
-        private readonly CancellationTokenSource _cts = new();
-
-        private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
-        private readonly LogiDeviceCollection _logiDeviceCollection;
-        private readonly LogiDeviceViewModelFactory _logiDeviceViewModelFactory;
-        private readonly AppSettings _appSettings;
-
+        #region IDisposable
         private Func<Task>? _diposeSubs;
         private bool disposedValue;
 
@@ -52,17 +40,22 @@ namespace LGSTrayUI.Managers
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
+
+        private readonly CancellationTokenSource _cts = new();
+
+        private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
+        private readonly ILogiDeviceCollection _logiDeviceCollection;
+        private readonly AppSettings _appSettings;
 
         public LGSTrayHIDManager(
             IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber,
-            LogiDeviceCollection logiDeviceCollection,
-            LogiDeviceViewModelFactory logiDeviceViewModelFactory,
+            ILogiDeviceCollection logiDeviceCollection,
             IOptions<AppSettings> appSettings
         )
         {
             _subscriber = subscriber;
             _logiDeviceCollection = logiDeviceCollection;
-            _logiDeviceViewModelFactory = logiDeviceViewModelFactory;
             _appSettings = appSettings.Value;
         }
 

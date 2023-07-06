@@ -22,7 +22,6 @@ namespace LGSTrayUI
     {
         private readonly MainTaskbarIconWrapper _mainTaskbarIconWrapper;
         
-        private readonly LogiDeviceCollection _logiDeviceCollection;
         [ObservableProperty]
         private ObservableCollection<LogiDeviceViewModel> _logiDevices;
 
@@ -43,13 +42,12 @@ namespace LGSTrayUI
 
         private readonly Dictionary<string, LogiDeviceIcon> _taskbarIcons = new();
 
-        public NotifyIconViewModel(MainTaskbarIconWrapper mainTaskbarIconWrapper, LogiDeviceCollection logiDeviceCollection, UserSettingsWrapper userSettings)
+        public NotifyIconViewModel(MainTaskbarIconWrapper mainTaskbarIconWrapper, ILogiDeviceCollection logiDeviceCollection, UserSettingsWrapper userSettings)
         {
             _mainTaskbarIconWrapper = mainTaskbarIconWrapper;
             ((ContextMenu)Application.Current.FindResource("SysTrayMenu")).DataContext = this;
 
-            _logiDeviceCollection = logiDeviceCollection;
-            _logiDevices = logiDeviceCollection.Devices;
+            _logiDevices = (logiDeviceCollection as LogiDeviceCollection)!.Devices;
             _userSettings = userSettings;
         }
 

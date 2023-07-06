@@ -11,12 +11,13 @@ using System.Windows;
 
 namespace LGSTrayUI
 {
-    public class LogiDeviceCollection
+    public class LogiDeviceCollection : ILogiDeviceCollection
     {
         private readonly UserSettingsWrapper _userSettings;
         private readonly LogiDeviceViewModelFactory _logiDeviceViewModelFactory;
 
         public ObservableCollection<LogiDeviceViewModel> Devices { get; } = new();
+        public IEnumerable<LogiDevice> GetDevices() => Devices;
 
         public LogiDeviceCollection(UserSettingsWrapper userSettings, LogiDeviceViewModelFactory logiDeviceViewModelFactory)
         {

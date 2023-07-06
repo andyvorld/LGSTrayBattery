@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Net;
 
-namespace LGSTrayUI
+namespace LGSTrayCore
 {
     public class AppSettings
     {

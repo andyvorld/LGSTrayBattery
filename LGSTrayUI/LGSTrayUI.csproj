@@ -59,4 +59,8 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="WebServer\" />
+  </ItemGroup>
+
 </Project>
