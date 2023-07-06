@@ -59,5 +59,20 @@ namespace LGSTrayCore
         {
             Console.WriteLine(ToolTipString);
         }
+
+        public string GetXmlData()
+        {
+            return
+                $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                $"<xml>" +
+                $"<device_id>{DeviceId}</device_id>" +
+                $"<device_name>{DeviceName}</device_name>" +
+                $"<device_type>{DeviceType}</device_type>" +
+                $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
+                $"<charging>{PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING}</charging>" +
+                $"<last_update>{LastUpdate}</last_update>" +
+                $"</xml>"
+                ;
+        }
     }
 }
