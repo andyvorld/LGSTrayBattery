@@ -16,6 +16,8 @@ namespace LGSTrayHID
         public int DeviceType { get; private set; } = 3;
         public string Identifier { get; private set; } = string.Empty;
 
+        private DateTime lastUpdate = DateTime.MinValue;
+
         private readonly HidppDevices _parent;
         public HidppDevices Parent => _parent;
 
@@ -168,8 +170,19 @@ namespace LGSTrayHID
             {
                 while (true)
                 {
-                    await Task.Delay(1000);
+                    var now = DateTime.Now;
+#if DEBUG
+                    var expectedUpdateTime = lastUpdate.AddSeconds(1);
+#else
+                    var expectedUpdateTime = lastUpdate.AddMinutes(10);
+#endif
+                    if (now < expectedUpdateTime)
+                    {
+                        await Task.Delay((int) (expectedUpdateTime - now).TotalMilliseconds);
+                    }
+
                     await UpdateBattery();
+                    await Task.Delay(10_000);
                 }
             });
         }
@@ -185,9 +198,10 @@ namespace LGSTrayHID
 
             var batStatus = ret.Value;
 
+            lastUpdate = DateTime.Now;
             HidppManagerContext.Instance.SignalDeviceEvent(
                 IPCMessageType.UPDATE,
-                new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt, DateTime.Now)
+                new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt, lastUpdate)
             );
         }
     }
