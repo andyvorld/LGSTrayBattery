@@ -7,7 +7,7 @@ using static LGSTrayHID.HidApi.HidApiWinApi;
 using static LGSTrayHID.HidApi.HidApiHotPlug;
 using System.Collections.Concurrent;
 using System.ComponentModel;
-using LGSTrayCore;
+using LGSTrayPrimitives;
 using Microsoft.Extensions.Hosting;
 using System.Diagnostics;
 using MessagePipe;

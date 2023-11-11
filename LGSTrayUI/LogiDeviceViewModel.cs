@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Hardcodet.Wpf.TaskbarNotification;
 using LGSTrayCore;
-using LGSTrayCore.MessageStructs;
+using LGSTrayPrimitives.MessageStructs;
 using System;
 
 namespace LGSTrayUI

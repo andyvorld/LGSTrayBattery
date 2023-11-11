@@ -3,7 +3,7 @@ using static LGSTrayHID.HidApi.HidApiWinApi;
 using static LGSTrayHID.HidApi.HidApiHotPlug;
 using LGSTrayHID.HidApi;
 using System.Collections.Concurrent;
-using LGSTrayCore.MessageStructs;
+using LGSTrayPrimitives.MessageStructs;
 
 namespace LGSTrayHID
 {

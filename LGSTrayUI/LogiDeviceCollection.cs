@@ -1,5 +1,5 @@
 ﻿using LGSTrayCore;
-using LGSTrayCore.MessageStructs;
+using LGSTrayPrimitives.MessageStructs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

@@ -12,6 +12,7 @@ using System.Drawing.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Runtime.InteropServices;
 using System.Resources;
+using LGSTrayPrimitives;
 
 namespace LGSTrayUI
 {

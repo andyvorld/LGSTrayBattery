@@ -1,5 +1,5 @@
-﻿using LGSTrayCore;
-using static LGSTrayCore.PowerSupplyStatus;
+﻿using LGSTrayPrimitives;
+using static LGSTrayPrimitives.PowerSupplyStatus;
 
 namespace LGSTrayHID.Features
 {

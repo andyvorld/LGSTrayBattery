@@ -1,4 +1,4 @@
-﻿namespace LGSTrayCore
+﻿namespace LGSTrayPrimitives
 {
     public enum PowerSupplyStatus : byte
     {

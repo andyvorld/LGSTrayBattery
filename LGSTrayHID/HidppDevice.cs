@@ -1,5 +1,5 @@
-﻿using LGSTrayCore;
-using LGSTrayCore.MessageStructs;
+﻿using LGSTrayPrimitives;
+using LGSTrayPrimitives.MessageStructs;
 using LGSTrayHID.Features;
 using System.Text;
 

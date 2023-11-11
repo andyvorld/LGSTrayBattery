@@ -5,12 +5,17 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayHID", "LGSTrayHID\LGSTrayHID.csproj", "{EEA4B09D-17A7-486B-B570-72751D0D6071}"
 	ProjectSection(ProjectDependencies) = postProject
-		{FAF4FA85-B52C-4587-92E7-0D55645625AB} = {FAF4FA85-B52C-4587-92E7-0D55645625AB}
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0} = {F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayCore", "LGSTrayCore\LGSTrayCore.csproj", "{FAF4FA85-B52C-4587-92E7-0D55645625AB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0} = {F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LGSTrayUI", "LGSTrayUI\LGSTrayUI.csproj", "{2C80ABC3-6A95-4ED6-9265-D901CC6607BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LGSTrayPrimitives", "LGSTrayPrimitives\LGSTrayPrimitives.csproj", "{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,6 +35,10 @@ Global
 		{2C80ABC3-6A95-4ED6-9265-D901CC6607BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C80ABC3-6A95-4ED6-9265-D901CC6607BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C80ABC3-6A95-4ED6-9265-D901CC6607BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F85B7D61-5588-4BC1-8A46-E2A6899CFBC0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
