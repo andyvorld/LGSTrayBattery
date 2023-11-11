@@ -63,7 +63,9 @@ namespace LGSTrayHID
             unsafe
             {
                 dev = HidOpenPath(deviceInfo.Path);
+#pragma warning disable CS9123 // The '&' operator should not be used on parameters or local variables in async methods.
                 _ = HidWinApiGetContainerId(dev, &containerId);
+#pragma warning restore CS9123 // The '&' operator should not be used on parameters or local variables in async methods.
 
                 Console.WriteLine(containerId.ToString());
                 Console.WriteLine("x{0:X04}", (deviceInfo).Usage);

@@ -5,8 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Swan;
 using System.Diagnostics;
 using System.Net.WebSockets;
+using System.Text.RegularExpressions;
 using Websocket.Client;
 
 namespace LGSTrayCore.Managers
@@ -26,7 +28,7 @@ namespace LGSTrayCore.Managers
         }
     }
 
-    public class GHubManager : IHostedService, IDisposable
+    public partial class GHubManager : IHostedService, IDisposable
     {
         #region IDisposable
         private bool disposedValue;
@@ -62,21 +64,20 @@ namespace LGSTrayCore.Managers
         #endregion
 
         private const string WEBSOCKET_SERVER = "ws://localhost:9010";
-        private const string DEVICE_REGEX = @"dev[0-9a-zA-Z]+";
 
-        private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
+        [GeneratedRegex(@"\/battery\/dev[0-9a-zA-Z]+\/state")]
+        private static partial Regex BatteryDeviceStateRegex();
+
         private readonly ILogiDeviceCollection _logiDeviceCollection;
         private readonly AppSettings _appSettings;
 
         protected WebsocketClient _ws = null!;
 
         public GHubManager(
-            IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber,
             ILogiDeviceCollection logiDeviceCollection,
             IOptions<AppSettings> appSettings
         )
         {
-            _subscriber = subscriber;
             _logiDeviceCollection = logiDeviceCollection;
             _appSettings = appSettings.Value;
         }
@@ -159,13 +160,21 @@ namespace LGSTrayCore.Managers
         {
             GHUBMsg ghubmsg = GHUBMsg.DeserializeJson(msg.Text);
 
-            if (ghubmsg.Path == "/devices/state/changed")
+            switch (ghubmsg.Path)
             {
-
-            }
-            else if (ghubmsg.Path == "/devices/list")
-            {
-                _loadDevices(ghubmsg.Payload);
+                case "/devices/list":
+                    {
+                        _loadDevices(ghubmsg.Payload);
+                        break;
+                    }
+                case "/battery/state/changed":
+                case { } when BatteryDeviceStateRegex().Match(ghubmsg.Path).Success:
+                    {
+                        Console.WriteLine(ghubmsg.Path);
+                        _parseBatteryUpdate(ghubmsg.Payload);
+                        break;
+                    }
+                default: break;
             }
         }
 
@@ -180,12 +189,20 @@ namespace LGSTrayCore.Managers
                         deviceType = DeviceType.Mouse;
                     }
 
+                    string deviceId = deviceToken["id"]!.ToString();
                     _logiDeviceCollection.OnInitMessage(new(
-                        deviceToken["id"]!.ToString(),
+                        deviceId,
                         deviceToken["extendedDisplayName"]!.ToString(),
                         (bool) deviceToken["capabilities"]!["hasBatteryStatus"]!,
                         deviceType
                     ));
+
+                    _ws.Send(JsonConvert.SerializeObject(new
+                    {
+                        msgId = "",
+                        verb = "GET",
+                        path = $"/battery/{deviceId}/state"
+                    }));
                 }
             }
             catch (Exception e)
@@ -195,6 +212,21 @@ namespace LGSTrayCore.Managers
                     Debug.WriteLine("Failed to parse device list, LGHUB_agent is probably starting up");
                 }
             }
+        }
+
+        protected void _parseBatteryUpdate(JObject payload)
+        {
+            try
+            {
+                _logiDeviceCollection.OnUpdateMessage(new(
+                    payload["deviceId"]!.ToString(),
+                    payload["percentage"]!.ToObject<int>(),
+                    payload["charging"]!.ToBoolean() ? PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING : PowerSupplyStatus.POWER_SUPPLY_STATUS_NOT_CHARGING,
+                    0,
+                    DateTime.Now
+                ));
+            }
+            catch { }
         }
     }
 }

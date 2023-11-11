@@ -1,12 +1,7 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 using LGSTrayCore;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace LGSTrayUI
@@ -20,7 +15,7 @@ namespace LGSTrayUI
             _userSettings = userSettings;
         }
 
-        public LogiDeviceIcon CreateDeviceIcon(LogiDevice device, Action<LogiDeviceIcon>? config = null) 
+        public LogiDeviceIcon CreateDeviceIcon(LogiDevice device, Action<LogiDeviceIcon>? config = null)
         {
             LogiDeviceIcon output = new(device, _userSettings);
             config?.Invoke(output);
@@ -29,7 +24,7 @@ namespace LGSTrayUI
         }
     }
 
-    public class LogiDeviceIcon : IDisposable
+    public partial class LogiDeviceIcon : UserControl, IDisposable
     {
         public static int RefCount = 0;
 
@@ -49,20 +44,20 @@ namespace LGSTrayUI
 
         #region IDisposable
         private bool disposedValue;
-
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    _taskbarIcon.Dispose();
+                    // TODO: dispose managed state (managed objects)
                     SubRef();
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
                 // TODO: set large fields to null
                 disposedValue = true;
+                taskbarIcon.Dispose();
             }
         }
 
@@ -81,26 +76,17 @@ namespace LGSTrayUI
         }
         #endregion
 
-        private readonly TaskbarIcon _taskbarIcon;
-        private readonly LogiDevice _logiDevice;
-        //private readonly NotifyIconViewModel _notifyIconViewModel;
-
         private Action<TaskbarIcon, LogiDevice> _drawBatteryIcon;
 
         public LogiDeviceIcon(LogiDevice device, UserSettingsWrapper userSettings)
         {
+            InitializeComponent();
+
             AddRef();
 
-            _taskbarIcon = new()
-            {
-                DataContext = device,
-                ToolTipText = device.ToolTipString
-            };
-            _taskbarIcon.ContextMenu = (ContextMenu)_taskbarIcon.FindResource("SysTrayMenu");
+            DataContext = device;
 
-            _logiDevice = device;
-            _logiDevice.PropertyChanged += LogiDevicePropertyChanged;
-
+            device.PropertyChanged += LogiDevicePropertyChanged;
             userSettings.PropertyChanged += NotifyIconViewModelPropertyChanged;
             _drawBatteryIcon = userSettings.NumericDisplay ? BatteryIconDrawing.DrawNumeric : BatteryIconDrawing.DrawIcon;
             DrawBatteryIcon();
@@ -122,18 +108,11 @@ namespace LGSTrayUI
 
         private void LogiDevicePropertyChanged(object? s, PropertyChangedEventArgs e)
         {
-            if (s is not LogiDevice _logiDevice)
+            if (s is not LogiDevice)
             {
                 return;
             }
 
-            if (e.PropertyName == nameof(LogiDevice.ToolTipString))
-            {
-                _taskbarIcon?.Dispatcher.Invoke(() =>
-                {
-                    _taskbarIcon.ToolTipText = _logiDevice.ToolTipString;
-                });
-            }
             else if (e.PropertyName == nameof(LogiDevice.BatteryPercentage))
             {
                 DrawBatteryIcon();
@@ -142,7 +121,7 @@ namespace LGSTrayUI
 
         private void DrawBatteryIcon()
         {
-            _taskbarIcon?.Dispatcher.BeginInvoke(() => _drawBatteryIcon(_taskbarIcon, _logiDevice));
+            _ = Dispatcher.BeginInvoke(() => _drawBatteryIcon(taskbarIcon, (LogiDevice)DataContext));
         }
     }
 }

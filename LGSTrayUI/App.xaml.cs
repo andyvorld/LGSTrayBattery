@@ -14,8 +14,6 @@ namespace LGSTrayUI
     /// </summary>
     public partial class App : Application
     {
-        //TaskbarIcon notifyIcon = null!;
-
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
