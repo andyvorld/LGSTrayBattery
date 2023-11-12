@@ -225,7 +225,7 @@ namespace LGSTrayHID
 
         public async Task<bool> Ping20(byte deviceId, int timeout = 100, bool ignoreHIDPP10 = true)
         {
-            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+            ObjectDisposedException.ThrowIf(_disposeCount > 0, this);
 
             byte pingPayload = ++PING_PAYLOAD;
             Hidpp20 buffer = new byte[7] { 0x10, deviceId, 0x00, 0x10 | SW_ID, 0x00, 0x00, pingPayload };
