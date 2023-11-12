@@ -19,12 +19,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="hidapi.dll">
+    <ContentWithTargetPath Include="libhidapi/*.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="hidapi.pdb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+      <TargetPath>%(Filename)%(Extension)</TargetPath>
+    </ContentWithTargetPath>
+    <None Include="libhidapi/*.dll" />
   </ItemGroup>
 
 </Project>
