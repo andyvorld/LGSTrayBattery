@@ -1,17 +1,11 @@
 ﻿using LGSTrayCore;
 using LGSTrayUI.Properties;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Runtime.InteropServices;
-using System.Resources;
 using LGSTrayPrimitives;
 
 namespace LGSTrayUI
@@ -53,37 +47,13 @@ namespace LGSTrayUI
             //};
         }
 
-        private static Bitmap _GetBatteryValue(LogiDevice device)
-        {
-            if (device.BatteryPercentage < 0)
-            {
-                return Missing;
-            }
-            else if (device.BatteryPercentage < 10)
-            {
-                return Resources.Indicator_10;
-            }
-            else if (device.BatteryPercentage < 30)
-            {
-                return Resources.Indicator_30;
-            }
-            else if (device.BatteryPercentage < 50)
-            {
-                return Resources.Indicator_50;
-            }
-            else
-            {
-                return Resources.Indicator_100;
-            }
-        }
-
         private static Bitmap GetBatteryValue(LogiDevice device) => device.BatteryPercentage switch
         {
             { } when device.PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING => Charging,
             <0 => Missing,
             <10 => Resources.Indicator_10,
-            <30 => Resources.Indicator_30,
-            <50 => Resources.Indicator_50,
+            <50 => Resources.Indicator_30,
+            <85 => Resources.Indicator_50,
             _ => Resources.Indicator_100
         };
 
