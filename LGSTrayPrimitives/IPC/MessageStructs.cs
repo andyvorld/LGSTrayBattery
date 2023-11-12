@@ -36,7 +36,7 @@ public class UpdateMessage(
     double batteryPercentage,
     PowerSupplyStatus powerSupplyStatus,
     int batteryMVolt,
-    DateTime updateTime
+    DateTimeOffset updateTime
 ) : IPCMessage(deviceId)
 {
     [Key(1)]
@@ -49,5 +49,5 @@ public class UpdateMessage(
     public int batteryMVolt = batteryMVolt;
 
     [Key(4)]
-    public DateTime updateTime = updateTime;
+    public DateTimeOffset updateTime = updateTime;
 }

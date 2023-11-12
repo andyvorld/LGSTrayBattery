@@ -33,7 +33,7 @@ namespace LGSTrayCore
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
-        private DateTime _lastUpdate = DateTime.MinValue;
+        private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
         public string ToolTipString
         {
@@ -56,7 +56,7 @@ namespace LGSTrayCore
             }
         }
 
-        partial void OnLastUpdateChanged(DateTime value)
+        partial void OnLastUpdateChanged(DateTimeOffset value)
         {
             Console.WriteLine(ToolTipString);
         }
