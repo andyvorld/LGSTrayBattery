@@ -2,7 +2,7 @@
 
 namespace LGSTrayHID.Features
 {
-    public readonly struct BatteryUpdateReturn
+    public readonly record struct BatteryUpdateReturn
     {
         public readonly double batteryPercentage;
         public readonly PowerSupplyStatus status;

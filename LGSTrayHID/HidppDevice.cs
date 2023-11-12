@@ -16,6 +16,7 @@ namespace LGSTrayHID
         public int DeviceType { get; private set; } = 3;
         public string Identifier { get; private set; } = string.Empty;
 
+        private BatteryUpdateReturn lastBatteryReturn;
         private DateTimeOffset lastUpdate = DateTimeOffset.MinValue;
 
         private readonly HidppDevices _parent;
@@ -187,7 +188,7 @@ namespace LGSTrayHID
             });
         }
 
-        public async Task UpdateBattery()
+        public async Task UpdateBattery(bool forceIpcUpdate = false)
         {
             if (Parent.Disposed) { return; }
             if (_getBatteryAsync == null) { return; }
@@ -197,8 +198,15 @@ namespace LGSTrayHID
             if (ret == null) { return; }
 
             var batStatus = ret.Value;
-
             lastUpdate = DateTimeOffset.Now;
+
+            if (forceIpcUpdate || (batStatus == lastBatteryReturn))
+            {
+                // Don't report if no change
+                return;
+            }
+
+            lastBatteryReturn = batStatus;
             HidppManagerContext.Instance.SignalDeviceEvent(
                 IPCMessageType.UPDATE,
                 new UpdateMessage(Identifier, batStatus.batteryPercentage, batStatus.status, batStatus.batteryMVolt, lastUpdate)
