@@ -1,20 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Hardcodet.Wpf.TaskbarNotification;
 using LGSTrayCore;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace LGSTrayUI
 {
@@ -37,6 +32,14 @@ namespace LGSTrayUI
             {
                 _userSettings.NumericDisplay = value;
                 OnPropertyChanged();
+            }
+        }
+
+        public static string AssemblyVersion
+        {
+            get
+            {
+                return "v" + Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+')[0] ?? "Missing";
             }
         }
 

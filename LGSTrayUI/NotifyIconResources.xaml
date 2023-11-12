@@ -27,6 +27,8 @@
 		</MenuItem>
         <MenuItem Header="Display Numeric Icon" IsCheckable="True" IsChecked="{Binding NumericDisplay}" />
         <Separator />
+        <MenuItem Header="{Binding AssemblyVersion}" IsEnabled="False" />
+        <Separator />
         <MenuItem Header="Exit" Command="{Binding ExitApplicationCommand}" />
     </ContextMenu>
 
