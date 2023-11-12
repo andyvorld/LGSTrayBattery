@@ -9,6 +9,7 @@ using Winmdroot = Windows.Win32;
 using System.Windows;
 using System;
 using System.Diagnostics;
+using LGSTrayPrimitives.IPC;
 
 namespace LGSTrayUI
 {
@@ -103,11 +104,7 @@ namespace LGSTrayUI
                     var configurationRoot = ctx.Configuration;
                     services.Configure<AppSettings>(configurationRoot);
 
-                    services.AddMessagePipe();
-                    services.AddMessagePipeNamedPipeInterprocess("LGSTray", config =>
-                    {
-                        config.HostAsServer = true;
-                    });
+                    services.AddLGSMessagePipe(true);
                     services.AddSingleton<UserSettingsWrapper>();
 
                     services.AddSingleton<LogiDeviceIconFactory>();

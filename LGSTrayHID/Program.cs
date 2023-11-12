@@ -13,6 +13,7 @@ using System.Diagnostics;
 using MessagePipe;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using LGSTrayPrimitives.IPC;
 
 namespace LGSTrayHID
 {
@@ -116,8 +117,7 @@ namespace LGSTrayHID
                 })
                 .ConfigureServices((ctx, services) =>
                 {
-                    services.AddMessagePipe();
-                    services.AddMessagePipeNamedPipeInterprocess("LGSTray");
+                    services.AddLGSMessagePipe();
                     services.AddHostedService<HidppManagerService>();
                 })
                 .Build();
