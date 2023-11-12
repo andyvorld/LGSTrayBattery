@@ -2,9 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using LGSTrayCore;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,6 +45,42 @@ namespace LGSTrayUI
                 return "v" + Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+')[0] ?? "Missing";
             }
         }
+
+        private bool? _autoStart = null;
+        public bool AutoStart
+        {
+            get
+            {
+                if (_autoStart == null)
+                {
+                    RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                    _autoStart = registryKey?.GetValue("LGSTray") != null;
+                }
+
+                return _autoStart ?? false;
+            }
+            set
+            {
+                RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
+                if (registryKey == null)
+                {
+                    return;
+                }
+
+                if (value)
+                {
+                    registryKey.SetValue("LGSTray", Path.Combine(AppContext.BaseDirectory, Environment.ProcessPath!));
+                }
+                else
+                {
+                    registryKey.DeleteValue("LGSTray", false);
+                }
+
+                _autoStart = value;
+            }
+        }
+
 
         private readonly Dictionary<string, LogiDeviceIcon> _taskbarIcons = new();
 
