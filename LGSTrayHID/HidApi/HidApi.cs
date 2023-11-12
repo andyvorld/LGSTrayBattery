@@ -1,8 +1,19 @@
-﻿//global using HidDevicePtr = System.IntPtr;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace LGSTrayHID.HidApi
 {
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct HidApiVersion
+    {
+        readonly int Major;
+        readonly int Minor;
+        readonly int Patch;
+
+        public override readonly string ToString()
+        {
+            return $"{Major}.{Minor}.{Patch}";
+        }
+    }
 
     internal static partial class HidApi
     {
@@ -19,7 +30,12 @@ namespace LGSTrayHID.HidApi
         internal static unsafe partial void HidFreeEnumeration(HidDeviceInfo* devs);
 
         [LibraryImport("hidapi", EntryPoint = "hid_open_path")]
-        internal static unsafe partial nint HidOpenPath(byte* path);
+        private static unsafe partial nint _HidOpenPath(byte* path);
+
+        internal static unsafe nint HidOpenPath(ref HidDeviceInfo dev)
+        {
+            return _HidOpenPath(dev.Path);
+        }
 
         [LibraryImport("hidapi", EntryPoint = "hid_close")]
         internal static unsafe partial void HidClose(nint dev);
@@ -29,5 +45,13 @@ namespace LGSTrayHID.HidApi
 
         [LibraryImport("hidapi", EntryPoint = "hid_read_timeout")]
         internal static unsafe partial int HidReadTimeOut(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, nuint length, int milliseconds);
+
+        [LibraryImport("hidapi", EntryPoint = "hid_version")]
+        private static unsafe partial HidApiVersion* _HidVersion();
+
+        internal unsafe static HidApiVersion HidVersion()
+        {
+            return *_HidVersion();
+        }
     }
 }
