@@ -28,7 +28,7 @@ namespace LGSTrayCore.Managers
         }
     }
 
-    public partial class GHubManager : IHostedService, IDisposable
+    public partial class GHubManager : IDeviceManager, IHostedService, IDisposable
     {
         #region IDisposable
         private bool disposedValue;
@@ -39,7 +39,8 @@ namespace LGSTrayCore.Managers
             {
                 if (disposing)
                 {
-                    _ws.Dispose();
+                    _ws?.Dispose();
+                    _ws = null;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
@@ -71,7 +72,7 @@ namespace LGSTrayCore.Managers
         private readonly ILogiDeviceCollection _logiDeviceCollection;
         private readonly AppSettings _appSettings;
 
-        protected WebsocketClient _ws = null!;
+        protected WebsocketClient? _ws;
 
         public GHubManager(
             ILogiDeviceCollection logiDeviceCollection,
@@ -84,11 +85,6 @@ namespace LGSTrayCore.Managers
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (!_appSettings.DeviceManager.GHUB)
-            {
-                return;
-            }
-
             var url = new Uri(WEBSOCKET_SERVER);
 
             var factory = new Func<ClientWebSocket>(() =>
@@ -143,12 +139,14 @@ namespace LGSTrayCore.Managers
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            _ws?.Dispose();
+
+            return Task.CompletedTask;
         }
 
         public void LoadDevices()
         {
-            _ws.Send(JsonConvert.SerializeObject(new
+            _ws?.Send(JsonConvert.SerializeObject(new
             {
                 msgId = "",
                 verb = "GET",
@@ -197,7 +195,7 @@ namespace LGSTrayCore.Managers
                         deviceType
                     ));
 
-                    _ws.Send(JsonConvert.SerializeObject(new
+                    _ws?.Send(JsonConvert.SerializeObject(new
                     {
                         msgId = "",
                         verb = "GET",
@@ -227,6 +225,13 @@ namespace LGSTrayCore.Managers
                 ));
             }
             catch { }
+        }
+
+        public async void RediscoverDevices()
+        {
+            using var cts = new CancellationTokenSource();
+            await StopAsync(cts.Token);
+            await StartAsync(cts.Token);
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace LGSTrayCore.Managers
 {
-    public class LGSTrayHIDManager : IHostedService, IDisposable
+    public class LGSTrayHIDManager : IDeviceManager, IHostedService, IDisposable
     {
         #region IDisposable
         private Func<Task>? _diposeSubs;
@@ -43,6 +43,7 @@ namespace LGSTrayCore.Managers
         #endregion
 
         private readonly CancellationTokenSource _cts = new();
+        private CancellationTokenSource? _daemonCts;
 
         private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
         private readonly ILogiDeviceCollection _logiDeviceCollection;
@@ -59,8 +60,10 @@ namespace LGSTrayCore.Managers
             _appSettings = appSettings.Value;
         }
 
-        private async Task DaemonLoop()
+        private async Task<int> DaemonLoop()
         {
+            _daemonCts = new();
+
             using Process proc = new();
             proc.StartInfo = new()
             {
@@ -76,7 +79,8 @@ namespace LGSTrayCore.Managers
 
             try
             {
-                await proc.WaitForExitAsync(_cts.Token);
+                using var cts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, _daemonCts.Token);
+                await proc.WaitForExitAsync(cts.Token);
             }
             catch (Exception)
             {
@@ -85,17 +89,18 @@ namespace LGSTrayCore.Managers
                     proc.Kill();
                 }
             }
+            finally
+            {
+                _daemonCts.Dispose();
+                _daemonCts = null;
+            }
 
             await Task.Delay(1000);
+            return proc.ExitCode;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            if (!_appSettings.DeviceManager.Native)
-            {
-                return;
-            }
-
             var sub1 = await _subscriber.SubscribeAsync(
                 IPCMessageType.INIT,
                 x =>
@@ -129,9 +134,10 @@ namespace LGSTrayCore.Managers
                 while (!_cts.Token.IsCancellationRequested)
                 {
                     DateTime then = DateTime.Now;
-                    await DaemonLoop();
+                    int ret = await DaemonLoop();
 
-                    if ((DateTime.Now - then).TotalSeconds < 20)
+                    // Daemon returns -1 on .Kill(), assume its user
+                    if ((ret != -1) || (DateTime.Now - then).TotalSeconds < 20)
                     {
                         fastFailCount++;
                     }
@@ -156,6 +162,11 @@ namespace LGSTrayCore.Managers
             _cts.Cancel();
 
             return Task.CompletedTask;
+        }
+
+        public void RediscoverDevices()
+        {
+            _daemonCts?.Cancel();
         }
     }
 }

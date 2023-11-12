@@ -1,7 +1,6 @@
 ﻿using LGSTrayCore;
 using LGSTrayCore.HttpServer;
 using LGSTrayCore.Managers;
-using MessagePipe;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -113,8 +112,8 @@ namespace LGSTrayUI
                     services.AddSingleton<HttpControllerFactory>();
                     services.AddHostedService<HttpServer>();
 
-                    services.AddHostedService<LGSTrayHIDManager>();
-                    services.AddHostedService<GHubManager>();
+                    services.AddIDeviceManager<LGSTrayHIDManager>(configurationRoot);
+                    services.AddIDeviceManager<GHubManager>(configurationRoot);
                     services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
 
                     services.AddSingleton<MainTaskbarIconWrapper>();

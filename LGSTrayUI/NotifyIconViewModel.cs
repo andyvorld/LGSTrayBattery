@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LGSTrayCore;
+using LGSTrayCore.Managers;
+using MessagePipe;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
 using System;
@@ -19,7 +21,7 @@ namespace LGSTrayUI
     public partial class NotifyIconViewModel : ObservableObject, IHostedService
     {
         private readonly MainTaskbarIconWrapper _mainTaskbarIconWrapper;
-        
+
         [ObservableProperty]
         private ObservableCollection<LogiDeviceViewModel> _logiDevices;
 
@@ -81,16 +83,24 @@ namespace LGSTrayUI
             }
         }
 
+        [ObservableProperty]
+        private bool _rediscoverDevicesEnabled = true;
 
-        private readonly Dictionary<string, LogiDeviceIcon> _taskbarIcons = new();
+        private readonly IEnumerable<IDeviceManager> _deviceManagers;
 
-        public NotifyIconViewModel(MainTaskbarIconWrapper mainTaskbarIconWrapper, ILogiDeviceCollection logiDeviceCollection, UserSettingsWrapper userSettings)
+        public NotifyIconViewModel(
+            MainTaskbarIconWrapper mainTaskbarIconWrapper,
+            ILogiDeviceCollection logiDeviceCollection,
+            UserSettingsWrapper userSettings,
+            IEnumerable<IDeviceManager> deviceManagers
+        )
         {
             _mainTaskbarIconWrapper = mainTaskbarIconWrapper;
             ((ContextMenu)Application.Current.FindResource("SysTrayMenu")).DataContext = this;
 
             _logiDevices = (logiDeviceCollection as LogiDeviceCollection)!.Devices;
             _userSettings = userSettings;
+            _deviceManagers = deviceManagers;
         }
 
         [RelayCommand]
@@ -107,7 +117,7 @@ namespace LGSTrayUI
                 return;
             }
 
-            LogiDevice logiDevice = (LogiDevice) menuItem.DataContext;
+            LogiDevice logiDevice = (LogiDevice)menuItem.DataContext;
 
             if (menuItem.IsChecked)
             {
@@ -117,6 +127,22 @@ namespace LGSTrayUI
             {
                 _userSettings.RemoveDevice(logiDevice.DeviceId);
             }
+        }
+
+        [RelayCommand]
+        private async void RediscoverDevices()
+        {
+            Console.WriteLine("Rediscover");
+            RediscoverDevicesEnabled = false;
+
+            foreach (var manager in _deviceManagers)
+            {
+                manager.RediscoverDevices();
+            }
+
+            await Task.Delay(10_000);
+
+            RediscoverDevicesEnabled = true;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)

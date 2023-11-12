@@ -14,10 +14,12 @@ namespace LGSTrayHID
 
             HidppManagerContext.Instance.HidppDeviceEvent += async (type, message) =>
             {
+#if DEBUG
                 if (message is InitMessage initMessage)
                 {
                     Console.WriteLine(initMessage.deviceName);
                 }
+#endif
 
                 await _publisher.PublishAsync(type, message);
             };

@@ -2,28 +2,29 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:tb="http://www.hardcodet.net/taskbar">
 	<ContextMenu x:Shared="True" x:Key="SysTrayMenu">
-		<MenuItem Header="Devices" ItemsSource="{Binding LogiDevices}">
-			<MenuItem.ItemContainerStyle>
-				<Style TargetType="MenuItem">
-					<Setter Property="IsCheckable" Value="True"/>
+        <MenuItem Header="Devices" ItemsSource="{Binding LogiDevices}">
+            <MenuItem.ItemContainerStyle>
+                <Style TargetType="MenuItem">
+                    <Setter Property="IsCheckable" Value="True"/>
                     <Setter Property="IsChecked" Value="{Binding IsChecked}"/>
-					<Setter Property="StaysOpenOnClick" Value="True"/>
+                    <Setter Property="StaysOpenOnClick" Value="True"/>
                     <Setter Property="Command">
                         <Setter.Value>
                             <Binding Path="DataContext.DeviceClickedCommand" RelativeSource="{RelativeSource AncestorType=ContextMenu}"/>
                         </Setter.Value>
                     </Setter>
                     <Setter Property="CommandParameter" Value="{Binding RelativeSource={RelativeSource Self}}" />
-				</Style>
-			</MenuItem.ItemContainerStyle>
-			<MenuItem.ItemTemplate>
-				<DataTemplate>
-					<StackPanel Orientation="Horizontal">
-						<TextBlock Text="{Binding DeviceName}"/>
-					</StackPanel>
-				</DataTemplate>
-			</MenuItem.ItemTemplate>
-		</MenuItem>
+                </Style>
+            </MenuItem.ItemContainerStyle>
+            <MenuItem.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding DeviceName}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </MenuItem.ItemTemplate>
+        </MenuItem>
+        <MenuItem Header="Rediscover Devices" Command="{Binding RediscoverDevicesCommand}" IsEnabled="{Binding RediscoverDevicesEnabled}"/>
         <MenuItem Header="Display Numeric Icon" IsCheckable="True" IsChecked="{Binding NumericDisplay}" StaysOpenOnClick="True" />
         <MenuItem Header="Autostart with Windows" IsCheckable="True" IsChecked="{Binding AutoStart}" StaysOpenOnClick="True" />
         <Separator />

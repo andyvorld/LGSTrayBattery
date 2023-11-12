@@ -130,6 +130,8 @@ namespace LGSTrayHID
                 Identifier = serialNumber ?? $"{unitId}-{modelId}";
 
             }
+
+#if DEBUG
             Console.WriteLine("---");
             Console.WriteLine(DeviceName + " Ready");
             Console.WriteLine(Identifier);
@@ -146,6 +148,7 @@ namespace LGSTrayHID
                 }
             }
             Console.WriteLine("---");
+#endif
 
             if (FeatureMap.ContainsKey(0x1000))
             {

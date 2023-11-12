@@ -28,7 +28,6 @@ namespace LGSTrayHID
         static HidppManagerContext()
         {
             _ = HidInit();
-            Console.WriteLine(HidVersion());
         }
 
         public void SignalDeviceEvent(IPCMessageType messageType, IPCMessage message)
@@ -57,16 +56,17 @@ namespace LGSTrayHID
             }
 
             string devPath = (deviceInfo).GetPath();
-            Console.WriteLine(devPath);
 
             HidDevicePtr dev = HidOpenPath(ref deviceInfo);
             _ = HidWinApiGetContainerId(dev, out Guid containerId);
 
+#if DEBUG
+            Console.WriteLine(devPath);
             Console.WriteLine(containerId.ToString());
             Console.WriteLine("x{0:X04}", (deviceInfo).Usage);
             Console.WriteLine("x{0:X04}", (deviceInfo).UsagePage);
             Console.WriteLine();
-
+#endif
 
             if (!_deviceMap.ContainsKey(containerId))
             {

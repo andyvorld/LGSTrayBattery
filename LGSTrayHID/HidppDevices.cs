@@ -290,7 +290,9 @@ namespace LGSTrayHID
                 return;
             }
             
+#if DEBUG
             Console.WriteLine("Device ready");
+#endif
 
             Thread t1 = new(async () => { await ReadThread(_devShort, 7); })
             {
