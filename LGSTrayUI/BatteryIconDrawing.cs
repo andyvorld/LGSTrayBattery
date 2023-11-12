@@ -27,6 +27,7 @@ namespace LGSTrayUI
         private static Bitmap Headset => CheckTheme.LightTheme ? Resources.Headset : Resources.Headset_dark;
         private static Bitmap Battery => CheckTheme.LightTheme ? Resources.Battery : Resources.Battery_dark;
         private static Bitmap Missing => CheckTheme.LightTheme ? Resources.Missing : Resources.Missing_dark;
+        private static Bitmap Charging => CheckTheme.LightTheme ? Resources.Charging : Resources.Charging_dark;
 
         private const int ImageSize = 32;
 
@@ -52,7 +53,7 @@ namespace LGSTrayUI
             //};
         }
 
-        private static Bitmap GetBatteryValue(LogiDevice device)
+        private static Bitmap _GetBatteryValue(LogiDevice device)
         {
             if (device.BatteryPercentage < 0)
             {
@@ -75,6 +76,16 @@ namespace LGSTrayUI
                 return Resources.Indicator_100;
             }
         }
+
+        private static Bitmap GetBatteryValue(LogiDevice device) => device.BatteryPercentage switch
+        {
+            { } when device.PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING => Charging,
+            <0 => Missing,
+            <10 => Resources.Indicator_10,
+            <30 => Resources.Indicator_30,
+            <50 => Resources.Indicator_50,
+            _ => Resources.Indicator_100
+        };
 
         public static void DrawUnknown(TaskbarIcon taskbarIcon)
         {
