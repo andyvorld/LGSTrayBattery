@@ -6,7 +6,12 @@ public enum IPCMessageType : byte
 {
     HEARTBEAT = 0,
     INIT,
-    UPDATE,
+    UPDATE
+}
+
+public enum IPCMessageRequestType : byte
+{
+    BATTERY_UPDATE_REQUEST = 0
 }
 
 [Union(0, typeof(InitMessage))]
@@ -50,4 +55,11 @@ public class UpdateMessage(
 
     [Key(4)]
     public DateTimeOffset updateTime = updateTime;
+}
+
+[MessagePackObject]
+public class BatteryUpdateRequestMessage()
+{
+    [Key(0)]
+    public int id;
 }

@@ -1,6 +1,7 @@
 ﻿using LGSTrayHID.HidApi;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
@@ -21,6 +22,7 @@ namespace LGSTrayHID
         private const int READ_TIMEOUT = 100;
 
         private readonly Dictionary<ushort, HidppDevice> _deviceCollection = new();
+        public IReadOnlyDictionary<ushort, HidppDevice> DeviceCollection => _deviceCollection;
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly Channel<byte[]> _channel = Channel.CreateBounded<byte[]>(new BoundedChannelOptions(5)

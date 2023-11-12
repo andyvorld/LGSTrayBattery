@@ -123,5 +123,17 @@ namespace LGSTrayHID
                 HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_LEFT, HidApiHotPlugFlag.NONE, DeviceLeft, IntPtr.Zero, (int*)IntPtr.Zero);
             }
         }
+    
+        public async Task ForceBatteryUpdates()
+        {
+            foreach (var (_, hidppDevice) in _deviceMap)
+            {
+                var tasks = hidppDevice.DeviceCollection
+                    .Select(x => x.Value)
+                    .Select(x => x.UpdateBattery(true));
+
+                await Task.WhenAll(tasks);
+            }
+        }
     }
 }
