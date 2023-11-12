@@ -47,8 +47,8 @@ namespace LGSTrayHID.Features
             {
                 status = (flags & 0x07) switch
                 {
-                    0 => POWER_SUPPLY_STATUS_FULL,
-                    1 => POWER_SUPPLY_STATUS_CHARGING,
+                    0 => POWER_SUPPLY_STATUS_CHARGING,
+                    1 => POWER_SUPPLY_STATUS_FULL,
                     2 => POWER_SUPPLY_STATUS_NOT_CHARGING,
                     _ => POWER_SUPPLY_STATUS_UNKNOWN,
                 };
