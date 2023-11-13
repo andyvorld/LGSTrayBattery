@@ -6,21 +6,16 @@ namespace LGSTrayCore.Managers;
 
 public static class IServiceExtension 
 {
-    private static bool IsManagerEnabled(AppSettings settings, Type T) => T switch
-    {
-        { } when T == typeof(GHubManager) => settings.DeviceManager.GHUB,
-        { } when T == typeof(LGSTrayHIDManager) => settings.DeviceManager.Native,
-        _ => false
-    };
-
     public static void AddIDeviceManager<T>(this IServiceCollection services, IConfiguration configs) where T : class, IDeviceManager, IHostedService
     {
         var settings = configs.Get<AppSettings>()!;
-        bool isEnabled = IsManagerEnabled(settings, typeof(T));
-        if (!isEnabled)
+        bool isEnabled = typeof(T) switch
         {
-            return;
-        }
+            { } when typeof(T) == typeof(GHubManager) => settings.DeviceManager.GHUB,
+            { } when typeof(T) == typeof(LGSTrayHIDManager) => settings.DeviceManager.Native,
+            _ => false
+        };
+        if (!isEnabled) return;
 
         services.AddSingleton<T>();
         services.AddSingleton<IDeviceManager>(p => p.GetRequiredService<T>());

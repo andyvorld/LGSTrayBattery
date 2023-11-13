@@ -14,7 +14,7 @@ namespace LGSTrayUI
         {
             BatteryIconDrawing.DrawUnknown(_taskbarIcon);
             LogiDeviceIcon.RefCountChanged += RefCountChanged;
-            _RefCountChanged(LogiDeviceIcon.RefCount);
+            OnRefCountChanged(LogiDeviceIcon.RefCount);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -47,7 +47,7 @@ namespace LGSTrayUI
             GC.SuppressFinalize(this);
         }
 
-        private void _RefCountChanged(int refCount)
+        private void OnRefCountChanged(int refCount)
         {
             _taskbarIcon.Visibility = (refCount == 0) ? Visibility.Visible : Visibility.Collapsed;
         }
@@ -59,7 +59,7 @@ namespace LGSTrayUI
                 return;
             }
 
-            _RefCountChanged(refCount);
+            OnRefCountChanged(refCount);
         }
     }
 }

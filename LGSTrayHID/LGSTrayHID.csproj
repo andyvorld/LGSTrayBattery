@@ -32,4 +32,8 @@
     <None Include="libhidapi/*.dll" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
 </Project>

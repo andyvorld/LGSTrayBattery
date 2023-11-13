@@ -41,10 +41,10 @@ namespace LGSTrayHID.HidApi
         internal static unsafe partial void HidClose(nint dev);
 
         [LibraryImport("hidapi", EntryPoint = "hid_write")]
-        internal static unsafe partial int HidWrite(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, nuint length);
+        internal static unsafe partial int HidWrite(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2), In] byte[] data, nuint length);
 
         [LibraryImport("hidapi", EntryPoint = "hid_read_timeout")]
-        internal static unsafe partial int HidReadTimeOut(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] data, nuint length, int milliseconds);
+        internal static unsafe partial int HidReadTimeOut(nint dev, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2), Out] byte[] data, nuint length, int milliseconds);
 
         [LibraryImport("hidapi", EntryPoint = "hid_version")]
         private static unsafe partial HidApiVersion* _HidVersion();

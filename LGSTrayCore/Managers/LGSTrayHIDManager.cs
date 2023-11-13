@@ -1,4 +1,5 @@
 ﻿using LGSTrayPrimitives.MessageStructs;
+using MessagePack.Resolvers;
 using MessagePipe;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -46,18 +47,15 @@ namespace LGSTrayCore.Managers
         private CancellationTokenSource? _daemonCts;
 
         private readonly IDistributedSubscriber<IPCMessageType, IPCMessage> _subscriber;
-        private readonly ILogiDeviceCollection _logiDeviceCollection;
-        private readonly AppSettings _appSettings;
+        private readonly IPublisher<IPCMessage> _deviceEventBus;
 
         public LGSTrayHIDManager(
             IDistributedSubscriber<IPCMessageType, IPCMessage> subscriber,
-            ILogiDeviceCollection logiDeviceCollection,
-            IOptions<AppSettings> appSettings
+            IPublisher<IPCMessage> deviceEventBus
         )
         {
             _subscriber = subscriber;
-            _logiDeviceCollection = logiDeviceCollection;
-            _appSettings = appSettings.Value;
+            _deviceEventBus = deviceEventBus;
         }
 
         private async Task<int> DaemonLoop()
@@ -106,7 +104,8 @@ namespace LGSTrayCore.Managers
                 x =>
                 {
                     var initMessage = (InitMessage)x;
-                    _logiDeviceCollection.OnInitMessage(initMessage);
+                    //_logiDeviceCollection.OnInitMessage(initMessage);
+                    _deviceEventBus.Publish(initMessage);
                 },
                 cancellationToken
             );
@@ -116,7 +115,8 @@ namespace LGSTrayCore.Managers
                 x =>
                 {
                     var updateMessage = (UpdateMessage)x;
-                    _logiDeviceCollection.OnUpdateMessage(updateMessage);
+                    //_logiDeviceCollection.OnUpdateMessage(updateMessage);
+                    _deviceEventBus.Publish(updateMessage);
                 },
                 cancellationToken
             );

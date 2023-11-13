@@ -25,15 +25,12 @@ namespace LGSTrayUI
 
         private const int ImageSize = 32;
 
-        private static Bitmap GetDeviceIcon(LogiDevice device)
+        private static Bitmap GetDeviceIcon(LogiDevice device) => device.DeviceType switch
         {
-            return device.DeviceType switch
-            {
-                DeviceType.Keyboard => Keyboard,
-                DeviceType.Headset => Headset,
-                _ => Mouse,
-            };
-        }
+            DeviceType.Keyboard => Keyboard,
+            DeviceType.Headset => Headset,
+            _ => Mouse,
+        };
 
         private static Color GetDeviceColor(LogiDevice device)
         {

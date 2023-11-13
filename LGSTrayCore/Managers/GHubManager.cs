@@ -69,18 +69,13 @@ namespace LGSTrayCore.Managers
         [GeneratedRegex(@"\/battery\/dev[0-9a-zA-Z]+\/state")]
         private static partial Regex BatteryDeviceStateRegex();
 
-        private readonly ILogiDeviceCollection _logiDeviceCollection;
-        private readonly AppSettings _appSettings;
+        private readonly IPublisher<IPCMessage> _deviceEventBus;
 
         protected WebsocketClient? _ws;
 
-        public GHubManager(
-            ILogiDeviceCollection logiDeviceCollection,
-            IOptions<AppSettings> appSettings
-        )
+        public GHubManager(IPublisher<IPCMessage> deviceEventBus)
         {
-            _logiDeviceCollection = logiDeviceCollection;
-            _appSettings = appSettings.Value;
+            _deviceEventBus = deviceEventBus;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -162,21 +157,21 @@ namespace LGSTrayCore.Managers
             {
                 case "/devices/list":
                     {
-                        _loadDevices(ghubmsg.Payload);
+                        LoadDevices(ghubmsg.Payload);
                         break;
                     }
                 case "/battery/state/changed":
                 case { } when BatteryDeviceStateRegex().Match(ghubmsg.Path).Success:
                     {
                         Console.WriteLine(ghubmsg.Path);
-                        _parseBatteryUpdate(ghubmsg.Payload);
+                        ParseBatteryUpdate(ghubmsg.Payload);
                         break;
                     }
                 default: break;
             }
         }
 
-        protected void _loadDevices(JObject payload)
+        protected void LoadDevices(JObject payload)
         {
             try
             {
@@ -188,7 +183,7 @@ namespace LGSTrayCore.Managers
                     }
 
                     string deviceId = deviceToken["id"]!.ToString();
-                    _logiDeviceCollection.OnInitMessage(new(
+                    _deviceEventBus.Publish(new InitMessage(
                         deviceId,
                         deviceToken["extendedDisplayName"]!.ToString(),
                         (bool) deviceToken["capabilities"]!["hasBatteryStatus"]!,
@@ -212,11 +207,11 @@ namespace LGSTrayCore.Managers
             }
         }
 
-        protected void _parseBatteryUpdate(JObject payload)
+        protected void ParseBatteryUpdate(JObject payload)
         {
             try
             {
-                _logiDeviceCollection.OnUpdateMessage(new(
+                _deviceEventBus.Publish(new UpdateMessage(
                     payload["deviceId"]!.ToString(),
                     payload["percentage"]!.ToObject<int>(),
                     payload["charging"]!.ToBoolean() ? PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING : PowerSupplyStatus.POWER_SUPPLY_STATUS_NOT_CHARGING,
