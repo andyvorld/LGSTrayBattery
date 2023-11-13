@@ -5,7 +5,7 @@ namespace LGSTrayHID.Features
 {
     public static class Battery1001
     {
-        static readonly int[] _mvLUT = new[] {
+        static readonly int[] _mvLUT = [
             4186, 4156, 4143, 4133, 4122, 4113, 4103, 4094, 4086, 4075,
             4067, 4059, 4051, 4043, 4035, 4027, 4019, 4011, 4003, 3997,
             3989, 3983, 3976, 3969, 3961, 3955, 3949, 3942, 3935, 3929,
@@ -16,7 +16,7 @@ namespace LGSTrayHID.Features
             3751, 3748, 3744, 3741, 3737, 3734, 3730, 3726, 3724, 3720,
             3717, 3714, 3710, 3706, 3702, 3697, 3693, 3688, 3683, 3677,
             3671, 3666, 3662, 3658, 3654, 3646, 3633, 3612, 3579, 3537
-        };
+        ];
 
         private static double LookupBatPercent(int mv)
         {

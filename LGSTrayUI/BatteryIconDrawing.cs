@@ -76,12 +76,11 @@ namespace LGSTrayUI
             using var wrapMode = new ImageAttributes();
             wrapMode.SetWrapMode(WrapMode.TileFlipXY);
 
-            Bitmap[] layers = new Bitmap[]
-            {
+            Bitmap[] layers = [
                 GetBatteryValue(device),
                 Battery,
                 GetDeviceIcon(device),
-            };
+            ];
 
             foreach (var image in layers)
             {

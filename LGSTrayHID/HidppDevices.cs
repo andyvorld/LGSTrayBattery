@@ -309,7 +309,7 @@ namespace LGSTrayHID
             byte[] ret;
 
             // Read number of devices on reciever
-            ret = await WriteRead10(_devShort, new byte[7] { 0x10, 0xFF, 0x81, 0x02, 0x00, 0x00, 0x00 }, 1000);
+            ret = await WriteRead10(_devShort, [0x10, 0xFF, 0x81, 0x02, 0x00, 0x00, 0x00], 1000);
             byte numDeviceFound = 0;
             if ((ret[2] == 0x81) && (ret[3] == 0x02))
             {
@@ -319,7 +319,7 @@ namespace LGSTrayHID
             if (numDeviceFound > 0)
             {
                 // Force arrival announce
-                ret = await WriteRead10(_devShort, new byte[7] { 0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00 }, 1000);
+                ret = await WriteRead10(_devShort, [0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00], 1000);
             }
 
             await Task.Delay(500);
