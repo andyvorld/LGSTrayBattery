@@ -89,6 +89,7 @@ namespace LGSTrayUI
 
             device.PropertyChanged += LogiDevicePropertyChanged;
             userSettings.PropertyChanged += NotifyIconViewModelPropertyChanged;
+            CheckTheme.ThemeChanged += (_, _) => DrawBatteryIcon();
             _drawBatteryIcon = userSettings.NumericDisplay ? BatteryIconDrawing.DrawNumeric : BatteryIconDrawing.DrawIcon;
             DrawBatteryIcon();
         }

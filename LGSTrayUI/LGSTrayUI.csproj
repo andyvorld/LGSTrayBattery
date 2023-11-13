@@ -31,6 +31,7 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="7.0.0" />
+    <PackageReference Include="System.Management" Version="7.0.2" />
     <PackageReference Include="Websocket.Client" Version="4.6.1" />
   </ItemGroup>
 

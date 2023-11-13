@@ -1,19 +1,18 @@
 ﻿using Microsoft.Win32;
+using System.ComponentModel;
+using System.Globalization;
+using System.Management;
+using System.Security.Principal;
 
 namespace LGSTrayUI
 {
-    static class CheckTheme
+    public static class CheckTheme
     {
-        public static bool LightTheme
-        {
-            get
-            {
-                var regPath = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", false);
-                int regFlag = (int) regPath!.GetValue("SystemUsesLightTheme", 0);
+        private const string RegistryKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
+        private const string RegistryValueName = "SystemUsesLightTheme";
 
-                return (regFlag != 0);
-            }
-        }
+        private static bool _lightTheme = true;
+        public static bool LightTheme => _lightTheme;
 
         public static string ThemeSuffix
         {
@@ -21,6 +20,48 @@ namespace LGSTrayUI
             {
                 return LightTheme ? "" : "_dark";
             }
+        }
+
+        public static event PropertyChangedEventHandler? ThemeChanged;
+
+        static CheckTheme()
+        {
+            var currentUser = WindowsIdentity.GetCurrent();
+            string query = string.Format(
+                CultureInfo.InvariantCulture,
+                @"SELECT * FROM RegistryValueChangeEvent WHERE Hive = 'HKEY_USERS' AND KeyPath = '{0}\\{1}' AND ValueName = '{2}'",
+                currentUser.User!.Value,
+                RegistryKeyPath.Replace(@"\", @"\\"),
+                RegistryValueName);
+
+            try
+            {
+                var watcher = new ManagementEventWatcher(query);
+                watcher.EventArrived += Watcher_EventArrived;
+
+                watcher.Start();
+                UpdateThemeStatus();
+            }
+            catch
+            {
+                // Fails on Win7
+                _lightTheme = false;
+            }
+
+        }
+
+        private static void UpdateThemeStatus()
+        {
+            var regPath = Registry.CurrentUser.OpenSubKey(RegistryKeyPath, false);
+            int regFlag = (int)regPath!.GetValue(RegistryValueName, 0);
+
+            _lightTheme = regFlag != 0;
+            ThemeChanged?.Invoke(typeof(CheckTheme), new(nameof(LightTheme)));
+        }
+
+        private static void Watcher_EventArrived(object sender, EventArrivedEventArgs e)
+        {
+            UpdateThemeStatus();
         }
     }
 }
