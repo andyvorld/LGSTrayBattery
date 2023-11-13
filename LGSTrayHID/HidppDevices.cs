@@ -21,7 +21,7 @@ namespace LGSTrayHID
         private bool _isReading = true;
         private const int READ_TIMEOUT = 100;
 
-        private readonly Dictionary<ushort, HidppDevice> _deviceCollection = new();
+        private readonly Dictionary<ushort, HidppDevice> _deviceCollection = [];
         public IReadOnlyDictionary<ushort, HidppDevice> DeviceCollection => _deviceCollection;
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -146,7 +146,7 @@ namespace LGSTrayHID
             bool locked = await _semaphore.WaitAsync(100);
             if (!locked)
             {
-                return Array.Empty<byte>();
+                return [];
             }
 
             try
@@ -171,7 +171,7 @@ namespace LGSTrayHID
                     catch (OperationCanceledException) { break; }
                 }
 
-                return Array.Empty<byte>();
+                return [];
             }
             finally
             {

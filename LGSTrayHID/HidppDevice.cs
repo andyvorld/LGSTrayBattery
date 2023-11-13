@@ -25,7 +25,7 @@ namespace LGSTrayHID
         private readonly byte _deviceIdx;
         public byte DeviceIdx => _deviceIdx;
 
-        private readonly Dictionary<ushort, byte> _featureMap = new();
+        private readonly Dictionary<ushort, byte> _featureMap = [];
         public Dictionary<ushort, byte> FeatureMap => _featureMap;
 
         public HidppDevice(HidppDevices parent, byte deviceIdx)

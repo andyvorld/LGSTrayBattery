@@ -12,9 +12,9 @@ namespace LGSTrayHID
         public static readonly HidppManagerContext _instance = new();
         public static HidppManagerContext Instance => _instance;
 
-        private readonly Dictionary<string, Guid> _containerMap = new();
-        private readonly Dictionary<Guid, HidppDevices> _deviceMap = new();
-        private readonly BlockingCollection<HidDeviceInfo> _deviceQueue = new();
+        private readonly Dictionary<string, Guid> _containerMap = [];
+        private readonly Dictionary<Guid, HidppDevices> _deviceMap = [];
+        private readonly BlockingCollection<HidDeviceInfo> _deviceQueue = [];
 
         public delegate void HidppDeviceEventHandler(IPCMessageType messageType, IPCMessage message);
 

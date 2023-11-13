@@ -18,7 +18,7 @@ namespace LGSTrayUI
         private readonly LogiDeviceViewModelFactory _logiDeviceViewModelFactory;
         private readonly ISubscriber<IPCMessage> _subscriber;
 
-        public ObservableCollection<LogiDeviceViewModel> Devices { get; } = new();
+        public ObservableCollection<LogiDeviceViewModel> Devices { get; } = [];
         public IEnumerable<LogiDevice> GetDevices() => Devices;
 
         public LogiDeviceCollection(
