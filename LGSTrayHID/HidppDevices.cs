@@ -141,7 +141,7 @@ namespace LGSTrayHID
 
         public async Task<byte[]> WriteRead10(HidDevicePtr hidDevicePtr, byte[] buffer, int timeout = 100)
         {
-            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+            ObjectDisposedException.ThrowIf(_disposeCount > 0, this);
 
             bool locked = await _semaphore.WaitAsync(100);
             if (!locked)
@@ -181,7 +181,7 @@ namespace LGSTrayHID
 
         public async Task<Hidpp20> WriteRead20(HidDevicePtr hidDevicePtr, Hidpp20 buffer, int timeout = 100, bool ignoreHID10 = true)
         {
-            if (_disposeCount > 0) throw new ObjectDisposedException(GetType().Name);
+            ObjectDisposedException.ThrowIf(_disposeCount > 0, this);
 
             bool locked = await _semaphore.WaitAsync(100);
             if (!locked)
