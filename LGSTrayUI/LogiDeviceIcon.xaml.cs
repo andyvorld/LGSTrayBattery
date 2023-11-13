@@ -26,22 +26,6 @@ namespace LGSTrayUI
 
     public partial class LogiDeviceIcon : UserControl, IDisposable
     {
-        public static int RefCount = 0;
-
-        public static void AddRef()
-        {
-            RefCount++;
-            RefCountChanged?.Invoke(RefCount, new("_refCount"));
-        }
-
-        public static void SubRef()
-        {
-            RefCount--;
-            RefCountChanged?.Invoke(RefCount, new("_refCount"));
-        }
-
-        public static event PropertyChangedEventHandler? RefCountChanged;
-
         #region IDisposable
         private bool disposedValue;
         protected virtual void Dispose(bool disposing)
@@ -75,6 +59,23 @@ namespace LGSTrayUI
             GC.SuppressFinalize(this);
         }
         #endregion
+
+        private static int _refCount = 0;
+        public static int RefCount => _refCount;
+
+        public static void AddRef()
+        {
+            _refCount++;
+            RefCountChanged?.Invoke(RefCount);
+        }
+
+        public static void SubRef()
+        {
+            _refCount--;
+            RefCountChanged?.Invoke(RefCount);
+        }
+
+        public static event Action<int>? RefCountChanged;
 
         private Action<TaskbarIcon, LogiDevice> _drawBatteryIcon;
 

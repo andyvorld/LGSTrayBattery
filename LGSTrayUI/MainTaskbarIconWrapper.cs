@@ -7,15 +7,8 @@ namespace LGSTrayUI
 {
     public class MainTaskbarIconWrapper : IDisposable
     {
-        private readonly TaskbarIcon _taskbarIcon = (TaskbarIcon)Application.Current.FindResource("NotifyIcon");
+        #region IDisposable
         private bool disposedValue;
-
-        public MainTaskbarIconWrapper()
-        {
-            BatteryIconDrawing.DrawUnknown(_taskbarIcon);
-            LogiDeviceIcon.RefCountChanged += RefCountChanged;
-            OnRefCountChanged(LogiDeviceIcon.RefCount);
-        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -24,7 +17,7 @@ namespace LGSTrayUI
                 if (disposing)
                 {
                     _taskbarIcon.Dispose();
-                    LogiDeviceIcon.RefCountChanged -= RefCountChanged;
+                    LogiDeviceIcon.RefCountChanged -= OnRefCountChanged;
                 }
 
                 // TODO: free unmanaged resources (unmanaged objects) and override finalizer
@@ -46,20 +39,20 @@ namespace LGSTrayUI
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
+
+        private readonly TaskbarIcon _taskbarIcon = (TaskbarIcon)Application.Current.FindResource("NotifyIcon");
+
+        public MainTaskbarIconWrapper()
+        {
+            BatteryIconDrawing.DrawUnknown(_taskbarIcon);
+            LogiDeviceIcon.RefCountChanged += OnRefCountChanged;
+            OnRefCountChanged(LogiDeviceIcon.RefCount);
+        }
 
         private void OnRefCountChanged(int refCount)
         {
             _taskbarIcon.Visibility = (refCount == 0) ? Visibility.Visible : Visibility.Collapsed;
-        }
-
-        private void RefCountChanged(object? s, PropertyChangedEventArgs _)
-        {
-            if (s is not int refCount)
-            {
-                return;
-            }
-
-            OnRefCountChanged(refCount);
         }
     }
 }
