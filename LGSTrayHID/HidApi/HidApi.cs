@@ -3,7 +3,7 @@
 namespace LGSTrayHID.HidApi
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct HidApiVersion
+    internal readonly struct HidApiVersion
     {
         readonly int Major;
         readonly int Minor;

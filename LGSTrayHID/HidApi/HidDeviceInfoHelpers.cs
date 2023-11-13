@@ -31,16 +31,12 @@ namespace LGSTrayHID.HidApi
             {
                 if ((deviceInfo.UsagePage & 0xFF00) == 0xFF00)
                 {
-                    switch (deviceInfo.Usage)
+                    return deviceInfo.Usage switch
                     {
-                        case 0x0001:
-                            return HidppMessageType.SHORT;
-                        case 0x0002:
-                            return HidppMessageType.LONG;
-                        
-                        default:
-                            return HidppMessageType.NONE;
-                    }
+                        0x0001 => HidppMessageType.SHORT,
+                        0x0002 => HidppMessageType.LONG,
+                        _ => HidppMessageType.NONE,
+                    };
                 }
                 else
                 {
