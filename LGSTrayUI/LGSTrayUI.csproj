@@ -10,14 +10,19 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <PublishSingleFile>true</PublishSingleFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>3.0.0</Version>
+    <Version>3.0.0-rc.1</Version>
     <AssemblyName>LGSTray</AssemblyName>
     <ApplicationIcon>Resources\logo_black.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <Content Include="Resources\logo_black.ico" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(PublishProtocol)'=='' ">
+    <ProjectReference Include="..\LGSTrayHID\LGSTrayHID.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,7 +47,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LGSTrayCore\LGSTrayCore.csproj" />
-    <ProjectReference Include="..\LGSTrayHID\LGSTrayHID.csproj" />
   </ItemGroup>
 
   <ItemGroup>
