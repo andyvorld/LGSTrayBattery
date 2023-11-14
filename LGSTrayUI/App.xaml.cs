@@ -46,81 +46,7 @@ namespace LGSTrayUI
         {
             base.OnStartup(e);
 
-            //create the notifyicon (it's a resource declared in NotifyIconResources.xaml
-            //notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
-
-            //LogiDevice[] ldevs = new LogiDevice[]
-            //{
-            //    new LogiDevice()
-            //    {
-            //        LastUpdate = DateTime.Now,
-            //        BatteryPercentage = 99,
-            //        DeviceId = "1",
-            //        DeviceType = DeviceType.Keyboard,
-            //    },
-            //    new LogiDevice()
-            //    {
-            //        LastUpdate = DateTime.Now,
-            //        BatteryPercentage = 99,
-            //        DeviceId = "2",
-            //        DeviceType = DeviceType.Mouse,
-            //    },
-            //    new LogiDevice()
-            //    {
-            //        LastUpdate = DateTime.Now,
-            //        BatteryPercentage = 99,
-            //        DeviceId = "3",
-            //        DeviceType = DeviceType.Headset,
-            //    },
-            //};
-
-            //LogiDeviceCollection.Instance.Devices.Add(ldevs[0]);
-            //LogiDeviceCollection.Instance.Devices.Add(ldevs[1]);
-            //LogiDeviceCollection.Instance.Devices.Add(ldevs[2]);
-
-            //new Thread(async () =>
-            //{
-            //    while (true)
-            //    {
-            //        foreach (var ldev in ldevs)
-            //        {
-            //            ldev.LastUpdate = DateTime.Now;
-            //            ldev.BatteryPercentage = (ldev.BatteryPercentage < -10) ? 99 : ldev.BatteryPercentage - 1;
-            //        }
-            //        await Task.Delay(100);
-            //    }
-            //}).Start();
-
             EnableEfficiencyMode();
-
-            //var host = Host.CreateDefaultBuilder()
-            //    .ConfigureAppConfiguration((_, configuration) =>
-            //    {
-            //        configuration.Sources.Clear();
-            //        configuration.AddIniFile("appsettings.ini");
-            //    })
-            //    .ConfigureServices((ctx, services) =>
-            //    {
-            //        var configurationRoot = ctx.Configuration;
-            //        services.Configure<AppSettings>(configurationRoot);
-
-            //        services.AddLGSMessagePipe(true);
-            //        services.AddSingleton<UserSettingsWrapper>();
-
-            //        services.AddSingleton<LogiDeviceIconFactory>();
-            //        services.AddSingleton<LogiDeviceViewModelFactory>();
-
-            //        services.AddSingleton<HttpControllerFactory>();
-            //        services.AddHostedService<HttpServer>();
-
-            //        services.AddIDeviceManager<LGSTrayHIDManager>(configurationRoot);
-            //        services.AddIDeviceManager<GHubManager>(configurationRoot);
-            //        services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
-
-            //        services.AddSingleton<MainTaskbarIconWrapper>();
-            //        services.AddHostedService<NotifyIconViewModel>();
-            //    })
-            //    .Build();
 
             var builder = Host.CreateEmptyApplicationBuilder(null);
             builder.Configuration.AddIniFile("appsettings.ini");
@@ -134,8 +60,7 @@ namespace LGSTrayUI
             builder.Services.AddSingleton<LogiDeviceIconFactory>();
             builder.Services.AddSingleton<LogiDeviceViewModelFactory>();
 
-            builder.Services.AddSingleton<HttpControllerFactory>();
-            builder.Services.AddHostedService<HttpServer>();
+            builder.Services.AddWebserver(builder.Configuration);
 
             builder.Services.AddIDeviceManager<LGSTrayHIDManager>(builder.Configuration);
             builder.Services.AddIDeviceManager<GHubManager>(builder.Configuration);

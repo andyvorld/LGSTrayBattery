@@ -54,11 +54,6 @@ namespace LGSTrayCore.HttpServer
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            if (!_appSettings.HTTPServer.ServerEnable)
-            {
-                return Task.CompletedTask;
-            }
-
             _serverCts = new();
             _server = CreateServer(_appSettings, _httpControllerFactory);
             _server.RunAsync(_serverCts.Token);

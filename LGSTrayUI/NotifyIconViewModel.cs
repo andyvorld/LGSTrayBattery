@@ -2,13 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using LGSTrayCore;
 using LGSTrayCore.Managers;
-using MessagePipe;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading;
@@ -48,6 +46,8 @@ namespace LGSTrayUI
             }
         }
 
+        private const string AutoStartRegKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+        private const string AutoStartRegKeyValue = "LGSTrayGUI";
         private bool? _autoStart = null;
         public bool AutoStart
         {
@@ -55,15 +55,15 @@ namespace LGSTrayUI
             {
                 if (_autoStart == null)
                 {
-                    RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
-                    _autoStart = registryKey?.GetValue("LGSTray") != null;
+                    RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey(AutoStartRegKey, true);
+                    _autoStart = registryKey?.GetValue(AutoStartRegKeyValue) != null;
                 }
 
                 return _autoStart ?? false;
             }
             set
             {
-                RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+                RegistryKey? registryKey = Registry.CurrentUser.OpenSubKey(AutoStartRegKey, true);
 
                 if (registryKey == null)
                 {
@@ -72,11 +72,11 @@ namespace LGSTrayUI
 
                 if (value)
                 {
-                    registryKey.SetValue("LGSTray", Path.Combine(AppContext.BaseDirectory, Environment.ProcessPath!));
+                    registryKey.SetValue(AutoStartRegKeyValue, Path.Combine(AppContext.BaseDirectory, Environment.ProcessPath!));
                 }
                 else
                 {
-                    registryKey.DeleteValue("LGSTray", false);
+                    registryKey.DeleteValue(AutoStartRegKeyValue, false);
                 }
 
                 _autoStart = value;
