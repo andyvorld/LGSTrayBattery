@@ -130,7 +130,7 @@ namespace LGSTrayUI
         }
 
         [RelayCommand]
-        private async void RediscoverDevices()
+        private async Task RediscoverDevices()
         {
             Console.WriteLine("Rediscover");
             RediscoverDevicesEnabled = false;

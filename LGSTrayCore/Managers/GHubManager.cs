@@ -151,7 +151,7 @@ namespace LGSTrayCore.Managers
 
         protected void ParseSocketMsg(ResponseMessage msg)
         {
-            GHUBMsg ghubmsg = GHUBMsg.DeserializeJson(msg.Text);
+            GHUBMsg ghubmsg = GHUBMsg.DeserializeJson(msg.Text!);
 
             switch (ghubmsg.Path)
             {
