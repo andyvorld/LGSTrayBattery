@@ -98,8 +98,9 @@ namespace LGSTrayGUI
             {
                 return;
             }
-
+            var prevIcon = view.TaskbarIcon.Icon;
             view.TaskbarIcon.Icon = TrayIconTools.GenerateIcon(sender as LogiDevice);
+            TrayIconTools.DisposeIcon(prevIcon);
         }
 
         public IEnumerable<LogiDevice> LogiDevicesFlat { get => LogiDevices.SelectMany(x => x); }
