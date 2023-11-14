@@ -10,6 +10,9 @@ using System;
 using System.Diagnostics;
 using LGSTrayPrimitives.IPC;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
+using System.IO;
+using System.Threading;
 
 namespace LGSTrayUI
 {
@@ -46,12 +49,15 @@ namespace LGSTrayUI
         {
             base.OnStartup(e);
 
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory);
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CrashHandler);
+
             EnableEfficiencyMode();
 
             var builder = Host.CreateEmptyApplicationBuilder(null);
             builder.Configuration.AddIniFile("appsettings.ini");
-
-            builder.Logging.ClearProviders();
 
             builder.Services.Configure<AppSettings>(builder.Configuration);
             builder.Services.AddLGSMessagePipe(true);
@@ -72,6 +78,15 @@ namespace LGSTrayUI
             var host = builder.Build();
             await host.RunAsync();
             Dispatcher.InvokeShutdown();
+        }
+
+        private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
+        {
+            Exception e = (Exception)args.ExceptionObject;
+            long unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            using StreamWriter writer = new($"./crashlog_{unixTime}.log", false);
+            writer.WriteLine(e.ToString());
         }
 
         protected override void OnExit(ExitEventArgs e)
