@@ -110,17 +110,12 @@ namespace LGSTrayHID
 
         static async Task Main(string[] args)
         {
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureLogging(logger =>
-                {
-                    logger.ClearProviders();
-                })
-                .ConfigureServices((ctx, services) =>
-                {
-                    services.AddLGSMessagePipe();
-                    services.AddHostedService<HidppManagerService>();
-                })
-                .Build();
+            var builder = Host.CreateEmptyApplicationBuilder(null);
+
+            builder.Services.AddLGSMessagePipe();
+            builder.Services.AddHostedService<HidppManagerService>();
+
+            var host = builder.Build();
 
             _ = Task.Run(async () =>
             {

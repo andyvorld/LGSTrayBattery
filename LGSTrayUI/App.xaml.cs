@@ -9,6 +9,7 @@ using System.Windows;
 using System;
 using System.Diagnostics;
 using LGSTrayPrimitives.IPC;
+using Microsoft.Extensions.Logging;
 
 namespace LGSTrayUI
 {
@@ -92,35 +93,58 @@ namespace LGSTrayUI
 
             EnableEfficiencyMode();
 
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureAppConfiguration((_, configuration) =>
-                {
-                    configuration.Sources.Clear();
-                    configuration.AddIniFile("appsettings.ini");
-                })
-                .ConfigureServices((ctx, services) =>
-                {
-                    var configurationRoot = ctx.Configuration;
-                    services.Configure<AppSettings>(configurationRoot);
+            //var host = Host.CreateDefaultBuilder()
+            //    .ConfigureAppConfiguration((_, configuration) =>
+            //    {
+            //        configuration.Sources.Clear();
+            //        configuration.AddIniFile("appsettings.ini");
+            //    })
+            //    .ConfigureServices((ctx, services) =>
+            //    {
+            //        var configurationRoot = ctx.Configuration;
+            //        services.Configure<AppSettings>(configurationRoot);
 
-                    services.AddLGSMessagePipe(true);
-                    services.AddSingleton<UserSettingsWrapper>();
+            //        services.AddLGSMessagePipe(true);
+            //        services.AddSingleton<UserSettingsWrapper>();
 
-                    services.AddSingleton<LogiDeviceIconFactory>();
-                    services.AddSingleton<LogiDeviceViewModelFactory>();
+            //        services.AddSingleton<LogiDeviceIconFactory>();
+            //        services.AddSingleton<LogiDeviceViewModelFactory>();
 
-                    services.AddSingleton<HttpControllerFactory>();
-                    services.AddHostedService<HttpServer>();
+            //        services.AddSingleton<HttpControllerFactory>();
+            //        services.AddHostedService<HttpServer>();
 
-                    services.AddIDeviceManager<LGSTrayHIDManager>(configurationRoot);
-                    services.AddIDeviceManager<GHubManager>(configurationRoot);
-                    services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
+            //        services.AddIDeviceManager<LGSTrayHIDManager>(configurationRoot);
+            //        services.AddIDeviceManager<GHubManager>(configurationRoot);
+            //        services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
 
-                    services.AddSingleton<MainTaskbarIconWrapper>();
-                    services.AddHostedService<NotifyIconViewModel>();
-                })
-                .Build();
+            //        services.AddSingleton<MainTaskbarIconWrapper>();
+            //        services.AddHostedService<NotifyIconViewModel>();
+            //    })
+            //    .Build();
 
+            var builder = Host.CreateEmptyApplicationBuilder(null);
+            builder.Configuration.AddIniFile("appsettings.ini");
+
+            builder.Logging.ClearProviders();
+
+            builder.Services.Configure<AppSettings>(builder.Configuration);
+            builder.Services.AddLGSMessagePipe(true);
+            builder.Services.AddSingleton<UserSettingsWrapper>();
+
+            builder.Services.AddSingleton<LogiDeviceIconFactory>();
+            builder.Services.AddSingleton<LogiDeviceViewModelFactory>();
+
+            builder.Services.AddSingleton<HttpControllerFactory>();
+            builder.Services.AddHostedService<HttpServer>();
+
+            builder.Services.AddIDeviceManager<LGSTrayHIDManager>(builder.Configuration);
+            builder.Services.AddIDeviceManager<GHubManager>(builder.Configuration);
+            builder.Services.AddSingleton<ILogiDeviceCollection, LogiDeviceCollection>();
+
+            builder.Services.AddSingleton<MainTaskbarIconWrapper>();
+            builder.Services.AddHostedService<NotifyIconViewModel>();
+
+            var host = builder.Build();
             await host.RunAsync();
             Dispatcher.InvokeShutdown();
         }
