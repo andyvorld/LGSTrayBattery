@@ -12,7 +12,7 @@
     <UseWPF>true</UseWPF>
     <PublishSingleFile>true</PublishSingleFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Version>3.0.0-rc.1</Version>
+    <Version>3.0.0-rc.2</Version>
     <AssemblyName>LGSTray</AssemblyName>
     <ApplicationIcon>Resources\logo_black.ico</ApplicationIcon>
   </PropertyGroup>
@@ -21,7 +21,7 @@
     <Content Include="Resources\logo_black.ico" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(PublishSingleFile)' == 'true' ">
+  <ItemGroup Condition=" '$(PublishProtocol)' == '' ">
     <ProjectReference Include="..\LGSTrayHID\LGSTrayHID.csproj" />
   </ItemGroup>
 
