@@ -1,5 +1,7 @@
 # LGS Tray Battery
 
+## *[Checkout the pre-release v3](https://github.com/andyvorld/LGSTrayBattery/releases)*
+
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
 
 ## New Features to V1
