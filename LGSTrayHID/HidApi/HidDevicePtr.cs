@@ -6,7 +6,6 @@ namespace LGSTrayHID.HidApi
 {
     public readonly struct HidDevicePtr
     {
-        private readonly SemaphoreSlim semaphoreWrite = new(1, 1);
         private readonly nint _ptr;
 
         private HidDevicePtr(nint ptr)
@@ -23,9 +22,7 @@ namespace LGSTrayHID.HidApi
 #if DEBUG && PRINT
             PrintBuffer($"0x{_ptr:X} - W", buffer);
 #endif
-            //await semaphoreWrite.WaitAsync();
             var ret = HidWrite(this, buffer, (nuint)buffer.Length);
-            //semaphoreWrite.Release();
 
             return Task.FromResult(ret);
         }

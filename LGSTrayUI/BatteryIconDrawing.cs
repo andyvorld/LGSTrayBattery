@@ -23,7 +23,7 @@ namespace LGSTrayUI
         private static Bitmap Missing => CheckTheme.LightTheme ? Resources.Missing : Resources.Missing_dark;
         private static Bitmap Charging => CheckTheme.LightTheme ? Resources.Charging : Resources.Charging_dark;
 
-        private const int ImageSize = 32;
+        private const int ImageSize = 256;
 
         private static Bitmap GetDeviceIcon(LogiDevice device) => device.DeviceType switch
         {
@@ -32,9 +32,9 @@ namespace LGSTrayUI
             _ => Mouse,
         };
 
-        private static Color GetDeviceColor(LogiDevice device)
+        private static Color GetDeviceColor(LogiDevice device) => device.DeviceType switch
         {
-            return Color.FromArgb(0xEE, 0xEE, 0xEE);
+            _ => CheckTheme.LightTheme ? Color.FromArgb(0x11, 0x11, 0x11) : Color.FromArgb(0xEE, 0xEE, 0xEE)
 
             //return device.DeviceType switch
             //{
@@ -42,7 +42,7 @@ namespace LGSTrayUI
             //    DeviceType.Headset => Color.FromArgb(0xFA, 0x79, 0x21),
             //    _ => Color.FromArgb(0xBB, 0x86, 0xFC),
             //};
-        }
+        };
 
         private static Bitmap GetBatteryValue(LogiDevice device) => device.BatteryPercentage switch
         {
@@ -114,6 +114,11 @@ namespace LGSTrayUI
                     Alignment = StringAlignment.Center,
                 }
             );
+            g.CompositingMode = CompositingMode.SourceOver;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.SmoothingMode = SmoothingMode.HighQuality;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             IntPtr iconHandle = b.GetHicon();
             Icon tempManagedRes = Icon.FromHandle(iconHandle);

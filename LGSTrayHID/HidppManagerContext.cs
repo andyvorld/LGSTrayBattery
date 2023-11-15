@@ -68,19 +68,20 @@ namespace LGSTrayHID
             Console.WriteLine();
 #endif
 
-            if (!_deviceMap.ContainsKey(containerId))
+            if (!_deviceMap.TryGetValue(containerId, out HidppDevices? value))
             {
-                _deviceMap[containerId] = new();
+                value = new();
+                _deviceMap[containerId] = value;
                 _containerMap[devPath] = containerId;
             }
 
             switch (messageType)
             {
                 case HidppMessageType.SHORT:
-                    await _deviceMap[containerId].SetDevShort(dev);
+                    await value.SetDevShort(dev);
                     break;
                 case HidppMessageType.LONG:
-                    await _deviceMap[containerId].SetDevLong(dev);
+                    await value.SetDevLong(dev);
                     break;
             }
 

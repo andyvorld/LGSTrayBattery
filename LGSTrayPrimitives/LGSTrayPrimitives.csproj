@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="MessagePack" Version="2.5.129" />
     <PackageReference Include="MessagePipe.Interprocess" Version="1.7.4" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0-rc.2.23479.6" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
   </ItemGroup>
 
 </Project>
