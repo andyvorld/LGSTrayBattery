@@ -96,15 +96,13 @@ Native = true
 ## Known Issues
 ### Common
 - Native HID and GHUB do not provide similar percentages, this is due to how native and GHUB calculates percentages from the device's voltages. Native uses an average curve of a 3.7V lipo battery, while GHUB will use a lookup table specific to the device.
-- Numerical Mode does not have a "light theme"
 
 ### Native HID (hidapi)
 - Certain wired devices like the G403 when in wired mode does not report the number of HID devices connected and will respond to all request. Causing battery polls to occur 6x per request.
-- Hotplug not supported
-- Device and protocol discovery changed from the previous method, some devices like the G533 headsets might not be detected.
+- Device and protocol discovery changed from the previous method, some devices like the G533 headsets might not be detected, try the GHUB based manager.
 
 ### GHUB
-- Future GHUB version may change IPC protocol/endpoints (current websocket)
+- Future GHUB version may change IPC protocol/endpoints (currently websocket)
 
 ## Working with
 - G403 Wireless
