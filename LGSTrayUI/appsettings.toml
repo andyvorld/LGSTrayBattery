@@ -1,0 +1,10 @@
+[HTTPServer]
+serverEnable = true
+serverAddr = "127.0.0.1"
+port = 12321
+
+[GHub]
+enabled = true
+
+[Native]
+enabled = true

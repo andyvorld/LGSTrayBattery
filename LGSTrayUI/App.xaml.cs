@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Tommy.Extensions.Configuration;
 
 namespace LGSTrayUI
 {
@@ -57,7 +58,7 @@ namespace LGSTrayUI
             EnableEfficiencyMode();
 
             var builder = Host.CreateEmptyApplicationBuilder(null);
-            builder.Configuration.AddIniFile("appsettings.ini");
+            builder.Configuration.AddTomlFile("appsettings.toml");
 
             builder.Services.Configure<AppSettings>(builder.Configuration);
             builder.Services.AddLGSMessagePipe(true);

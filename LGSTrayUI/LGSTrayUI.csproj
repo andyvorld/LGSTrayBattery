@@ -34,7 +34,6 @@
     </PackageReference>
     <PackageReference Include="MessagePipe.Interprocess" Version="1.7.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Ini" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
       <PrivateAssets>all</PrivateAssets>
@@ -42,6 +41,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Tommy.Extensions.Configuration" Version="6.2.0" />
     <PackageReference Include="Websocket.Client" Version="5.0.0" />
   </ItemGroup>
 
@@ -70,7 +70,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="appsettings.ini">
+    <None Update="appsettings.toml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">

@@ -22,8 +22,8 @@ public static class IServiceExtension
         var settings = configs.Get<AppSettings>()!;
         bool isEnabled = typeof(T) switch
         {
-            { } when typeof(T) == typeof(GHubManager) => settings.DeviceManager.GHUB,
-            { } when typeof(T) == typeof(LGSTrayHIDManager) => settings.DeviceManager.Native,
+            { } when typeof(T) == typeof(GHubManager) => settings.GHub.Enabled,
+            { } when typeof(T) == typeof(LGSTrayHIDManager) => settings.Native.Enabled,
             _ => false
         };
         if (!isEnabled) return;
