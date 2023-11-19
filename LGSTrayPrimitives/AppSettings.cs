@@ -1,4 +1,6 @@
-﻿namespace LGSTrayCore
+﻿using Tommy;
+
+namespace LGSTrayPrimitives
 {
     public class AppSettings
     {
@@ -11,11 +13,11 @@
 
     public class HttpServerSettings
     {
-        public bool ServerEnable { get; set; }
+        public bool Enabled { get; set; }
         public int Port { get; set; }
-        public string ServerAddr { get; set; } = null!;
+        public string Addr { get; set; } = null!;
 
-        public string UrlPrefix => $"http://{ServerAddr}:{Port}/";
+        public string UrlPrefix => $"http://{Addr}:{Port}/";
     }
 
     public class IDeviceManagerSettings
@@ -25,6 +27,9 @@
 
     public class NativeDeviceManagerSettings : IDeviceManagerSettings
     {
+        public int RetryTime { get; set; } = 11;
+        public int PollPeriod { get; set; } = 601;
 
+        public IEnumerable<string> DisabledDevices { get; set; } = null!;
     }
 }

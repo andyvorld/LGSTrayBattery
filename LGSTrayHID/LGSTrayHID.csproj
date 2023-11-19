@@ -19,6 +19,7 @@
     <PackageReference Include="MessagePipe.Interprocess" Version="1.7.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="8.0.0" />
+    <PackageReference Include="Tommy.Extensions.Configuration" Version="6.2.0" />
   </ItemGroup>
 
   <ItemGroup>

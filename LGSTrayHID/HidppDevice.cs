@@ -5,14 +5,20 @@ using System.Text;
 
 using static LGSTrayHID.HidppDevices;
 
+#if DEBUG
+using Log = System.Console;
+#else
+using Log = System.Diagnostics.Debug;
+#endif
+
 namespace LGSTrayHID
 {
     public class HidppDevice
     {
-        private readonly SemaphoreSlim _initSemaphore = new(1,1);
+        private readonly SemaphoreSlim _initSemaphore = new(1, 1);
         private Func<HidppDevice, Task<BatteryUpdateReturn?>>? _getBatteryAsync;
 
-        public string DeviceName { get; private set;} = string.Empty;
+        public string DeviceName { get; private set; } = string.Empty;
         public int DeviceType { get; private set; } = 3;
         public string Identifier { get; private set; } = string.Empty;
 
@@ -73,7 +79,7 @@ namespace LGSTrayHID
                 for (byte i = 0; i <= featureCount; i++)
                 {
                     ret = await _parent.WriteRead20(_parent.DevShort, new byte[7] { 0x10, _deviceIdx, _featureMap[0x0001], 0x10 | SW_ID, i, 0x00, 0x00 });
-                    ushort featureId = (ushort) ((ret.GetParam(0) << 8) + ret.GetParam(1));
+                    ushort featureId = (ushort)((ret.GetParam(0) << 8) + ret.GetParam(1));
 
                     _featureMap[featureId] = i;
                 }
@@ -108,8 +114,22 @@ namespace LGSTrayHID
 
                 DeviceName = name.TrimEnd('\0');
 
+                foreach (var tag in GlobalSettings.settings.DisabledDevices)
+                {
+                    if (DeviceName.Contains(tag))
+                    {
+                        Log.WriteLine($"{DeviceName} is marked as disabled");
+                        return;
+                    }
+                };
+
                 ret = await _parent.WriteRead20(_parent.DevShort, new byte[7] { 0x10, _deviceIdx, featureId, 0x20 | SW_ID, 0x00, 0x00, 0x00 });
                 DeviceType = ret.GetParam(0);
+            }
+            else
+            {
+                // Device does not have a name/Hidpp error ignore it
+                return;
             }
 
             if (_featureMap.TryGetValue(0x0003, out featureId))
@@ -128,13 +148,17 @@ namespace LGSTrayHID
                 }
 
                 Identifier = serialNumber ?? $"{unitId}-{modelId}";
-
+            }
+            else
+            {
+                // Device does not have a serial identifier the device name as a hash identifier
+                Identifier = $"{DeviceName.GetHashCode():X04}";
             }
 
 #if DEBUG
-            Console.WriteLine("---");
-            Console.WriteLine(DeviceName + " Ready");
-            Console.WriteLine(Identifier);
+            Log.WriteLine("---");
+            Log.WriteLine(DeviceName + " Ready");
+            Log.WriteLine(Identifier);
             foreach ((ushort featureIdItr, string featureDesc) in new (ushort, string)[]
             {
                 (0x1000, "Battery Unified Level"),
@@ -144,10 +168,10 @@ namespace LGSTrayHID
             {
                 if (_featureMap.ContainsKey(featureIdItr))
                 {
-                    Console.WriteLine($"0x{featureIdItr:X} - {featureDesc} Found");
+                    Log.WriteLine($"0x{featureIdItr:X} - {featureDesc} Found");
                 }
             }
-            Console.WriteLine("---");
+            Log.WriteLine("---");
 #endif
 
             _getBatteryAsync = FeatureMap switch
@@ -175,15 +199,15 @@ namespace LGSTrayHID
 #if DEBUG
                     var expectedUpdateTime = lastUpdate.AddSeconds(1);
 #else
-                    var expectedUpdateTime = lastUpdate.AddMinutes(10);
+                    var expectedUpdateTime = lastUpdate.AddSeconds(GlobalSettings.settings.PollPeriod);
 #endif
                     if (now < expectedUpdateTime)
                     {
-                        await Task.Delay((int) (expectedUpdateTime - now).TotalMilliseconds);
+                        await Task.Delay((int)(expectedUpdateTime - now).TotalMilliseconds);
                     }
 
                     await UpdateBattery();
-                    await Task.Delay(10_000);
+                    await Task.Delay(GlobalSettings.settings.RetryTime * 1000);
                 }
             });
         }

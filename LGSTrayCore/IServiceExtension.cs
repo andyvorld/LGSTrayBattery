@@ -1,5 +1,6 @@
 ﻿using LGSTrayCore.HttpServer;
 using LGSTrayCore.Managers;
+using LGSTrayPrimitives;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

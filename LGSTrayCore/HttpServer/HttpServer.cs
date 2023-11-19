@@ -1,5 +1,6 @@
 ﻿using EmbedIO;
 using EmbedIO.WebApi;
+using LGSTrayPrimitives;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
