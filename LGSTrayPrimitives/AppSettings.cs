@@ -1,6 +1,4 @@
-﻿using Tommy;
-
-namespace LGSTrayPrimitives
+﻿namespace LGSTrayPrimitives
 {
     public class AppSettings
     {

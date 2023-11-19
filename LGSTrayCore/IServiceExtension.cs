@@ -12,7 +12,7 @@ public static class IServiceExtension
     public static void AddWebserver(this IServiceCollection services, IConfiguration configs)
     {
         var settings = configs.Get<AppSettings>()!;
-        if (!settings.HTTPServer.ServerEnable) return;
+        if (!settings.HTTPServer.Enabled) return;
 
         services.AddSingleton<HttpControllerFactory>();
         services.AddHostedService<HttpServer.HttpServer>();
