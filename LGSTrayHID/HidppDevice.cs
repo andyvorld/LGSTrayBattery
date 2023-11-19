@@ -10,7 +10,7 @@ namespace LGSTrayHID
     public class HidppDevice
     {
         private readonly SemaphoreSlim _initSemaphore = new(1,1);
-        private Func<Task<BatteryUpdateReturn?>>? _getBatteryAsync;
+        private Func<HidppDevice, Task<BatteryUpdateReturn?>>? _getBatteryAsync;
 
         public string DeviceName { get; private set;} = string.Empty;
         public int DeviceType { get; private set; } = 3;
@@ -150,18 +150,13 @@ namespace LGSTrayHID
             Console.WriteLine("---");
 #endif
 
-            if (FeatureMap.ContainsKey(0x1000))
+            _getBatteryAsync = FeatureMap switch
             {
-                _getBatteryAsync = () => Battery1000.GetBatteryAsync(this);
-            }
-            else if (FeatureMap.ContainsKey(0x1001))
-            {
-                _getBatteryAsync = () => Battery1001.GetBatteryAsync(this);
-            }
-            else if (FeatureMap.ContainsKey(0x1004))
-            {
-                _getBatteryAsync = () => Battery1004.GetBatteryAsync(this);
-            }
+                { } when FeatureMap.ContainsKey(0x1000) => Battery1000.GetBatteryAsync,
+                { } when FeatureMap.ContainsKey(0x1001) => Battery1001.GetBatteryAsync,
+                { } when FeatureMap.ContainsKey(0x1004) => Battery1004.GetBatteryAsync,
+                _ => null
+            };
 
             HidppManagerContext.Instance.SignalDeviceEvent(
                 IPCMessageType.INIT,
@@ -172,6 +167,8 @@ namespace LGSTrayHID
 
             _ = Task.Run(async () =>
             {
+                if (_getBatteryAsync == null) { return; }
+
                 while (true)
                 {
                     var now = DateTimeOffset.Now;
@@ -196,7 +193,7 @@ namespace LGSTrayHID
             if (Parent.Disposed) { return; }
             if (_getBatteryAsync == null) { return; }
 
-            var ret = await _getBatteryAsync.Invoke();
+            var ret = await _getBatteryAsync.Invoke(this);
 
             if (ret == null) { return; }
 
