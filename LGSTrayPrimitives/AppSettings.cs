@@ -25,9 +25,9 @@
 
     public class NativeDeviceManagerSettings : IDeviceManagerSettings
     {
-        public int RetryTime { get; set; } = 11;
-        public int PollPeriod { get; set; } = 601;
+        public int RetryTime { get; set; } = 10;
+        public int PollPeriod { get; set; } = 600;
 
-        public IEnumerable<string> DisabledDevices { get; set; } = null!;
+        public IEnumerable<string> DisabledDevices { get; set; } = [];
     }
 }

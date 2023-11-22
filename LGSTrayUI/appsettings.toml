@@ -17,5 +17,4 @@ pollPeriod = 600
 
 # List of disabled devices
 disabledDevices = [
-#	"G403"
 ]

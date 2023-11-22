@@ -26,7 +26,7 @@ namespace LGSTrayCore
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
-        private int _batteryVoltage;
+        private double _batteryVoltage;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
@@ -76,6 +76,7 @@ namespace LGSTrayCore
                 $"<device_name>{DeviceName}</device_name>" +
                 $"<device_type>{DeviceType}</device_type>" +
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
+                $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>" +
                 $"<mileage>{BatteryMileage:f2}</mileage>" +
                 $"<charging>{PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING}</charging>" +
                 $"<last_update>{LastUpdate}</last_update>" +
