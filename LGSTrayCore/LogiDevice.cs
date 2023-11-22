@@ -40,15 +40,14 @@ namespace LGSTrayCore
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
         private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
-        private string MileageSuffix => (BatteryMileage > 0) ? $" - {BatteryMileage:f1} hrs" : "";
         public string ToolTipString
         {
             get
             {
 #if DEBUG
-                return $"{DeviceName}, {BatteryPercentage:f2}% - {LastUpdate}" + MileageSuffix;
+                return $"{DeviceName}, {BatteryPercentage:f2}% - {LastUpdate}";
 #else
-                return $"{DeviceName}, {BatteryPercentage:f2}%" + MileageSuffix;
+                return $"{DeviceName}, {BatteryPercentage:f2}%";
 #endif
             }
         }
