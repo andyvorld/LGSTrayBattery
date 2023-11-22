@@ -29,20 +29,26 @@ namespace LGSTrayCore
         private int _batteryVoltage;
 
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private double _batteryMileage;
+
+
+        [ObservableProperty]
         private PowerSupplyStatus _powerSupplyStatus;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ToolTipString))]
         private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
 
+        private string MileageSuffix => (BatteryMileage > 0) ? $" - {BatteryMileage:f1} hrs" : "";
         public string ToolTipString
         {
             get
             {
 #if DEBUG
-                return $"{DeviceName}, {BatteryPercentage:f2}% - {LastUpdate}";
+                return $"{DeviceName}, {BatteryPercentage:f2}% - {LastUpdate}" + MileageSuffix;
 #else
-                return $"{DeviceName}, {BatteryPercentage:f2}%";
+                return $"{DeviceName}, {BatteryPercentage:f2}%" + MileageSuffix;
 #endif
             }
         }
@@ -70,6 +76,7 @@ namespace LGSTrayCore
                 $"<device_name>{DeviceName}</device_name>" +
                 $"<device_type>{DeviceType}</device_type>" +
                 $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
+                $"<mileage>{BatteryMileage:f2}</mileage>" +
                 $"<charging>{PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING}</charging>" +
                 $"<last_update>{LastUpdate}</last_update>" +
                 $"</xml>"

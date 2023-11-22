@@ -215,7 +215,8 @@ namespace LGSTrayCore.Managers
                     payload["percentage"]!.ToObject<int>(),
                     payload["charging"]!.ToBoolean() ? PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING : PowerSupplyStatus.POWER_SUPPLY_STATUS_NOT_CHARGING,
                     0,
-                    DateTime.Now
+                    DateTime.Now,
+                    payload["mileage"]!.ToObject<double>()
                 ));
             }
             catch { }

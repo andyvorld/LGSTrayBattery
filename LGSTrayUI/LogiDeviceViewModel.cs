@@ -68,6 +68,7 @@ namespace LGSTrayUI
             BatteryPercentage = updateMessage.batteryPercentage;
             PowerSupplyStatus = updateMessage.powerSupplyStatus;
             BatteryVoltage = updateMessage.batteryMVolt * 1000;
+            BatteryMileage = updateMessage.Mileage;
             LastUpdate = updateMessage.updateTime;
         }
     }
