@@ -14,7 +14,7 @@ FILE_TYPES = [
     '*.exe',
     '*.pdb',
     '*.dll',
-    '*.ini'
+    '*.toml'
 ]
 
 TARGET_PROJ = 'LGSTrayUI'
