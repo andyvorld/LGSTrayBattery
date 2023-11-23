@@ -1,6 +1,6 @@
 [HTTPServer]
 enabled = true
-addr = "127.0.0.1"
+addr = "localhost"
 port = 12321
 
 [GHub]
@@ -9,7 +9,7 @@ enabled = true
 [Native]
 enabled = true
 
- # Time in seconds to retry a device poll on failure
+# Time in seconds to retry a device poll on failure
 retryTime = 10
 
 # Time in seconds to next device poll on sucess

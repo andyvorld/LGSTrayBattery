@@ -1,17 +1,18 @@
 # LGS Tray Battery -- V3 Preview
 
-A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech Gaming Hub websockets.
+A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech GaminG Hub websockets.
 
 ## Changes from V2
 *When migrating from earlier versions, device ids may have changed.*
 - Moved to .Net 8
-- Realtime reactive icons
+- Realtime reactive icons and rich tooltips
     - Light/Dark theme is now reactive in realtime
 - Rewritten to use hidapi directly for hotplug support
     - Wired/Wireless devices like the G403 should behave like a single device
 - Multi-device mode
 - Numerical Icons
 - HID.NET manager has been deprecated
+- Migrated to using a `.toml` for appsettings
 
 ## Features
 ### Tray Indicator
@@ -22,12 +23,12 @@ Battery percentage and voltage (if supported) in a tray tooltip with notificatio
 Right-click for more options.
 
 ### Multiple Icons
-![image](https://i.imgur.com/h1UUpeX.png)
+![image](Assets/multi_icon.png)
 
 Depending on the number of devices selected in the context menu, multiple devices can be seen simultatniously
 
 ### Numerical Icons
-![image](https://i.imgur.com/DNiCGz1.png)
+![image](Assets/numerical_icon.png)
 
 Display the current battery percentage as a number.
 
@@ -36,28 +37,30 @@ Display the current battery percentage as a number.
 ### Reactive Icons
 ![image](https://user-images.githubusercontent.com/24492062/138284660-95949372-c59a-4569-9545-0cfe0506d1fb.png)
 
-Icon changes to match devices type (Current supported: mouse, keyboard and headsets)
+*Icon changes to match devices type (Current supported: mouse, keyboard and headsets)*
 
 ![image](https://user-images.githubusercontent.com/24492062/138285048-ad229703-5c4e-430e-b107-c50eb341e46b.png)
 
-Icon changes to match light/dark system theme
+*Icon changes to match light/dark system theme*
 
-![image](https://i.imgur.com/351EEX0.png)
+![image](Assets/charging_icon.png)
 
-Icon changes to reflect current charging status
+*Icon changes to reflect current charging status*
 
 ### Http/Web "server" api
-By default the running of the http server is disabled, to enable modify `appsettings.ini` and change `serverEnable = false` to `serverEnable = true`. The IP address and port used for bindings are under `tcpAddr` and `tcpPort` respectively with the defaults being `localhost` and `12321`.
+By default the running of the http server is enabled. The IP address and port used for bindings are under `addr` and `port` respectively with the defaults being `localhost` and `12321`.
 
-`tcpAddr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `0.0.0.0` to allow for external access to the devices. If an invalid hostname is provided, the server will fall back to binding on `127.0.0.1`.
+`addr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `0.0.0.0` to allow for external access to the devices.
 
-![image](https://user-images.githubusercontent.com/24492062/138280886-1929b49b-b4a3-454d-8371-80fd41df8e66.png)
+If due to any issues arise from the server, it can be turned off by the `enable` value in `appsettings.toml` under `[HTTPServer]`.
 
-Send a HTTP/GET request to `{tcpAddr}:{tcpPort}/devices`, for the list of devices currently detected by the program and the corresponding `deviceID`.
+![image](Assets/server_index.png)
+
+Visit `http://{addr}:{port}/` on your browser to view the list of devices available.
 
 ![image](https://user-images.githubusercontent.com/24492062/138281030-f40ba805-69bf-48ac-a126-6f58f9ca7828.png)
 
-With the `deviceID`, a HTTP/GET request to `{tcpAddr}:{tcpPort}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
+With the `deviceID`, a HTTP/GET request to `{addr}:{port}/device/{deviceID}`, will result in an xml document of the name and battery status of the device. Devices that do not support `battery_voltage` will report 0.00.
 
 Device ids starting with `dev` originates from tapping into Logitech GHUB's own drivers, while random numbers are from the natively implement HID++ code. Thus, there are some fields that different between the two,
 
@@ -71,7 +74,7 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 | mileage***      | ✔️   | ❌     |
 | charging        | ✔️   | ✔️     |
 
-\* - Need Logitech G Hub Installed
+\* - Requires Logitech G Hub Installed
 
 \** - Depends on the device
 
@@ -80,18 +83,39 @@ Device ids starting with `dev` originates from tapping into Logitech GHUB's own 
 ## HID++ Device Sources
 As of v3.0.0, there are 2 sources in which the program will pull battery status,
 
-- Logitech G HUB via Websockets
+- Logitech G Hub via Websockets
 - Native HID, hidapi via PInvoke (Called "Native" in settings)
 
-These sources can be individually disabled/enabled before runtime via `appsettings.ini`, in the `DeviceManager` section,
+These sources can be individually disabled/enabled before runtime via `appsettings.toml`, in the their respective sections,
 
 ```
-[DeviceManager]
-GHUB = true
-Native = true
+[GHub]
+enabled = true
+
+[Native]
+enabled = true
 ```
 
-*GHUB is Logitech G HUB, Native is hidapi*
+*GHub is Logitech G Hub, Native is hidapi*
+
+## appsettings.toml
+Refer to https://toml.io/en/ for a guide on toml syntax.
+
+*Note the `"` around strings*
+
+In the event of an invalid settings, at launch the app will prompt you for a reset to the default settings.
+
+
+### `[Native]` settings
+- `retryTime` - The time in seconds to re-try a device on a failed device state query; usually the device is asleep.
+- `pollPeriod` - The time in seconds to request an update from the device, keep this as high as possible as it may interfere with the default power saving sleep modes of devices.
+- `disabledDevices` - If all else fails, and the addition of a new device has caused the app to be unusable. Adding a part of the device name into this list will prevent the device from being polled. E.g. The following will disable the G403 and G502,
+```
+disabledDevices = [
+    "G403",
+    "G502"
+]
+```
 
 ## Known Issues
 ### Common
@@ -107,6 +131,7 @@ Native = true
 ## Working with
 - G403 Wireless
 - MX Anywhere 2
+
 ### Community Tested
 *HID Backend has changed, would need restesting of devices, please raise a PR to add to this list*
 
