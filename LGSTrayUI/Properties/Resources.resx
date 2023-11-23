@@ -130,6 +130,9 @@
   <data name="Charging_dark" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Charging_dark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="defaultAppsettings" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\appsettings.toml;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Headset" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Headset.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

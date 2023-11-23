@@ -12,6 +12,7 @@ using LGSTrayPrimitives;
 using Tommy.Extensions.Configuration;
 
 using static LGSTrayUI.AppExtensions;
+using System.Threading.Tasks;
 
 namespace LGSTrayUI;
 
@@ -32,7 +33,7 @@ public partial class App : Application
         EnableEfficiencyMode();
 
         var builder = Host.CreateEmptyApplicationBuilder(null);
-        builder.Configuration.AddTomlFile("appsettings.toml");
+        await LoadAppSettings(builder.Configuration);
 
         builder.Services.Configure<AppSettings>(builder.Configuration);
         builder.Services.AddLGSMessagePipe(true);
@@ -53,6 +54,39 @@ public partial class App : Application
         var host = builder.Build();
         await host.RunAsync();
         Dispatcher.InvokeShutdown();
+    }
+
+    static async Task LoadAppSettings(Microsoft.Extensions.Configuration.ConfigurationManager config)
+    {
+        try
+        {
+            config.AddTomlFile("appsettings.toml");
+        }
+        catch (Exception ex)
+        {
+            if (ex is FileNotFoundException || ex is InvalidDataException)
+            {
+                var msgBoxRet = MessageBox.Show(
+                    "Failed to read settings, do you want reset to default?", 
+                    "LGSTray - Settings Load Error", 
+                    MessageBoxButton.YesNo, MessageBoxImage.Error, MessageBoxResult.No
+                );
+
+                if (msgBoxRet == MessageBoxResult.Yes)
+                {
+                    await File.WriteAllBytesAsync(
+                        Path.Combine(AppContext.BaseDirectory, "appsettings.toml"),
+                        LGSTrayUI.Properties.Resources.defaultAppsettings
+                    );
+                }
+
+                config.AddTomlFile("appsettings.toml");
+            }
+            else
+            {
+                throw;
+            }
+        }
     }
 
     private void CrashHandler(object sender, UnhandledExceptionEventArgs args)
