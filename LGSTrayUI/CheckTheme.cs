@@ -22,7 +22,7 @@ namespace LGSTrayUI
             }
         }
 
-        public static event PropertyChangedEventHandler? ThemeChanged;
+        public static event PropertyChangedEventHandler? StaticPropertyChanged;
 
         static CheckTheme()
         {
@@ -56,7 +56,7 @@ namespace LGSTrayUI
             int regFlag = (int)regPath!.GetValue(RegistryValueName, 0);
 
             _lightTheme = regFlag != 0;
-            ThemeChanged?.Invoke(typeof(CheckTheme), new(nameof(LightTheme)));
+            StaticPropertyChanged?.Invoke(typeof(CheckTheme), new(nameof(LightTheme)));
         }
 
         private static void Watcher_EventArrived(object sender, EventArrivedEventArgs e)

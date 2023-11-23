@@ -4,11 +4,27 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:tb="http://www.hardcodet.net/taskbar"
+             xmlns:local="clr-namespace:LGSTrayUI"
              xmlns:lgstraycore="clr-namespace:LGSTrayCore;assembly=LGSTrayCore"
              d:DataContext="{d:DesignInstance Type=lgstraycore:LogiDevice}"
              mc:Ignorable="d" 
              >
-    <tb:TaskbarIcon x:Name="taskbarIcon" ToolTipText="{Binding Path=ToolTipString}"
+    <tb:TaskbarIcon x:Name="taskbarIcon"
                     ContextMenu="{StaticResource SysTrayMenu}">
+        <tb:TaskbarIcon.TrayToolTip>
+            <Grid>
+                <Border 
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Background="{Binding Path=(local:CheckTheme.LightTheme), Converter={StaticResource ThemeBrushConverter}, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    >
+                    <StackPanel Margin="5">
+                        <TextBlock Text="{Binding Path=ToolTipString}" 
+                                   Foreground="{Binding Path=(local:CheckTheme.LightTheme), Converter={StaticResource ThemeBrushConverter}, ConverterParameter=Text}" 
+                        />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </tb:TaskbarIcon.TrayToolTip>
     </tb:TaskbarIcon>
 </UserControl>
