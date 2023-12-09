@@ -1,10 +1,10 @@
-import zipfile
+import glob
 import os
 import os.path
-import glob
+import subprocess
 import xml.etree.ElementTree as ET
+import zipfile
 
-TARGET_PROJ = 'LGSTrayGUI'
 PUB_PROFILES = [
     ('Framedep', ''),
     ('Standalone', '-standalone')
@@ -14,11 +14,13 @@ FILE_TYPES = [
     '*.exe',
     '*.pdb',
     '*.dll',
-    '*.ini'
+    '*.toml'
 ]
 
-proj = ET.parse(f'./{TARGET_PROJ}/{TARGET_PROJ}.csproj').getroot()
-TARGET_VER = proj[0].findtext('Version')
+TARGET_PROJ = 'LGSTrayUI'
+PROJ_FILE = f'./{TARGET_PROJ}/{TARGET_PROJ}.csproj'
+proj = ET.parse(PROJ_FILE).getroot()
+TARGET_VER = proj.findall('./PropertyGroup/Version')[0].text
 
 def fileList(zipFolder):
     output = list()
@@ -34,19 +36,27 @@ def createZip(zipPath, zipFolder):
             zip.write(file, os.path.basename(file))
 
 def main():
-    solRoot = os.path.dirname(__file__)
-    projRoot = os.path.join(solRoot, TARGET_PROJ)
-
+    publishRoot = os.path.join('./bin/Release/Publish/win-x64')
+    
     for profile, zip_suffix in PUB_PROFILES:
-        publishRoot = os.path.join(projRoot, 'bin/Publish')
         safe_ver = TARGET_VER.replace('.', '_')
+
+        for proj in ["LGSTrayHID", "LGSTrayUI"]:
+            subprocess.run(
+                ["dotnet", "publish", f"{proj}/{proj}.csproj", f"/p:PublishProfile={profile}"],
+                shell=False
+            )
+
         zipName = f'Release_v{safe_ver}{zip_suffix}.zip'
 
-        zipPath = os.path.join(publishRoot, zipName)
+        zipPath = os.path.join(publishRoot+"/..", zipName)
         zipFolder = os.path.join(publishRoot, profile)
 
+        print("\n---")
+        print(f"Zipping {profile} ...")
         createZip(zipPath, zipFolder)
+        print("---")
 
 if __name__ == "__main__":
-    print("Build the publish profiles within Visual Studio first.")
     main()
+    input("Packaging done.")

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LGSTrayHID": {
+      "commandName": "Project",
+      "nativeDebugging": false
+    }
+  }
+}
