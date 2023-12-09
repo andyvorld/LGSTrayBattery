@@ -1,66 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PropertyChanged;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using LGSTrayPrimitives;
 
 namespace LGSTrayCore
 {
-    public enum DeviceType
+    public partial class LogiDevice : ObservableObject
     {
-        Mouse = 3,
-        Keyboard = 0,
-        Headset = 8
-    }
-    public abstract class LogiDevice : INotifyPropertyChanged
-    {
-        private const double MIN_UPDATE_PERIOD_S = 60;
+        public const string NOT_FOUND = "NOT FOUND";
 
-        protected DeviceType _deviceType = DeviceType.Mouse;
-        public DeviceType DeviceType { get; set; }
-        public string DeviceID { get; set; } = "NOT_FOUND";
-        public string DeviceName { get; set; } = "NOT_FOUND";
-        public bool HasBattery { get; set; } = true;
-        public abstract double BatteryPercentage { get; set; }
-        public DateTime LastUpdate { get; private set; } = DateTime.MinValue;
-        public bool BatteryStatExpired
+        [ObservableProperty]
+        private DeviceType _deviceType;
+
+        [ObservableProperty]
+        private string _deviceId = NOT_FOUND;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private string _deviceName = NOT_FOUND;
+
+        [ObservableProperty]
+        private bool _hasBattery = true;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private double _batteryPercentage = -1;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private double _batteryVoltage;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private double _batteryMileage;
+
+
+        [ObservableProperty]
+        private PowerSupplyStatus _powerSupplyStatus;
+
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(ToolTipString))]
+        private DateTimeOffset _lastUpdate = DateTimeOffset.MinValue;
+
+        public string ToolTipString
         {
             get
             {
 #if DEBUG
-                return true;
-#else
-                return DateTime.Now > LastUpdate.AddSeconds(MIN_UPDATE_PERIOD_S);
-#endif
-            }
-        }
-
-        [DependsOn("DeviceName", "BatteryPercentage", "LastUpdate")]
-        public string TooltipString
-        {
-            get
-            {
-#if DEBUG
-                return $"{DeviceName}, {BatteryPercentage:f2}% at {LastUpdate}";
+                return $"{DeviceName}, {BatteryPercentage:f2}% - {LastUpdate}";
 #else
                 return $"{DeviceName}, {BatteryPercentage:f2}%";
 #endif
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void InvokePropertyChanged(object sender, PropertyChangedEventArgs e)
+        public Func<Task>? UpdateBatteryFunc;
+        public async Task UpdateBatteryAsync()
         {
-            PropertyChanged?.Invoke(sender, e);
+            if (UpdateBatteryFunc != null)
+            {
+                await UpdateBatteryFunc.Invoke();
+            }
         }
 
-        public abstract string GetXmlData();
-        public void UpdateLastUpdateTimestamp()
+        partial void OnLastUpdateChanged(DateTimeOffset value)
         {
-            LastUpdate = DateTime.Now;
+            Console.WriteLine(ToolTipString);
+        }
+
+        public string GetXmlData()
+        {
+            return
+                $"<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                $"<xml>" +
+                $"<device_id>{DeviceId}</device_id>" +
+                $"<device_name>{DeviceName}</device_name>" +
+                $"<device_type>{DeviceType}</device_type>" +
+                $"<battery_percent>{BatteryPercentage:f2}</battery_percent>" +
+                $"<battery_voltage>{BatteryVoltage:f2}</battery_voltage>" +
+                $"<mileage>{BatteryMileage:f2}</mileage>" +
+                $"<charging>{PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING}</charging>" +
+                $"<last_update>{LastUpdate}</last_update>" +
+                $"</xml>"
+                ;
         }
     }
 }

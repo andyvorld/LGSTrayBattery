@@ -1,0 +1,1 @@
+Custom build of hidapi 0.14.0 with hotplugging support
