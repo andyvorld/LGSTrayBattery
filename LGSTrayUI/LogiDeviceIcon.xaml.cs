@@ -1,5 +1,7 @@
 ﻿using Hardcodet.Wpf.TaskbarNotification;
 using LGSTrayCore;
+using LGSTrayPrimitives;
+using Microsoft.Extensions.Options;
 using System;
 using System.ComponentModel;
 using System.Windows.Controls;
@@ -8,16 +10,18 @@ namespace LGSTrayUI
 {
     public class LogiDeviceIconFactory
     {
+        private readonly AppSettings _appSettings;
         private readonly UserSettingsWrapper _userSettings;
 
-        public LogiDeviceIconFactory(UserSettingsWrapper userSettings)
+        public LogiDeviceIconFactory(IOptions<AppSettings> appSettings, UserSettingsWrapper userSettings)
         {
+            _appSettings = appSettings.Value;
             _userSettings = userSettings;
         }
 
         public LogiDeviceIcon CreateDeviceIcon(LogiDevice device, Action<LogiDeviceIcon>? config = null)
         {
-            LogiDeviceIcon output = new(device, _userSettings);
+            LogiDeviceIcon output = new(device, _appSettings, _userSettings);
             config?.Invoke(output);
 
             return output;
@@ -79,9 +83,12 @@ namespace LGSTrayUI
 
         private Action<TaskbarIcon, LogiDevice> _drawBatteryIcon;
 
-        public LogiDeviceIcon(LogiDevice device, UserSettingsWrapper userSettings)
+        public LogiDeviceIcon(LogiDevice device, AppSettings appSettings, UserSettingsWrapper userSettings)
         {
             InitializeComponent();
+
+            if (!appSettings.UI.EnableRichToolTips)
+                taskbarIcon.TrayToolTip = null;
 
             AddRef();
 

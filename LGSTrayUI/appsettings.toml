@@ -1,3 +1,6 @@
+[UI]
+enableRichToolTips = true
+
 [HTTPServer]
 enabled = true
 addr = "localhost"
