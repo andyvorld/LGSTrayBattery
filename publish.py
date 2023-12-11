@@ -59,4 +59,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    input("Packaging done.")
+    print("Packaging done.")
