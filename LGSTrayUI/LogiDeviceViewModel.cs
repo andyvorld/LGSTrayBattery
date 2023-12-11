@@ -8,16 +8,16 @@ namespace LGSTrayUI
 {
     public class LogiDeviceViewModelFactory
     {
-        private readonly UserSettingsWrapper _userSettings;
+        private readonly LogiDeviceIconFactory _logiDeviceIconFactory;
 
-        public LogiDeviceViewModelFactory(UserSettingsWrapper userSettings)
+        public LogiDeviceViewModelFactory(LogiDeviceIconFactory logiDeviceIconFactory)
         {
-            _userSettings = userSettings;
+            _logiDeviceIconFactory = logiDeviceIconFactory;
         }
 
         public LogiDeviceViewModel CreateViewModel(Action<LogiDeviceViewModel>? config = null)
         {
-            LogiDeviceViewModel output = new(_userSettings);
+            LogiDeviceViewModel output = new(_logiDeviceIconFactory);
             config?.Invoke(output);
 
             return output;
@@ -26,23 +26,23 @@ namespace LGSTrayUI
 
     public partial class LogiDeviceViewModel : LogiDevice
     {
-        private readonly UserSettingsWrapper _userSettings;
+        private readonly LogiDeviceIconFactory _logiDeviceIconFactory;
 
         [ObservableProperty]
         private bool _isChecked = false;
 
         private LogiDeviceIcon? taskbarIcon;
 
-        public LogiDeviceViewModel(UserSettingsWrapper userSettings)
+        public LogiDeviceViewModel(LogiDeviceIconFactory logiDeviceIconFactory)
         {
-            _userSettings = userSettings;
+            _logiDeviceIconFactory = logiDeviceIconFactory;
         }
 
         partial void OnIsCheckedChanged(bool oldValue, bool newValue)
         {
             if (newValue)
             {
-                taskbarIcon ??= new(this, _userSettings);
+                taskbarIcon ??= _logiDeviceIconFactory.CreateDeviceIcon(this);
             }
             else
             {

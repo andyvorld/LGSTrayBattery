@@ -2,11 +2,18 @@
 {
     public class AppSettings
     {
+        public UISettings UI { get; set; } = null!;
+
         public HttpServerSettings HTTPServer { get; set; } = null!;
 
         public IDeviceManagerSettings GHub { get; set; } = null!;
 
         public NativeDeviceManagerSettings Native { get; set; } = null!;
+    }
+
+    public class UISettings
+    {
+        public bool EnableRichToolTips { get; set; }
     }
 
     public class HttpServerSettings

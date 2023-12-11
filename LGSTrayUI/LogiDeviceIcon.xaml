@@ -10,6 +10,7 @@
              mc:Ignorable="d" 
              >
     <tb:TaskbarIcon x:Name="taskbarIcon"
+                    ToolTipText="{Binding Path=ToolTipString}"
                     ContextMenu="{StaticResource SysTrayMenu}">
         <tb:TaskbarIcon.TrayToolTip>
             <Grid>
