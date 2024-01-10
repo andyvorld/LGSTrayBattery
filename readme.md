@@ -2,6 +2,10 @@
 
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech GaminG Hub websockets.
 
+## How to install
+
+Please, visit [the latest release page](https://github.com/andyvorld/LGSTrayBattery/releases/latest) and download installation or standalone archive with the program from Assets.
+
 ## Changes from V2
 *When migrating from earlier versions, device ids may have changed.*
 - Moved to .Net 8
