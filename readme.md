@@ -57,7 +57,7 @@ Display the current battery percentage as a number.
 ### Http/Web "server" api
 By default the running of the http server is enabled. The IP address and port used for bindings are under `addr` and `port` respectively with the defaults being `localhost` and `12321`.
 
-`addr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `0.0.0.0` to allow for external access to the devices.
+`addr` accepts either a hostname (`DESKTOP-1234`) or an IP address (`127.0.0.1`) to bind to, if you are not sure use `localhost` or if you have admin permission `*` to allow for external access to the devices.
 
 If due to any issues arise from the server, it can be turned off by the `enable` value in `appsettings.toml` under `[HTTPServer]`.
 
