@@ -5,6 +5,7 @@ enableRichToolTips = true
 enabled = true
 addr = "localhost"
 port = 12321
+useIpv6 = true
 
 [GHub]
 enabled = true
