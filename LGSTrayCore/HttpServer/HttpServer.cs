@@ -1,4 +1,5 @@
 ﻿using EmbedIO;
+using EmbedIO.Net;
 using EmbedIO.WebApi;
 using LGSTrayPrimitives;
 using Microsoft.Extensions.Hosting;
@@ -71,6 +72,8 @@ namespace LGSTrayCore.HttpServer
 
         private static WebServer CreateServer(AppSettings appSettings, HttpControllerFactory httpControllerFactory)
         {
+            EndPointManager.UseIpv6 = appSettings.HTTPServer.UseIpv6;
+
             var server = new WebServer(o => o.WithUrlPrefix(appSettings.HTTPServer.UrlPrefix))
                 .WithWebApi("/", m => m.WithController(httpControllerFactory.CreateController));
 
