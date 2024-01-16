@@ -121,8 +121,7 @@ namespace LGSTrayUI
             {
                 return;
             }
-
-            else if (e.PropertyName == nameof(LogiDevice.BatteryPercentage))
+            else if (e.PropertyName is nameof(LogiDevice.BatteryPercentage) or nameof(LogiDevice.PowerSupplyStatus))
             {
                 DrawBatteryIcon();
             }
