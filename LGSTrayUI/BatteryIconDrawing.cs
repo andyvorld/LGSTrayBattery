@@ -7,6 +7,8 @@ using System.Drawing.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Runtime.InteropServices;
 using LGSTrayPrimitives;
+using System.Drawing.Text;
+using System.Windows;
 
 namespace LGSTrayUI
 {
@@ -23,7 +25,7 @@ namespace LGSTrayUI
         private static Bitmap Missing => CheckTheme.LightTheme ? Resources.Missing : Resources.Missing_dark;
         private static Bitmap Charging => CheckTheme.LightTheme ? Resources.Charging : Resources.Charging_dark;
 
-        private const int ImageSize = 256;
+        private static int ImageSize = (int) SystemParameters.SmallIconHeight;
 
         private static Bitmap GetDeviceIcon(LogiDevice device) => device.DeviceType switch
         {
@@ -103,6 +105,12 @@ namespace LGSTrayUI
             using Graphics g = Graphics.FromImage(b);
 
             string displayString = (device.BatteryPercentage < 0) ? "?" : $"{device.BatteryPercentage:f0}";
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            g.CompositingMode = CompositingMode.SourceOver;
+            g.CompositingQuality = CompositingQuality.HighQuality;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
             g.DrawString(
                 displayString,
                 new Font("Segoe UI", (int) (0.8 * ImageSize), GraphicsUnit.Pixel),
@@ -114,11 +122,6 @@ namespace LGSTrayUI
                     Alignment = StringAlignment.Center,
                 }
             );
-            g.CompositingMode = CompositingMode.SourceOver;
-            g.CompositingQuality = CompositingQuality.HighQuality;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
             IntPtr iconHandle = b.GetHicon();
             Icon tempManagedRes = Icon.FromHandle(iconHandle);
