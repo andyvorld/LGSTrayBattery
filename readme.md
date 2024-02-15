@@ -1,6 +1,6 @@
 # LGS Tray Battery
 
-A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech GaminG Hub websockets.
+Forked from andyvorld to fix an issue with the numeric display.  The problem is that the icon being created was 256x256 and Windows is scaling it down to fit on the taskbar.  All of the blank space is getting averaged with the text pixels due to the sampling algorithm, resulting in bad text.  
 
 ## How to install
 
