@@ -4,10 +4,10 @@ Forked from andyvorld to fix an issue with the numeric display.  The problem is 
 
 ## How to install
 
-[![GitHub Release](https://img.shields.io/github/v/release/andyvorld/LGSTrayBattery?sort=semver)](https://github.com/andyvorld/LGSTrayBattery/releases/latest)
+[![GitHub Release](https://img.shields.io/github/v/release/tr4npt/LGSTrayBattery?sort=semver)](https://github.com/tr4npt/LGSTrayBattery/releases/latest)
 
 
-Please, visit [the latest release page](https://github.com/andyvorld/LGSTrayBattery/releases/latest) and download the release zip files from assets. Builds with the `-standalone` suffix are pre-bundled with .Net 8 and does not require any further dependencies, the non-standalone version requires .Net 8 to be pre-installed (https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
+Please, visit [the latest release page](https://github.com/tr4npt/LGSTrayBattery/releases/latest) and download the release zip files from assets. Builds with the `-standalone` suffix are pre-bundled with .Net 8 and does not require any further dependencies, the non-standalone version requires .Net 8 to be pre-installed (https://dotnet.microsoft.com/en-us/download/dotnet/8.0).
 
 ## Changes from V2
 *When migrating from earlier versions, device ids may have changed.*
