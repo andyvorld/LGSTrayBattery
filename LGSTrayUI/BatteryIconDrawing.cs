@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using Hardcodet.Wpf.TaskbarNotification;
 using System.Runtime.InteropServices;
 using LGSTrayPrimitives;
+using Microsoft.Win32;
 
 namespace LGSTrayUI
 {
@@ -23,7 +24,26 @@ namespace LGSTrayUI
         private static Bitmap Missing => CheckTheme.LightTheme ? Resources.Missing : Resources.Missing_dark;
         private static Bitmap Charging => CheckTheme.LightTheme ? Resources.Charging : Resources.Charging_dark;
 
-        private const int ImageSize = 256;
+        private static int ImageSize;
+
+        static BatteryIconDrawing()
+        {
+            int dpi;
+
+            try
+            {
+                var reg = Registry.CurrentUser.OpenSubKey(@"SOFTWARE\Microsoft\Windows\CurrentVersion\ThemeManager", false);
+                var _dpi = (string?)reg?.GetValue("LastLoadedDPI");
+                if (!int.TryParse(_dpi, out dpi))
+                {
+                    dpi = 96;
+                }
+            }
+            catch { dpi = 96; }
+            var scale = dpi / 96f;
+
+            ImageSize = (int)(32 * scale);
+        }
 
         private static Bitmap GetDeviceIcon(LogiDevice device) => device.DeviceType switch
         {
@@ -47,10 +67,10 @@ namespace LGSTrayUI
         private static Bitmap GetBatteryValue(LogiDevice device) => device.BatteryPercentage switch
         {
             { } when device.PowerSupplyStatus == PowerSupplyStatus.POWER_SUPPLY_STATUS_CHARGING => Charging,
-            <0 => Missing,
-            <10 => Resources.Indicator_10,
-            <50 => Resources.Indicator_30,
-            <85 => Resources.Indicator_50,
+            < 0 => Missing,
+            < 10 => Resources.Indicator_10,
+            < 50 => Resources.Indicator_30,
+            < 85 => Resources.Indicator_50,
             _ => Resources.Indicator_100
         };
 
@@ -69,7 +89,7 @@ namespace LGSTrayUI
             using var g = Graphics.FromImage(b);
             g.CompositingMode = CompositingMode.SourceOver;
             g.CompositingQuality = CompositingQuality.HighQuality;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
@@ -105,9 +125,9 @@ namespace LGSTrayUI
             string displayString = (device.BatteryPercentage < 0) ? "?" : $"{device.BatteryPercentage:f0}";
             g.DrawString(
                 displayString,
-                new Font("Segoe UI", (int) (0.8 * ImageSize), GraphicsUnit.Pixel),
+                new Font("Segoe UI", (int)(0.8 * ImageSize), GraphicsUnit.Pixel),
                 new SolidBrush(GetDeviceColor(device)),
-                ImageSize/2, ImageSize/2,
+                ImageSize / 2, ImageSize / 2,
                 new(StringFormatFlags.FitBlackBox, 0)
                 {
                     LineAlignment = StringAlignment.Center,
@@ -116,7 +136,7 @@ namespace LGSTrayUI
             );
             g.CompositingMode = CompositingMode.SourceOver;
             g.CompositingQuality = CompositingQuality.HighQuality;
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
             g.SmoothingMode = SmoothingMode.HighQuality;
             g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
