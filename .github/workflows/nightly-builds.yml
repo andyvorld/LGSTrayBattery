@@ -22,13 +22,17 @@ jobs:
         python-version: '3.11' 
 
     - name: python .\publish.py
-      run: python .\publish.py --version-suffix="-nightly"
+      run: |
+        $commit_ts=git show --no-patch --format=%at
+        $commit_ds=(([System.DateTimeOffset]::FromUnixTimeSeconds($commit_ts)).DateTime).ToString("yyyyMMdd")
+        python .\publish.py --version-suffix="-nightly+$commit_ds"
 
     - name: upload nightly build
       env:
         GH_TOKEN: ${{ secrets.NIGHTLY_TOKEN }}
       run: |
         $commit_ts=git show --no-patch --format=%at
+        $commit_ds=(([System.DateTimeOffset]::FromUnixTimeSeconds($commit_ts)).DateTime).ToString("yyyyMMdd")
         gh release create -R "andyvorld/LGSTrayBattery-nightly" `
-          $commit_ts `
+          $commit_ds `
           (get-item ./bin/Release/publish/*.zip)
