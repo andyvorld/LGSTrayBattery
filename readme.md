@@ -142,6 +142,7 @@ disabledDevices = [
 - MX Anywhere 2
 
 ### Community Tested
+- G935 Wireless
 *HID Backend has changed, would need restesting of devices, please raise a PR to add to this list*
 
 
