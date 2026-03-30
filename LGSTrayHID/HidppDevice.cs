@@ -151,8 +151,10 @@ namespace LGSTrayHID
             }
             else
             {
-                // Device does not have a serial identifier the device name as a hash identifier
-                Identifier = $"{DeviceName.GetHashCode():X04}";
+                // Device does not have a serial identifier, use a stable hash of the device name
+                var hashBytes = System.Security.Cryptography.SHA256.HashData(
+                    System.Text.Encoding.UTF8.GetBytes(DeviceName));
+                Identifier = Convert.ToHexString(hashBytes, 0, 4);
             }
 
 #if DEBUG

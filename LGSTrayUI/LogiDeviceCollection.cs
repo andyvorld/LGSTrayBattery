@@ -29,6 +29,8 @@ namespace LGSTrayUI
             _logiDeviceViewModelFactory = logiDeviceViewModelFactory;
             _subscriber = subscriber;
 
+            LoadPreviouslySelectedDevices();
+
             _subscriber.Subscribe(x =>
             {
                 if (x is InitMessage initMessage)
@@ -40,8 +42,6 @@ namespace LGSTrayUI
                     OnUpdateMessage(updateMessage);
                 }
             });
-
-            LoadPreviouslySelectedDevices();
         }
 
         private void LoadPreviouslySelectedDevices()
@@ -81,7 +81,12 @@ namespace LGSTrayUI
                 return;
             }
 
-            dev = _logiDeviceViewModelFactory.CreateViewModel((x) => x.UpdateState(initMessage));
+            bool wasSelected = _userSettings.SelectedDevices?.Contains(initMessage.deviceId) ?? false;
+            dev = _logiDeviceViewModelFactory.CreateViewModel((x) =>
+            {
+                x.UpdateState(initMessage);
+                x.IsChecked = wasSelected;
+            });
 
             Application.Current.Dispatcher.BeginInvoke(() => Devices.Add(dev));
         }
