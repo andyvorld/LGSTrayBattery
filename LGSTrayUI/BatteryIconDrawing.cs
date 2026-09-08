@@ -119,32 +119,33 @@ namespace LGSTrayUI
 
         public static void DrawNumeric(TaskbarIcon taskbarIcon, LogiDevice device)
         {
-            using Bitmap b = new(ImageSize, ImageSize);
-            using Graphics g = Graphics.FromImage(b);
-
-            string displayString = (device.BatteryPercentage < 0) ? "?" : $"{device.BatteryPercentage:f0}";
-            g.DrawString(
-                displayString,
-                new Font("Segoe UI", (int)(0.8 * ImageSize), GraphicsUnit.Pixel),
-                new SolidBrush(GetDeviceColor(device)),
-                ImageSize / 2, ImageSize / 2,
-                new(StringFormatFlags.FitBlackBox, 0)
-                {
-                    LineAlignment = StringAlignment.Center,
-                    Alignment = StringAlignment.Center,
-                }
-            );
-            g.CompositingMode = CompositingMode.SourceOver;
-            g.CompositingQuality = CompositingQuality.HighQuality;
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
+            var colors = DeviceNumericColorStore.Resolve(Settings.Default.DeviceNumericColors,
+                device.DeviceId, Settings.Default.NumericTextColor, Settings.Default.NumericBackgroundColor, Settings.Default.NumericBold);
+            using Bitmap b = CreateNumericBitmap(device.BatteryPercentage,
+                NumericIconColors.Parse(colors.Text, GetDeviceColor(device)),
+                NumericIconColors.Parse(colors.Background, Color.Transparent), colors.Bold ?? false);
             IntPtr iconHandle = b.GetHicon();
             Icon tempManagedRes = Icon.FromHandle(iconHandle);
             taskbarIcon.Icon = (Icon)tempManagedRes.Clone();
             tempManagedRes.Dispose();
             DestroyIcon(iconHandle);
+        }
+        public static Bitmap CreateNumericBitmap(double percentage, Color textColor, Color backgroundColor, bool bold = false)
+        {
+            Bitmap bitmap = new(ImageSize, ImageSize);
+            using Graphics graphics = Graphics.FromImage(bitmap);
+            graphics.Clear(backgroundColor);
+            graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            using Font font = new("Segoe UI", (int)(0.8 * ImageSize), bold ? FontStyle.Bold : FontStyle.Regular, GraphicsUnit.Pixel);
+            using SolidBrush brush = new(textColor);
+            using StringFormat format = new(StringFormatFlags.FitBlackBox, 0)
+            {
+                LineAlignment = StringAlignment.Center,
+                Alignment = StringAlignment.Center,
+            };
+            string text = percentage < 0 ? "?" : $"{percentage:f0}";
+            graphics.DrawString(text, font, brush, ImageSize / 2, ImageSize / 2, format);
+            return bitmap;
         }
     }
 }

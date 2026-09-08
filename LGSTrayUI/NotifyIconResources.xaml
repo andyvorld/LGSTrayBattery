@@ -27,6 +27,7 @@
         </MenuItem>
         <MenuItem Header="Rediscover Devices" Command="{Binding RediscoverDevicesCommand}" IsEnabled="{Binding RediscoverDevicesEnabled}"/>
         <MenuItem Header="Display Numeric Icon" IsCheckable="True" IsChecked="{Binding NumericDisplay}" StaysOpenOnClick="True" />
+        <MenuItem Header="Numeric Icon Appearance..." Command="{Binding OpenNumericColorsCommand}" />
         <MenuItem Header="Autostart with Windows" IsCheckable="True" IsChecked="{Binding AutoStart}" StaysOpenOnClick="True" />
         <Separator />
         <MenuItem Header="{Binding AssemblyVersion}" IsEnabled="False" />

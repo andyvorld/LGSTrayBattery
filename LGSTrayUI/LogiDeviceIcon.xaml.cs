@@ -113,6 +113,10 @@ namespace LGSTrayUI
                 _drawBatteryIcon = userSettings.NumericDisplay ? BatteryIconDrawing.DrawNumeric : BatteryIconDrawing.DrawIcon;
                 DrawBatteryIcon();
             }
+            else if (e.PropertyName is nameof(UserSettingsWrapper.NumericTextColor) or nameof(UserSettingsWrapper.NumericBackgroundColor) or "DeviceNumericColors" or nameof(UserSettingsWrapper.NumericBold))
+            {
+                DrawBatteryIcon();
+            }
         }
 
         private void LogiDevicePropertyChanged(object? s, PropertyChangedEventArgs e)
@@ -129,7 +133,11 @@ namespace LGSTrayUI
 
         private void DrawBatteryIcon()
         {
-            _ = Dispatcher.BeginInvoke(() => _drawBatteryIcon(taskbarIcon, (LogiDevice)DataContext));
+            if (disposedValue) return;
+            _ = Dispatcher.BeginInvoke(() =>
+            {
+                if (!disposedValue) _drawBatteryIcon(taskbarIcon, (LogiDevice)DataContext);
+            });
         }
     }
 }

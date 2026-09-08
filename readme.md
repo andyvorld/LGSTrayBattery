@@ -1,4 +1,4 @@
-# LGS Tray Battery
+﻿# LGS Tray Battery
 
 A rewrite/combination of my two programs [LGSTrayBattery](https://github.com/andyvorld/LGSTrayBattery) and [LGSTrayBattery_GHUB](https://github.com/andyvorld/LGSTrayBattery_GHUB), which should allow for interaction via both the native HID and Logitech GaminG Hub websockets.
 
@@ -38,6 +38,9 @@ Depending on the number of devices selected in the context menu, multiple device
 ![image](Assets/numerical_icon.png)
 
 Display the current battery percentage as a number.
+
+Numeric icon text color, background color, and font weight can be customized
+globally or per device from `Numeric Icon Appearance...` in the tray menu.
 
 *In numerical display mode, charging status will not be displayed*
 
