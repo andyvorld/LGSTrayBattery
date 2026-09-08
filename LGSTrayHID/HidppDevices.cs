@@ -119,23 +119,31 @@ namespace LGSTrayHID
             if ((buffer[2] == 0x41) && ((buffer[4] & 0x40) == 0))
             {
                 byte deviceIdx = buffer[1];
-                if (true || !_deviceCollection.ContainsKey(deviceIdx))
+
+                // A new link-established notification supersedes any previous object for this index;
+                // stop its pending init retries / battery poll loop before replacing it.
+                if (_deviceCollection.TryGetValue(deviceIdx, out var oldDevice))
                 {
-                    _deviceCollection[deviceIdx] = new(this, deviceIdx);
-                    new Thread(async () =>
-                    {
-                        try
-                        {
-                            await Task.Delay(1000);
-                            await _deviceCollection[deviceIdx].InitAsync();
-                        }
-                        catch (Exception) { }
-                    }).Start();
+                    oldDevice.Cancel();
                 }
+
+                var device = new HidppDevice(this, deviceIdx);
+                _deviceCollection[deviceIdx] = device;
+                new Thread(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(1000);
+                        await device.InitAsync();
+                    }
+                    catch (Exception) { }
+                }).Start();
             }
             else
             {
-                await _channel.Writer.WriteAsync(buffer);
+                // The read thread reuses its buffer for the next report, so queue a copy rather than the
+                // shared reference (otherwise a reply can be overwritten before WriteRead* inspects it).
+                await _channel.Writer.WriteAsync((byte[])buffer.Clone());
             }
         }
 
@@ -143,7 +151,7 @@ namespace LGSTrayHID
         {
             ObjectDisposedException.ThrowIf(_disposeCount > 0, this);
 
-            bool locked = await _semaphore.WaitAsync(100);
+            bool locked = await _semaphore.WaitAsync(1000);
             if (!locked)
             {
                 return [];
@@ -183,7 +191,7 @@ namespace LGSTrayHID
         {
             ObjectDisposedException.ThrowIf(_disposeCount > 0, this);
 
-            bool locked = await _semaphore.WaitAsync(100);
+            bool locked = await _semaphore.WaitAsync(1000);
             if (!locked)
             {
                 return (Hidpp20)Array.Empty<byte>();
@@ -239,7 +247,7 @@ namespace LGSTrayHID
 
             return (ret.GetFeatureIndex() == 0x00) && (ret.GetSoftwareId() == SW_ID) && (ret.GetParam(2) == pingPayload);
 
-            //bool locked = await _semaphore.WaitAsync(100);
+            //bool locked = await _semaphore.WaitAsync(1000);
             //if (!locked)
             //{
             //    return false;
@@ -283,6 +291,9 @@ namespace LGSTrayHID
             //}
         }
 
+        // Discovery retry schedule: 5s, 10s, 20s, 40s, then every 60s, indefinitely.
+        private const int DISCOVERY_PING_TIMEOUT = 500;
+
         private async Task SetUp()
         {
             if ((_devShort == IntPtr.Zero) || (_devLong == IntPtr.Zero))
@@ -306,30 +317,50 @@ namespace LGSTrayHID
             };
             t2.Start();
 
+            // The first discovery attempt right after start-up frequently fails (receiver/device link still
+            // waking up, G HUB enumerating the same device at the same time). Previously a failed attempt was
+            // never retried and the device stayed "Not Initialised" until a manual rediscover, so retry with backoff.
+            int attempt = 0;
+            while (!Disposed && _deviceCollection.Count == 0)
+            {
+                await DiscoverDevicesOnce();
+
+                if (Disposed || _deviceCollection.Count > 0) { break; }
+
+                attempt++;
+                int delayMs = Math.Min(60_000, 5_000 * (1 << Math.Min(attempt - 1, 4)));
+                await Task.Delay(delayMs);
+            }
+        }
+
+        private async Task DiscoverDevicesOnce()
+        {
             byte[] ret;
 
             // Read number of devices on reciever
             ret = await WriteRead10(_devShort, [0x10, 0xFF, 0x81, 0x02, 0x00, 0x00, 0x00], 1000);
             byte numDeviceFound = 0;
-            if ((ret[2] == 0x81) && (ret[3] == 0x02))
+            if ((ret.Length >= 6) && (ret[2] == 0x81) && (ret[3] == 0x02))
             {
                 numDeviceFound = ret[5];
             }
 
             if (numDeviceFound > 0)
             {
-                // Force arrival announce
-                ret = await WriteRead10(_devShort, [0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00], 1000);
+                // Force arrival announce (receiver replies with 0x41 notifications, handled in ProcessMessgage)
+                _ = await WriteRead10(_devShort, [0x10, 0xFF, 0x80, 0x02, 0x02, 0x00, 0x00], 1000);
             }
 
-            await Task.Delay(500);
+            await Task.Delay(1500);
 
             if (_deviceCollection.Count == 0)
             {
-                // Fail to enumerate devices
+                // Fail to enumerate devices, fall back to pinging device indexes directly
                 for (byte i = 1; i <= 6; i++)
                 {
-                    var ping = await Ping20(i, 100, false);
+                    if (Disposed) { return; }
+
+                    var ping = await Ping20(i, DISCOVERY_PING_TIMEOUT, false);
                     if (ping)
                     {
                         var deviceIdx = i;
@@ -337,7 +368,7 @@ namespace LGSTrayHID
                     }
                 }
 
-                foreach ((_, var device) in _deviceCollection)
+                foreach ((_, var device) in _deviceCollection.ToList())
                 {
                     await device.InitAsync();
                 }
