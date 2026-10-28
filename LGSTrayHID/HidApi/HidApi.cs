@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 
 namespace LGSTrayHID.HidApi
 {
@@ -35,6 +35,15 @@ namespace LGSTrayHID.HidApi
         internal static unsafe nint HidOpenPath(ref HidDeviceInfo dev)
         {
             return _HidOpenPath(dev.Path);
+        }
+
+        internal static unsafe nint HidOpenPathAnsi(string path)
+        {
+            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(path + "\0");
+            fixed (byte* p = bytes)
+            {
+                return _HidOpenPath(p);
+            }
         }
 
         [LibraryImport("hidapi", EntryPoint = "hid_close")]

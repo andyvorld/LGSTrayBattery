@@ -1,4 +1,4 @@
-﻿using static LGSTrayHID.HidApi.HidApi;
+using static LGSTrayHID.HidApi.HidApi;
 using static LGSTrayHID.HidApi.HidApiWinApi;
 using static LGSTrayHID.HidApi.HidApiHotPlug;
 using LGSTrayHID.HidApi;
@@ -32,7 +32,14 @@ namespace LGSTrayHID
 
         public void SignalDeviceEvent(IPCMessageType messageType, IPCMessage message)
         {
-            HidppDeviceEvent?.Invoke(messageType, message);
+            try
+            {
+                HidppDeviceEvent?.Invoke(messageType, message);
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"signal {messageType} failed: {ex.GetType().Name}: {ex.Message}");
+            }
         }
 
         private unsafe int EnqueueDevice(HidHotPlugCallbackHandle _, HidDeviceInfo* device, HidApiHotPlugEvent hidApiHotPlugEvent, nint __)
@@ -57,16 +64,16 @@ namespace LGSTrayHID
 
             string devPath = (deviceInfo).GetPath();
 
-            HidDevicePtr dev = HidOpenPath(ref deviceInfo);
-            _ = HidWinApiGetContainerId(dev, out Guid containerId);
+            Log.Write($"arrived pid=0x{deviceInfo.ProductId:X4} usage=0x{deviceInfo.Usage:X4} {messageType} {devPath}");
 
-#if DEBUG
-            Console.WriteLine(devPath);
-            Console.WriteLine(containerId.ToString());
-            Console.WriteLine("x{0:X04}", (deviceInfo).Usage);
-            Console.WriteLine("x{0:X04}", (deviceInfo).UsagePage);
-            Console.WriteLine();
-#endif
+            HidDevicePtr dev = HidOpenPath(ref deviceInfo);
+            if (dev == IntPtr.Zero)
+            {
+                Log.Write($"open failed: {devPath}");
+                return 0;
+            }
+
+            _ = HidWinApiGetContainerId(dev, out Guid containerId);
 
             if (!_deviceMap.TryGetValue(containerId, out HidppDevices? value))
             {
@@ -90,13 +97,25 @@ namespace LGSTrayHID
 
         private unsafe int DeviceLeft(HidHotPlugCallbackHandle callbackHandle, HidDeviceInfo* deviceInfo, HidApiHotPlugEvent hidApiHotPlugEvent, nint userData)
         {
-            string devPath = (*deviceInfo).GetPath();
-
-            if (_containerMap.TryGetValue(devPath, out var containerId))
+            try
             {
-                _deviceMap[containerId].Dispose();
-                _deviceMap.Remove(containerId);
-                _containerMap.Remove(devPath);
+                string devPath = (*deviceInfo).GetPath();
+                Log.Write($"left {devPath}");
+
+                if (_containerMap.TryGetValue(devPath, out var containerId))
+                {
+                    if (_deviceMap.TryGetValue(containerId, out HidppDevices? devices))
+                    {
+                        devices.Dispose();
+                        _deviceMap.Remove(containerId);
+                    }
+
+                    _containerMap.Remove(devPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Write($"device-left handler failed: {ex.GetType().Name}: {ex.Message}");
             }
 
             return 0;
@@ -108,15 +127,30 @@ namespace LGSTrayHID
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var dev = _deviceQueue.Take();
-                    if (cancellationToken.IsCancellationRequested)
+                    HidDeviceInfo dev;
+                    try
+                    {
+                        dev = _deviceQueue.Take(cancellationToken);
+                    }
+                    catch (OperationCanceledException)
                     {
                         break;
                     }
 
-                    await InitDevice(dev);
+                    try
+                    {
+                        await InitDevice(dev);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Never let one bad device kill the queue processor
+                        Log.Write($"device init failed: {ex.GetType().Name}: {ex.Message}");
+                    }
                 }
-            }).Start();
+            })
+            { IsBackground = true }.Start();
+
+            _ = Task.Run(() => WatchdogAsync(cancellationToken));
 
             unsafe
             {
@@ -124,7 +158,148 @@ namespace LGSTrayHID
                 HidHotplugRegisterCallback(0x046D, 0x00, HidApiHotPlugEvent.HID_API_HOTPLUG_EVENT_DEVICE_LEFT, HidApiHotPlugFlag.NONE, DeviceLeft, IntPtr.Zero, (int*)IntPtr.Zero);
             }
         }
-    
+
+        /// <summary>
+        /// Watches for devices that stopped reporting. If the HID link went stale (mouse switched
+        /// between wired and wireless, USB power saving, ...) the whole HID layer is rebuilt,
+        /// which is what restarting the application manually used to do.
+        /// </summary>
+        private async Task WatchdogAsync(CancellationToken cancellationToken)
+        {
+            int staleSeconds = 90;
+
+            using PeriodicTimer timer = new(TimeSpan.FromSeconds(20));
+            try
+            {
+                while (await timer.WaitForNextTickAsync(cancellationToken))
+                {
+                    try
+                    {
+                        DateTimeOffset now = DateTimeOffset.Now;
+
+                        bool anyStale = false;
+                        bool anyFresh = false;
+
+                        foreach (var (_, devices) in _deviceMap)
+                        {
+                            foreach (var (_, device) in devices.DeviceCollection)
+                            {
+                                if (!device.HasBattery) { continue; }
+
+                                double age = (now - device.LastUpdate).TotalSeconds;
+                                if (age > staleSeconds) { anyStale = true; }
+                                if (age < 60) { anyFresh = true; }
+                            }
+                        }
+
+                        if (!anyStale)
+                        {
+                            staleSeconds = 90;
+                            continue;
+                        }
+
+                        if (anyFresh)
+                        {
+                            // Another device is still delivering data (e.g. the mouse is plugged in
+                            // and its wireless slot went quiet) - nothing to repair
+                            staleSeconds = 90;
+                            continue;
+                        }
+
+                        Log.Write($"watchdog: no fresh battery data for >{staleSeconds}s, rebuilding HID layer");
+                        await ReenumerateAsync(cancellationToken);
+
+                        staleSeconds = Math.Min(staleSeconds * 2, 600);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Write($"watchdog error: {ex.GetType().Name}: {ex.Message}");
+                    }
+                }
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        private async Task ReenumerateAsync(CancellationToken cancellationToken)
+        {
+            foreach (var (_, devices) in _deviceMap)
+            {
+                devices.Dispose();
+            }
+
+            _deviceMap.Clear();
+            _containerMap.Clear();
+
+            // hidapi owns the enumeration memory, copy what is needed before awaiting
+            var entries = new List<(string Path, ushort Usage)>();
+
+            unsafe
+            {
+                HidDeviceInfo* list = HidEnumerate(0x046D, 0x0000);
+                if (list == null) { return; }
+
+                try
+                {
+                    for (HidDeviceInfo* cur = list; cur != null; cur = cur->Next)
+                    {
+                        var type = (*cur).GetHidppMessageType();
+                        if (type != HidppMessageType.SHORT && type != HidppMessageType.LONG) { continue; }
+
+                        entries.Add(((*cur).GetPath(), (*cur).Usage));
+                    }
+                }
+                finally
+                {
+                    HidFreeEnumeration(list);
+                }
+            }
+
+            foreach (var (path, usage) in entries)
+            {
+                if (cancellationToken.IsCancellationRequested) { break; }
+
+                try
+                {
+                    await OpenAndAttachAsync(path, usage);
+                }
+                catch (Exception ex)
+                {
+                    Log.Write($"re-enumerate failed for {path}: {ex.GetType().Name}: {ex.Message}");
+                }
+            }
+
+            await Task.Delay(200, cancellationToken);
+        }
+
+        private async Task OpenAndAttachAsync(string path, ushort usage)
+        {
+            nint dev = HidOpenPathAnsi(path);
+            if (dev == IntPtr.Zero)
+            {
+                Log.Write($"re-open failed: {path}");
+                return;
+            }
+
+            _ = HidWinApiGetContainerId(dev, out Guid containerId);
+
+            if (!_deviceMap.TryGetValue(containerId, out HidppDevices? hidppDevices))
+            {
+                hidppDevices = new();
+                _deviceMap[containerId] = hidppDevices;
+                _containerMap[path] = containerId;
+            }
+
+            if (usage == 0x0001)
+            {
+                await hidppDevices.SetDevShort(dev);
+            }
+            else
+            {
+                await hidppDevices.SetDevLong(dev);
+            }
+        }
+
+
         public async Task ForceBatteryUpdates()
         {
             foreach (var (_, hidppDevice) in _deviceMap)
